@@ -1,0 +1,259 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.txt-default {
+  color: #fff;
+}
+
+.btn {
+  width: 140px;
+  height: 50px;
+  border-radius: 50px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  font-size: 16px;
+}
+
+.btn svg {
+  justify-content: 'center';
+  align-content: 'center';
+}
+
+.btn {
+  justify-content: 'center';
+  align-content: 'center';
+}
+
+.btn-primary {
+  background: linear-gradient(to top, #00154c, #12376e, #23487f);
+  color: #fff;
+}
+
+.btn span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: top 0.5s;
+}
+
+.btn-text-one {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.card {
+  background: #fdfeff;
+  position: relative;
+  display: flex;
+  place-content: center;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  margin: 5px;
+  box-shadow:0px 1px 5px #4b4b4b;
+}
+
+.card-body {
+  color: #6e6e6e;
+  text-align: left;
+  width: 100%;
+  padding: 15px;
+}
+
+/* From Uiverse.io by bhaveshxrawat */
+.card-animate {
+  background: #07182E;
+  position: relative;
+  display: flex;
+  place-content: center;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  margin: 5px;
+  padding: 15px;
+}
+
+.card-animate h2 {
+  z-index: 1;
+  color: white;
+  font-size: 2em;
+}
+
+.card-animate-body {
+  z-index: 1;
+  color: white;
+  font-size: 1em;
+  text-align: left;
+  width: 100%;
+}
+
+.card-animate::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  background-image: linear-gradient(180deg, rgb(0, 183, 255), rgb(255, 48, 255));
+  height: 100%;
+  animation: rotBGimg 10s linear infinite;
+  transition: all 10s linear;
+}
+
+@keyframes rotBGimg {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.card-animate::after {
+  content: '';
+  position: absolute;
+  background: #07182e;
+  ;
+  inset: 5px;
+  border-radius: 15px;
+}
+
+/* .card:hover:before {
+  background-image: linear-gradient(180deg, rgb(81, 255, 0), purple);
+  animation: rotBGimg 3.5s linear infinite;
+} */
+
+a:link {
+  color: green;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:visited {
+  color: pink;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:hover {
+  color: red;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:active {
+  color: yellow;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+.app {
+  text-align: center;
+  padding: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.open-camera-button,
+.capture-button,
+.close-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin-top: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.open-camera-button:hover,
+.capture-button:hover,
+.close-button:hover {
+  background-color: #0056b3;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 10px;
+  position: relative;
+  width: 100%;
+  max-width: 90%;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background-color: red;
+}
+
+.camera-container {
+  display: flex;
+  flex-direction: column;
+  max-width: 640px;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.photo-preview img {
+  margin-top: 1rem;
+  max-width: 100%;
+  border-radius: 10px;
+}
