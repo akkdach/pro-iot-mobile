@@ -1,5 +1,5 @@
 // Login.tsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import {
     Box,
@@ -29,14 +29,15 @@ export default function LoginPage() {
     } = useForm<FormData>();
 
     const onSubmit = async (data: FormData) => {
-        const result: AxiosResponse<LoginResponse> = await callApi.post('/login.php', data);
-        if (result.data.token) {
+        const result = await callApi.post('/Authen/token', data);
+        // console.log (result);
+        if (result.data.dataResult.access_token) {
             setTimeout(async() => {
-                localStorage.setItem('token', result.data.token);
-                const resultProfile = await callApi.get('/user?type=getprofile');
-                if (resultProfile.data?.data) {
-                    localStorage.setItem('profile', JSON.stringify(resultProfile.data?.data));
-                    window.location.replace('/');
+                localStorage.setItem('token', result.data.dataResult.access_token);
+                const resultProfile = await callApi.get('/Mobile/profile');
+                if (resultProfile.data?.dataResult) {
+                    localStorage.setItem('profile', JSON.stringify(resultProfile.data?.dataResult));
+                     window.location.replace('/');
                 }else{
                     Swal.fire('Error','User not found.')
                 }
@@ -47,14 +48,24 @@ export default function LoginPage() {
         }
     };
 
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'auto';
+        };
+    }, []);
+
+
     return (
         <Box
             sx={{
                 height: '100vh',
+                overflow: 'hidden',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: '#f5f5f5',
+                borderRadius: '8px',
             }}
         >
             <Paper
@@ -62,12 +73,15 @@ export default function LoginPage() {
                 sx={{
                     padding: 4,
                     width: '100%',
-                    maxWidth: 400,
-                    borderRadius: 2,
+                    maxWidth: 250,
+                    borderRadius: '8px',
+                    
+                alignItems: 'center',
+                justifyContent: 'center',
                 }}
             >
                 <Typography variant="h5" align="center" gutterBottom>
-                    Login
+                    Sign In
                 </Typography>
 
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -105,7 +119,7 @@ export default function LoginPage() {
                         fullWidth
                         sx={{ mt: 2 }}
                     >
-                        Sign In
+                        Log In
                     </Button>
                 </form>
             </Paper>

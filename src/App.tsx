@@ -12,20 +12,25 @@ import { Login } from '@mui/icons-material';
 import LoginPage from './Pages/Login/Login';
 import { UserProvider } from './Context/userContext';
 import TopBar from './Component/TopBar';
+import FlatListDevice from './Pages/Iotservice/ListDevice';
+import DeviceAction from './Pages/Iotservice/ActionDevices';
+
 const token = localStorage.getItem('token');
 function App() {
   return (
     <div className="App">
               <TopBar />
-        <div style={{marginTop:65}}>
-      <Layout >
+        <div>
+      
 
-        {token ? (<UserProvider><Routes>
+        {token ? (<UserProvider><Layout ><Routes>
           <Route path="/" element={<Home />}></Route>
           <Route path="checkin" element={<CheckIn />}></Route>
           <Route path="profile" element={<ProfileCard />}></Route>
-        </Routes></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
-      </Layout>
+          <Route path="List" element={<FlatListDevice />}></Route>
+          <Route path="Action" element={<DeviceAction />}></Route>
+        </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
+      
       </div>
     </div>
     

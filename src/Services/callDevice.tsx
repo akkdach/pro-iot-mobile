@@ -9,8 +9,8 @@ interface AxiosResponse<T = any> {
   request?: any;
 }
 
-const callApi = axios.create({
-  baseURL: 'https://service.bevproasia.com/api/v1', // เปลี่ยนเป็น URL จริงของคุณ
+const callDevice = axios.create({
+  baseURL: 'http://iotservice.bevproasia.com/api/v1/Devices', // เปลี่ยนเป็น URL จริงของคุณ
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -18,7 +18,7 @@ const callApi = axios.create({
 });
 
 // Request Interceptor
-callApi.interceptors.request.use(
+callDevice.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token'); // หรือจาก secure storage
     if (token) {
@@ -30,7 +30,7 @@ callApi.interceptors.request.use(
 );
 
 // Response Interceptor
-callApi.interceptors.response.use(
+callDevice.interceptors.response.use(
   (response) => response,
   (error) => {
     // จัดการ error เช่น token หมดอายุ
@@ -43,4 +43,4 @@ callApi.interceptors.response.use(
   }
 );
 
-export default callApi;
+export default callDevice;
