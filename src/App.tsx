@@ -14,22 +14,27 @@ import { UserProvider } from './Context/userContext';
 import TopBar from './Component/TopBar';
 import InventoryList from './Pages/Inventory/InventoryList';
 import NewInventoryCount from './Pages/Inventory/NewInventoryCount';
+import FlatListDevice from './Pages/Iotservice/ListDevice';
+import DeviceAction from './Pages/Iotservice/ActionDevices';
+
 const token = localStorage.getItem('token');
 function App() {
   return (
     <div className="App">
               {/* <TopBar /> */}
-        <div >
-      <Layout >
+        <div>
+      
 
-        {token ? (<UserProvider><Routes>
+        {token ? (<UserProvider><Layout ><Routes>
           <Route path="/" element={<Home />}></Route>
           <Route path="checkin" element={<CheckIn />}></Route>
           <Route path="profile" element={<ProfileCard />}></Route>
+          <Route path="List" element={<FlatListDevice />}></Route>
+          <Route path="Action" element={<DeviceAction />}></Route>
           <Route path="InventoryList" element={<InventoryList />}></Route>
           <Route path="NewInventoryCount" element={<NewInventoryCount />}></Route>
-        </Routes></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
-      </Layout>
+        </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
+      
       </div>
     </div>
 
