@@ -12,23 +12,27 @@ import { Login } from '@mui/icons-material';
 import LoginPage from './Pages/Login/Login';
 import { UserProvider } from './Context/userContext';
 import TopBar from './Component/TopBar';
+import InventoryList from './Pages/Inventory/InventoryList';
+import NewInventoryCount from './Pages/Inventory/NewInventoryCount';
 const token = localStorage.getItem('token');
 function App() {
   return (
     <div className="App">
-              <TopBar />
-        <div style={{marginTop:65}}>
+              {/* <TopBar /> */}
+        <div >
       <Layout >
 
         {token ? (<UserProvider><Routes>
           <Route path="/" element={<Home />}></Route>
           <Route path="checkin" element={<CheckIn />}></Route>
           <Route path="profile" element={<ProfileCard />}></Route>
+          <Route path="InventoryList" element={<InventoryList />}></Route>
+          <Route path="NewInventoryCount" element={<NewInventoryCount />}></Route>
         </Routes></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       </Layout>
       </div>
     </div>
-    
+
   );
 }
 

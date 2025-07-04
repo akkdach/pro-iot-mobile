@@ -1,6 +1,9 @@
 // Login.tsx
 import React from 'react';
 import { useForm } from 'react-hook-form';
+import { PublicClientApplication } from "@azure/msal-browser";
+import { MsalProvider, useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { msalConfig, loginRequest } from "../../authConfig";
 import {
     Box,
     TextField,
@@ -21,7 +24,28 @@ interface LoginResponse {
     token: string;
 }
 
+const msalInstance = new PublicClientApplication(msalConfig);
+
+function SignInButton() {
+    const { instance } = useMsal();
+    return (
+        <button onClick={() => instance.loginRedirect(loginRequest)}>
+            Sign in with Microsoft
+        </button>
+    );
+}
+
+function AppContent() {
+    const isAuthenticated = useIsAuthenticated();
+    return (
+        <div>
+            {isAuthenticated ? <p>Signed in!</p> : <SignInButton />}
+        </div>
+    );
+}
+
 export default function LoginPage() {
+
     const {
         register,
         handleSubmit,
@@ -31,14 +55,14 @@ export default function LoginPage() {
     const onSubmit = async (data: FormData) => {
         const result: AxiosResponse<LoginResponse> = await callApi.post('/login.php', data);
         if (result.data.token) {
-            setTimeout(async() => {
+            setTimeout(async () => {
                 localStorage.setItem('token', result.data.token);
                 const resultProfile = await callApi.get('/user?type=getprofile');
                 if (resultProfile.data?.data) {
                     localStorage.setItem('profile', JSON.stringify(resultProfile.data?.data));
                     window.location.replace('/');
-                }else{
-                    Swal.fire('Error','User not found.')
+                } else {
+                    Swal.fire('Error', 'User not found.')
                 }
             }, 1000);
 
@@ -107,6 +131,9 @@ export default function LoginPage() {
                     >
                         Sign In
                     </Button>
+                    <MsalProvider instance={msalInstance}>
+                        <AppContent />
+                    </MsalProvider>
                 </form>
             </Paper>
         </Box>
