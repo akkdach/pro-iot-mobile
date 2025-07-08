@@ -5,6 +5,7 @@ import callDevice from '../../Services/callDevice';
 import { Link } from 'react-router-dom';
 import WifiIndicator from '../../Component/WifiIndicator';
 import BatteryIndicator from '../../Component/BatteryIndicator';
+import IotHeader from './HeaderIot';
 
 
 export default function FlatListDevice() {
@@ -28,10 +29,12 @@ export default function FlatListDevice() {
   }, []);
 
   return (
-    <Box sx={{ p: 2, marginTop: '65px' }}>
-      <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: '#00416e' }}>
+    <>
+    <IotHeader title="Device List"/>
+    <Box sx={{ p: 2,  }}>
+      {/* <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold', color: '#00416e' }}>
         Device List
-      </Typography>
+      </Typography> */}
 
       
       <div
@@ -76,7 +79,7 @@ export default function FlatListDevice() {
             >
                 Device Number : {simEmi}
             </Typography>
-            <BatteryIndicator level={0} />
+            <BatteryIndicator level={60} />
             <WifiIndicator strength={2} isConnected={true} />
             </div>
         </Link>
@@ -84,5 +87,6 @@ export default function FlatListDevice() {
       </div>
       
     </Box>
+    </>
   );
 }

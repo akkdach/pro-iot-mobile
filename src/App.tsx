@@ -30,7 +30,7 @@ function App() {
           <Route path="checkin" element={<CheckIn />}></Route>
           <Route path="profile" element={<ProfileCard />}></Route>
           <Route path="List" element={<FlatListDevice />}></Route>
-          <Route path="Action" element={<DeviceAction />}></Route>
+          <Route path="Action/:simEmi" element={<DeviceAction />}></Route>
           <Route path="InventoryList" element={<InventoryList />}></Route>
           <Route path="NewInventoryCount" element={<NewInventoryCount />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}

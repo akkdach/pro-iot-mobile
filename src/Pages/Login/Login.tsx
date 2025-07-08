@@ -105,7 +105,7 @@ export default function LoginPage() {
                 }}
             >
                 <Typography variant="h5" align="center" gutterBottom>
-                    Sign In
+                    Log In
                 </Typography>
 
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>

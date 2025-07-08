@@ -12,7 +12,7 @@ const Header = () => {
                     <img src={avatar} alt='avatar' style={{ width: 100, height: 100, margin: 'auto' }} />
                 </div>
                 <div style={{ margin: '5px', fontWeight: 500, fontSize: '1rem', color: '#333' }}>
-                    <Typography>{user?.fullname}</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600, color: '#003264', mb: 1 }}>{user?.fullname}</Typography>
                     <small>{user?.department} - {user?.position}</small>
                 </div>
             </div>
