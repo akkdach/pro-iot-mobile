@@ -53,24 +53,24 @@ export default function DeviceAction() {
   }, [simEmi]);
 
   const handleAction = async (action: 'Start' | 'Stop') => {
-    if (!deviceInfo || !stopTime) return;
+    if (!deviceInfo || !stopTime){ console.log(stopTime); }
 
     const combined = new Date();
-    combined.setHours(stopTime.hour(), stopTime.minute(), 0, 0);
+    // combined.setHours(stopTime.hour(), stopTime.minute(), 0, 0);
 
     const stopTimeLocal = combined.toString(); // หรือ toLocaleString()
 
 
     try {
       const result = await callDevice.post('/WorkOrderRecordProcess', {
-        deviceNo: deviceInfo.deviceNo,
-        orderId: deviceInfo.orderId,
+        deviceNo: deviceInfo?.deviceNo,
+        orderId: deviceInfo?.orderId,
         action,
         stopTime: stopTimeLocal,
       });
-      console.log(`${action} sent to ${deviceInfo.deviceNo}`, result.data);
+      console.log(`${action} sent to ${deviceInfo?.deviceNo}`, result.data);
     } catch (error) {
-      console.error(`Failed to ${action} device ${deviceInfo.deviceNo}:`, error);
+      console.error(`Failed to ${action} device ${deviceInfo?.deviceNo}:`, error);
     }
   };
 
