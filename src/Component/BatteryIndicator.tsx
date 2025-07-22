@@ -12,14 +12,17 @@ type Props = {
 };
 
 const BatteryIndicator: React.FC<Props> = ({ level, isCharging = false }) => {
+  // ปรับ level ให้เป็น 0, 5, 10, 15, ... 100
+  const steppedLevel = Math.min(Math.ceil(level * 100) / 5, 100);
+
   let icon;
   if (isCharging) {
     icon = <BatteryChargingFullIcon color="primary" />;
-  } else if (level >= 80) {
+  } else if (steppedLevel >= 80) {
     icon = <BatteryFullIcon color="success" />;
-  } else if (level >= 30) {
+  } else if (steppedLevel >= 30) {
     icon = <Battery20Icon color="warning" />;
-  } else if (level >= 0) {
+  } else if (steppedLevel >= 0) {
     icon = <BatteryAlertIcon color="error" />;
   } else {
     icon = <BatteryUnknownIcon color="disabled" />;
@@ -29,17 +32,18 @@ const BatteryIndicator: React.FC<Props> = ({ level, isCharging = false }) => {
     <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 120 }}>
       {icon}
       <Box sx={{ flex: 1 }}>
-        <Typography variant="body2">{level}%</Typography>
+        <Typography variant="body2">{steppedLevel}%</Typography>
         <LinearProgress
           variant="determinate"
-          value={level}
+          value={steppedLevel}
           sx={{
             height: 6,
             borderRadius: 3,
             mt: 0.5,
             bgcolor: "#ddd",
             "& .MuiLinearProgress-bar": {
-              backgroundColor: level < 30 ? "#f44336" : "#4caf50",
+              backgroundColor: steppedLevel < 30 ? "#f44336" : "#4caf50",
+              transition: "all 0.3s ease",
             },
           }}
         />

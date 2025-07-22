@@ -12,7 +12,7 @@ export default function IotHeader({ title }: IotHeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <AppBar position="static" elevation={1} sx={{ backgroundColor: '#003264' }}>
+    <AppBar position="fixed" elevation={1} sx={{ backgroundColor: '#003264' }}>
       <Toolbar>
         <IconButton edge="start" color="inherit" onClick={() => navigate(-1)} sx={{ mr: 2 }}>
           <ArrowBackIosNewIcon />

@@ -18,32 +18,57 @@ import callDevice from '../../Services/callDevice';
 import WifiIndicator from '../../Component/WifiIndicator';
 import BatteryIndicator from '../../Component/BatteryIndicator';
 import IotHeader from './HeaderIot';
-
+import Swal from 'sweetalert2';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
+import Countdown from '../../Component/Countdown';
+
 
 export default function DeviceAction() {
   const { simEmi } = useParams();
   const [deviceInfo, setDeviceInfo] = useState<{ deviceNo: string; orderId: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [stopTime, setStopTime] = useState<Dayjs | null>(null);
+  const [battValue, setBattValue] = useState<number | null>(null);
+  const [rssiValue, setRssiValue] = useState<number | null>(null);
+  const [StartAt, setStartAt] = useState<string | null >(null);
+  const [FinishAt, setFinishAt] = useState<string | null >(null);
+  const [countdownTarget, setCountdownTarget] = useState<string | null>(null);
+
 
   useEffect(() => {
     async function fetchDeviceInfo() {
       try {
-        const result = await callDevice.get('/List_Devices');
-        if (result.data.dataResult) {
-          const match = result.data.dataResult.find(
-            (item: any) => item.simEmi?.trim() === simEmi?.trim()
-          );
-          if (match) {
-            setDeviceInfo({ deviceNo: match.deviceNo, orderId: match.orderId });
-          }
+        // 1. หาค่า id จาก simEmi ก่อน
+        const allDevices = await callDevice.get('/List_Devices');
+        const match = allDevices.data.dataResult.find(
+          (item: any) => item.simEmi?.trim() === simEmi?.trim()
+        );
+
+        if (!match) {
+          throw new Error(`ไม่พบอุปกรณ์ที่มี simEmi = ${simEmi}`);
+        }
+
+        const deviceId = match.id;
+        const deviceNo = match.deviceNo;
+        const orderId = match.orderId;
+
+        setDeviceInfo({ deviceNo, orderId }); // เก็บ deviceNo, orderId สำหรับปุ่ม Start/Stop
+
+        // 2. ใช้ id เรียกข้อมูลละเอียด
+        const workOrderRes = await callDevice.get(`/get_Devices/${deviceId}`);
+        const deviceData = workOrderRes.data.dataResult;
+
+        if (deviceData) {
+          setBattValue(parseFloat(deviceData.devices?.battValue) || 0);
+          setRssiValue(parseInt(deviceData.devices?.rssiValue) || 0);
+          setStartAt(deviceData.lastOrder?.startAt ?? null);
+          setFinishAt(deviceData.lastOrder?.finishAt ?? null);
         }
       } catch (error) {
-        console.error('Error fetching device info:', error);
+        console.error('Error fetching device info or work order record:', error);
       } finally {
         setLoading(false);
       }
@@ -52,33 +77,81 @@ export default function DeviceAction() {
     fetchDeviceInfo();
   }, [simEmi]);
 
+
+
   const handleAction = async (action: 'Start' | 'Stop') => {
-    if (!deviceInfo || !stopTime){ console.log(stopTime); }
+  if (!deviceInfo) return;
 
+  let stopTimeLocal: string | null = null;
+
+  if (stopTime) {
     const combined = new Date();
-    // combined.setHours(stopTime.hour(), stopTime.minute(), 0, 0);
+    combined.setHours(stopTime.hour(), stopTime.minute(), 0, 0);
+    stopTimeLocal = combined.toString();
+  }
 
-    const stopTimeLocal = combined.toString(); // หรือ toLocaleString()
-
-
-    try {
-      const result = await callDevice.post('/WorkOrderRecordProcess', {
-        deviceNo: deviceInfo?.deviceNo,
-        orderId: deviceInfo?.orderId,
-        action,
-        stopTime: stopTimeLocal,
-      });
-      console.log(`${action} sent to ${deviceInfo?.deviceNo}`, result.data);
-    } catch (error) {
-      console.error(`Failed to ${action} device ${deviceInfo?.deviceNo}:`, error);
+  if (action === 'Start') {
+    const now = new Date().toISOString();
+    setStartAt(now); // 👈 เก็บเวลาปัจจุบันไว้
+    if (stopTime) {
+      setCountdownTarget(stopTime.toISOString());
     }
+  }
+
+  if ( action === 'Stop') {
+    setCountdownTarget(null);
+  }
+
+  try {
+    const result = await callDevice.post('/WorkOrderRecordProcess', {
+      deviceNo: deviceInfo.deviceNo,
+      orderId: deviceInfo.orderId,
+      action,
+      stopTime: stopTimeLocal,
+    });
+
+    const { isSuccess, message } = result.data;
+
+    if (isSuccess) {
+      Swal.fire({
+        icon: 'success',
+        title: `${action} Device สำเร็จ`,
+        text: `Device ${simEmi} ถูกสั่ง "${action}" เรียบร้อยแล้ว`,
+        confirmButtonColor: '#1471b8',
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'คำสั่งไม่สำเร็จ',
+        text: message || `ไม่สามารถสั่ง "${action}" ไปยังอุปกรณ์ ${simEmi} ได้`,
+        confirmButtonColor: '#d33',
+      });
+    }
+
+  } catch (error) {
+    console.error(`Failed to ${action} device ${simEmi}:`, error);
+
+    Swal.fire({
+      icon: 'error',
+      title: `เกิดข้อผิดพลาด`,
+      text: `ไม่สามารถสั่ง "${action}" ไปยังอุปกรณ์ ${simEmi} ได้`,
+      confirmButtonColor: '#d33',
+    });
+  }
   };
+
+  const handleInputChange = async(e : any) => {
+    const {name, value} = e.target
+    var newData : any = {...deviceInfo,[name]:value}
+    setDeviceInfo(newData);
+  }
+
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <>
         <IotHeader title="Device Control" />
-        <Box sx={{ p: 2, marginTop: '10px' }}>
+        <Box sx={{ p: 2, marginTop: 2, marginBottom: 5 }}>
           <Container maxWidth="sm" sx={{ py: 3 }}>
             {loading ? (
               <CircularProgress />
@@ -88,20 +161,48 @@ export default function DeviceAction() {
                 <Typography variant="h5" sx={{ fontWeight: 600, color: '#003264', mb: 1 }}>
                   Device Control
                 </Typography>
-                <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 3 }}>
-                  SIM: {simEmi}
+                <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 1 }}>
+                  Device No. : {simEmi}
                 </Typography>
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
-                  <BatteryIndicator level={0} />
-                  <WifiIndicator strength={2} isConnected={true} />
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1}}>
+                  <Typography color="textSecondary" sx={{ fontWeight: 500, }}>
+                    Start Time : {StartAt ? new Date(StartAt).toLocaleString('th-TH') : '-'}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
+                  <Typography color="textSecondary" sx={{ fontWeight: 500 }}>
+                    Finish Time : {
+                      stopTime
+                        ? stopTime.format('D/M/YYYY HH:mm:ss')
+                        : FinishAt
+                          ? new Date(FinishAt).toLocaleString('th-TH')
+                          : '-'
+                    }
+                  </Typography>
                 </Box>
 
-                <TextField
+                {countdownTarget && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
+                    <Countdown targetDate={countdownTarget} />
+                  </Box>
+                )}
+
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
+                  <BatteryIndicator level={battValue ?? 0} />
+                  <WifiIndicator strength={rssiValue ?? 0} isConnected={true} />
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'center', }}>
+                <TextField name = "orderId"
+                  onBlur={handleInputChange}
                   variant="outlined"
                   placeholder="Enter OrderID"
                   sx={{
+                    height: 50,
                     fontWeight: 500,
+                    
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word',
                     maxWidth: '100%',
@@ -128,8 +229,9 @@ export default function DeviceAction() {
                       </InputAdornment>
                     ),
                   }}
-                />
+                /></Box>
 
+                <Box sx={{ display: 'flex', justifyContent: 'center',  mb: 1}}>
                 <TimePicker
                 label="เลือกเวลาหยุด (Stop Time)"
                 value={stopTime}
@@ -141,6 +243,7 @@ export default function DeviceAction() {
                     InputProps: {
                       sx: {
                         height: 50,
+                        gap: 3,
                         borderRadius: '12px',
                         backgroundColor: '#ffffff',
                         boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
@@ -158,12 +261,12 @@ export default function DeviceAction() {
                       overflowWrap: 'break-word',
                       maxWidth: '100%',
                       width: 300,
-                      mb: 2,
+                      mb: 1,
                       
                     },
                   },
                 }}
-              />
+              /></Box>
 
 
                 <Button
@@ -171,7 +274,7 @@ export default function DeviceAction() {
                   color="error"
                   size="large"
                   fullWidth
-                  sx={{ mb: 2, py: 0.5, fontSize: 18, borderRadius: 4 }}
+                  sx={{ mb: 2, py: 0.2, fontSize: 18, borderRadius: 4, width: 300 }}
                   startIcon={<StopIcon />}
                   onClick={() => handleAction('Stop')}
                   disabled={!deviceInfo}
@@ -184,7 +287,7 @@ export default function DeviceAction() {
                   color="success"
                   size="large"
                   fullWidth
-                  sx={{ mb: 2, py: 0.5, fontSize: 18, borderRadius: 4 }}
+                  sx={{ mb: 1, py: 0.2, fontSize: 18, borderRadius: 4, width: 300 }}
                   startIcon={<PowerSettingsNewIcon />}
                   onClick={() => handleAction('Start')}
                   disabled={!deviceInfo}
