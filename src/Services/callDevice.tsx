@@ -10,7 +10,7 @@ interface AxiosResponse<T = any> {
 }
 
 const callDevice = axios.create({
-  baseURL: 'http://iotservice.bevproasia.com/api/v1/Devices', // เปลี่ยนเป็น URL จริงของคุณ
+  baseURL: 'https://iotservice.bevproasia.com/api/v1/Devices', // เปลี่ยนเป็น URL จริงของคุณ
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
