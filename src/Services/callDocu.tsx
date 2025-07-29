@@ -14,8 +14,8 @@ const callDocu = axios.create({
   timeout: 10000,
   headers: {
     'Content-Type': 'multipart/form-data',
-  },
     
+  }
   
 });
 

@@ -1,80 +1,158 @@
-import React from "react";
-import {
-    Box,
-    Typography,
-    List,
-    ListItem,
-    ListItemText,
-    Fab,
-    AppBar,
-    Toolbar,
-    IconButton,
-    Container,
-    Paper,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import React, { useEffect, useState } from 'react';
+import { Box, Typography } from '@mui/material';
+import SensorsIcon from '@mui/icons-material/Sensors';
+import callDevice from '../../Services/callDevice';
+import { Link } from 'react-router-dom';
+import WifiIndicator from '../../Component/WifiIndicator';
+import BatteryIndicator from '../../Component/BatteryIndicator';
+import AppHearder from '../../Component/AppHeader';
+import { AddBox, DeviceHub, DeviceHubOutlined, GifBox, Store, StoreMallDirectory } from '@mui/icons-material';
+import InventoryAction from './InventoryAction';
+import Swal from 'sweetalert2';
 
-type InventoryItem = {
-    id: number;
-    productName: string;
-    count: number;
-    location: string;
-};
 
-const mockInventory: InventoryItem[] = [
-    { id: 1, productName: "Product A", count: 12, location: "Zone A1" },
-    { id: 2, productName: "Product B", count: 7, location: "Zone B2" },
-    { id: 3, productName: "Product C", count: 25, location: "Zone C3" },
-    { id: 4, productName: "Product D", count: 3, location: "Zone D1" },
-];
+export default function InventoryList() {
+    const [deviceList, setDeviceList] = useState<any[]>([]);
+    const [battMap, setBattMap] = useState<Record<string, number>>({});
+    const [rssiMap, setRssiMap] = useState<Record<string, number>>({});
+    const [startAt, setStartAt] = useState<Record<string, string>>({});
+    const [finishAt, setFinishAt] = useState<Record<string, string>>({});
 
-const InventoryList: React.FC = () => {
+    useEffect(() => {
+        async function fetchDevices() {
+            try {
+                const deviceRes = await callDevice.get('/List_Devices');
+
+                if (deviceRes.data.dataResult) {
+                    const list = deviceRes.data.dataResult;
+                    setDeviceList(list);
+
+                    const battValue: Record<string, number> = {};
+                    const rssiValue: Record<string, number> = {};
+                    const startTemp: Record<string, string> = {};
+                    const finishTemp: Record<string, string> = {};
+
+                    await Promise.all(
+                        list.map(async (item: any) => {
+                            const sim = item.simEmi?.trim();
+
+                            battValue[sim] = item.battValue ? parseFloat(item.battValue) : 0;
+                            rssiValue[sim] = item.rssiValue ? parseInt(item.rssiValue) : 0;
+
+
+                            // ตรวจสอบ ID ก่อนเรียก API
+                            if (!item.id) return;
+
+                            try {
+                                const detailRes = await callDevice.get(`/get_Devices/${item.id}`);
+                                const deviceData = detailRes.data.dataResult;
+                                const lastOrder = deviceData?.lastOrder;
+
+                                if (lastOrder) {
+                                    startTemp[sim] = lastOrder.startAt;
+                                    finishTemp[sim] = lastOrder.finishAt;
+                                }
+                            } catch (err) {
+                                // console.warn(`⚠️ Error fetching detail for ${sim}:`, err);
+                            }
+                        })
+                    );
+
+                    setBattMap(battValue);
+                    setRssiMap(rssiValue);
+                    setStartAt(startTemp);
+                    setFinishAt(finishTemp);
+
+                    // console.log('Start Map:', startTemp);
+                    // console.log('Finish Map:', finishTemp);
+                }
+            } catch (error) {
+                console.error('❌ Error fetching device list:', error);
+            }
+        }
+
+        fetchDevices();
+    }, []);
+
+    const handleNew = ()=>{
+        Swal.fire({
+            title:'ยืนยันการสร้างรายการตรวจนับสต๊อก?',
+            confirmButtonText:'ยืนยัน',
+            showConfirmButton:true,
+            showCancelButton:true,
+            cancelButtonText:'ยกเลิก',
+            icon:'question'
+        }).then((result)=>{
+            if(result.isConfirmed){
+                Swal.fire('ดำเนินการสำเร็จ','','success')
+            }
+        })
+    }   
     return (
-        <Box sx={{ height: "100vh", bgcolor: "#fff" }}>
-            {/* Top Bar */}
-            <AppBar position="static" color="default" elevation={1} sx={{ background: '#fff' }}>
-                <Toolbar>
-                    <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                        Inventory Count
-                    </Typography>
-                    <IconButton edge="end" color="inherit">
-                        <MoreVertIcon />
-                    </IconButton>
-                </Toolbar>
-            </AppBar>
+        <>
+            <InventoryAction handleNew={handleNew}/>
+            <AppHearder title="📊 Inventory Count List"  />
+            <Box sx={{ p: 2, marginTop: 7, marginBottom: 8 }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '16px',
+                        justifyContent: 'flex-start',
+                    }}
+                >
+                    {deviceList.map((item: any, index: number) => (
+                        <Link
+                            to={`/Action/${item.simEmi}`}
+                            key={index}
+                            style={{
+                                textDecoration: 'none',
+                                color: 'inherit',
+                                flex: '1 1 280px',
+                                minWidth: 300,
+                            }}
+                        >
+                            <div
+                                style={{
+                                    background: '#fff',
+                                    borderRadius: '12px',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    padding: '16px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '8px',
+                                    transition: 'all 0.3s ease',
+                                }}
+                            >
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <SensorsIcon style={{ fontSize: 30, color: '#1cc4c4' }} />
+                                    <Typography sx={{ fontWeight: 500 }}>
+                                        Device No : {item.simEmi}
+                                    </Typography>
+                                </Box>
 
-            {/* List */}
-            <Container sx={{ mt: 2 }}>
-                <Paper variant="outlined">
-                    <List>
-                        {mockInventory.map((item) => (
-                            <ListItem key={item.id} divider>
-                                <ListItemText
-                                    primary={item.productName}
-                                    secondary={`Count: ${item.count} • ${item.location}`}
-                                />
-                            </ListItem>
-                        ))}
-                    </List>
-                </Paper>
-            </Container>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Typography sx={{ fontWeight: 500 }}>
+                                        Start Time : {startAt[item.simEmi?.trim()] ? new Date(startAt[item.simEmi.trim()]).toLocaleString('th-TH') : '-'}
+                                    </Typography>
+                                </Box>
 
-            {/* FAB Button */}
-            <Fab
-                color="primary"
-                aria-label="add"
-                sx={{
-                    position: "fixed",
-                    bottom: 20,
-                    right: 20,
-                    boxShadow: 3,
-                }}
-            >
-                <AddIcon />
-            </Fab>
-        </Box>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Typography sx={{ fontWeight: 500 }}>
+                                        Finish Time : {finishAt[item.simEmi?.trim()] ? new Date(finishAt[item.simEmi.trim()]).toLocaleString('th-TH') : '-'}
+                                    </Typography>
+                                </Box>
+
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                                    <BatteryIndicator level={battMap[item.simEmi?.trim()] ?? 0} />
+                                    <WifiIndicator strength={rssiMap[item.simEmi?.trim()] ?? 0} isConnected={true} />
+                                </Box>
+
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+            </Box>
+        </>
     );
-};
-
-export default InventoryList;
+}
