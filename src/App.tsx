@@ -16,6 +16,8 @@ import InventoryList from './Pages/Inventory/InventoryList';
 import NewInventoryCount from './Pages/Inventory/NewInventoryCount';
 import FlatListDevice from './Pages/Iotservice/ListDevice';
 import DeviceAction from './Pages/Iotservice/ActionDevices';
+import Upload from './Pages/Upload/Upload';
+import MyDocument from './Pages/Upload/MyDocument';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -33,6 +35,8 @@ function App() {
           <Route path="Action/:simEmi" element={<DeviceAction />}></Route>
           <Route path="InventoryList" element={<InventoryList />}></Route>
           <Route path="NewInventoryCount" element={<NewInventoryCount />}></Route>
+          <Route path="MyDocument" element={<MyDocument />}></Route>
+          <Route path="UploadFile" element={<Upload />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
       </div>
