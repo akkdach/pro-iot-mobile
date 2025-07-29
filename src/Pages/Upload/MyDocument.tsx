@@ -8,6 +8,7 @@ import axios from "axios";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
 import AddIcon from "@mui/icons-material/Add";
+import DownloadIcon from '@mui/icons-material/Download';
 
 
 interface RawNode {
@@ -63,6 +64,7 @@ export default function UploadPage() {
   const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
   const [fileCountMap, setFileCountMap] = useState<Record<string, number>>({});
   const [lastModifiedMap, setLastModifiedMap] = useState<Record<string, string>>({});
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const navigate = useNavigate();
 
   // 🔁 ฟังก์ชันแปลงข้อมูลจาก API เป็น TreeNode[]
@@ -130,7 +132,14 @@ export default function UploadPage() {
         );
         saveAs(res.data, fileName || "downloaded-file");
       } catch (err) {
-        Swal.fire("Download failed for:", path, );
+
+        Swal.fire({
+              icon: 'error',
+              title: `เกิดข้อผิดพลาด`,
+              text: `Download failed for: "${path}"`,
+              confirmButtonColor: '#d33',
+            });
+        
       }
     }
   };
@@ -140,7 +149,7 @@ export default function UploadPage() {
   return (
     <>
       <UploadHeader title="My Document" />
-      <Box sx={{ p: 2, marginTop: 8, marginBottom: 8 }}>
+      <Box sx={{ p: 2, marginTop: 5, marginBottom: 8 }}>
 
         {/* <Button
           variant="contained"
@@ -152,21 +161,48 @@ export default function UploadPage() {
           Upload File
         </Button> */}
 
+        {selectedPaths.length > 0 ? (
         <Fab
-          color="primary"
           aria-label="add"
           sx={{
             position: "fixed",
             bottom: 75,
             right: 20,
-            boxShadow: 3,
             width: 45,
             height: 45,
+            backgroundColor: '#2086c1ff',
+            color: '#ffffff',
+            '&:hover': {
+              backgroundColor: '#2086c1ff',
+            },
+            boxShadow: 3,
+          }}
+          onClick={handleDownload}
+        >
+          <DownloadIcon />
+        </Fab>
+      ) : (
+        <Fab
+          aria-label="add"
+          sx={{
+            position: "fixed",
+            bottom: 75,
+            right: 20,
+            width: 45,
+            height: 45,
+            backgroundColor: '#163299ff',
+            color: '#ffffff',
+            '&:hover': {
+              backgroundColor: '#0f2569',
+            },
+            boxShadow: 3,
           }}
           onClick={handleUploadClick}
         >
           <AddIcon />
         </Fab>
+      )}
+
 
         {loading ? (
           <CircularProgress />
@@ -174,23 +210,16 @@ export default function UploadPage() {
           <TreeDocument
             data={treeData}
             selectedPaths={selectedPaths}
-            onToggleSelect={onToggleSelect} 
+            onToggleSelect={onToggleSelect}
+            lastSelectedIndex={lastSelectedIndex}
+            setLastSelectedIndex={setLastSelectedIndex}
             
             // fileCountMap={fileCountMap}
             // lastModifiedMap={lastModifiedMap}
           />
         )}
 
-        <Button 
-          onClick={handleDownload}
-          variant="contained"
-          color="primary"
-          
-          sx={{ mb: 2 }}
-          fullWidth>
-
-        Download
-      </Button>
+        
       </Box>
 
     </>
