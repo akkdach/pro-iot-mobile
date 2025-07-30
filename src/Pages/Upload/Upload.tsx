@@ -7,7 +7,7 @@ import UploadHeader from "./Header";
 import Swal from "sweetalert2";
 import callDocu from "../../Services/callDocu";
 import { uploadFile } from "../../Services/callUpload";
-import CameraCaptureFile from "../../Component/CameraCaptureToFile";
+import CameraModalToFile from "../../Component/CameraToFileModal";
 
 export default function UploadFile() {
   const { user } = useUser();
@@ -24,11 +24,11 @@ export default function UploadFile() {
     }
   };
 
-  const onCapture = (image: Blob) => {
-    const file = new File([image], `photo_${Date.now()}.jpg`, { type: image.type });
-    setFiles([...files, file]);
+  const onCapture = (files: File[]) => {
+    setFiles([...files, ...files]);
     setIsOpenCamera(false);
-  };
+  }; 
+
 
   const handleSubmit = async () => {
     if (!orderId) {
@@ -48,8 +48,6 @@ export default function UploadFile() {
       });
       return;
     }
-
-
 
     // const formData = new FormData();
     // files.forEach((file, i) => {
@@ -72,6 +70,8 @@ export default function UploadFile() {
         showConfirmButton: true,
 
       });
+      setOrderId('');
+      setFiles([]);
     } catch (err) {
       console.error("❌ Upload error:", err);
       Swal.fire({
@@ -85,14 +85,14 @@ export default function UploadFile() {
   return (
     <>
       <UploadHeader title="Upload File" />
-      <Box sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 17, marginBottom: 5,
-        p: 2,
-      }}>
+        <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: 20, marginBottom: 5,
+          p: 2,
+        }}>
 
         <TextField
           fullWidth
@@ -139,7 +139,7 @@ export default function UploadFile() {
             ถ่ายรูป
           </Button>
 
-          <CameraModal
+          <CameraModalToFile
             isOpen={isOpenCamera}
             onClose={() => setIsOpenCamera(false)}
             onCapture={onCapture}

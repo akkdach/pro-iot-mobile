@@ -7,8 +7,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
-import AddIcon from "@mui/icons-material/Add";
-import DownloadIcon from '@mui/icons-material/Download';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
 
 
 interface RawNode {
@@ -62,8 +62,6 @@ export default function UploadPage() {
   const [treeData, setTreeData] = useState<TreeNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
-  const [fileCountMap, setFileCountMap] = useState<Record<string, number>>({});
-  const [lastModifiedMap, setLastModifiedMap] = useState<Record<string, string>>({});
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const navigate = useNavigate();
 
@@ -123,14 +121,8 @@ export default function UploadPage() {
     for (const path of selectedPaths) {
       try {
         const fileName = path.split("\\").pop(); // ดึงชื่อไฟล์
-        const res = await axios.get(
-          `/FileManager/tree`,
-          {
-            params: { path },
-            responseType: "blob",
-          }
-        );
-        saveAs(res.data, fileName || "downloaded-file");
+        const res = await callDocu.get(`/FileManager/DownloadZip/${path}`);
+        saveAs(res.data, fileName || "downloaded-folder");
       } catch (err) {
 
         Swal.fire({
@@ -151,22 +143,12 @@ export default function UploadPage() {
       <UploadHeader title="My Document" />
       <Box sx={{ p: 2, marginTop: 5, marginBottom: 8 }}>
 
-        {/* <Button
-          variant="contained"
-          color="primary"
-          onClick={handleUploadClick}
-          sx={{ mb: 2 }}
-          fullWidth
-        >
-          Upload File
-        </Button> */}
-
-        {selectedPaths.length > 0 ? (
+        {/* {selectedPaths.length > 0 ? (
         <Fab
           aria-label="add"
           sx={{
             position: "fixed",
-            bottom: 75,
+            bottom: 78,
             right: 20,
             width: 45,
             height: 45,
@@ -179,14 +161,14 @@ export default function UploadPage() {
           }}
           onClick={handleDownload}
         >
-          <DownloadIcon />
+          <DownloadRoundedIcon />
         </Fab>
       ) : (
         <Fab
           aria-label="add"
           sx={{
             position: "fixed",
-            bottom: 75,
+            bottom: 78,
             right: 20,
             width: 45,
             height: 45,
@@ -199,9 +181,9 @@ export default function UploadPage() {
           }}
           onClick={handleUploadClick}
         >
-          <AddIcon />
+          <AddRoundedIcon />
         </Fab>
-      )}
+      )} */}
 
 
         {loading ? (
@@ -219,6 +201,25 @@ export default function UploadPage() {
           />
         )}
 
+        <Fab
+          aria-label="add"
+          sx={{
+            position: "fixed",
+            bottom: 78,
+            right: 20,
+            width: 45,
+            height: 45,
+            backgroundColor: '#163299ff',
+            color: '#ffffff',
+            '&:hover': {
+              backgroundColor: '#0f2569',
+            },
+            boxShadow: 3,
+          }}
+          onClick={handleUploadClick}
+        >
+          <AddRoundedIcon />
+        </Fab>
         
       </Box>
 

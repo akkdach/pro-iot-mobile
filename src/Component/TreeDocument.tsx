@@ -14,11 +14,16 @@ import { Checkbox } from '@mui/material';
 import {
   Description as FileIcon,
   InsertDriveFile,
-  Image as ImageIcon,
+  Image as ImageRoundedIcon,
   PictureAsPdf as PdfIcon,
   TableChart as ExcelIcon,
-  Folder as FolderIcon,
+  Folder as FolderRoundedIcon,
+  Padding,
 } from '@mui/icons-material';
+import DownloadIcon from '@mui/icons-material/Download';
+import Swal from 'sweetalert2';
+import callDocu from '../Services/callDocu';
+import saveAs from 'file-saver';
 
 interface TreeNode {
   id?: string;
@@ -44,7 +49,7 @@ const getFileIcon = (filename: string) => {
     case 'jpeg':
     case 'png':
     case 'gif':
-      return <ImageIcon sx={{ color: '#239be0ff' }} fontSize="small" />;
+      return <ImageRoundedIcon sx={{ color: '#239be0ff' }} fontSize="small" />;
     case 'pdf':
       return <PdfIcon sx={{ color: '#239be0ff' }} fontSize="small" />;
     case 'xlsx':
@@ -99,6 +104,7 @@ const TreeNodeItem: React.FC<{
   flatNodes: TreeNode[];
   lastSelectedIndex: number | null;
   setLastSelectedIndex: (index: number) => void;
+  onDownloadFolder?: (path: string) => void;
 }> = ({
   node,
   selectedPaths,
@@ -106,6 +112,7 @@ const TreeNodeItem: React.FC<{
   flatNodes,
   lastSelectedIndex,
   setLastSelectedIndex,
+  onDownloadFolder,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -117,14 +124,49 @@ const TreeNodeItem: React.FC<{
     }
   };
 
-  const getAllChildPaths = (node: TreeNode): string[] => {
-    if (!node.children || node.children.length === 0) {
-      return node.isFolder ? [] : [node.fullPath];
-    }
+  // const handleDownloadClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation(); // กันไม่ให้ collapse พับ
+  //   if (onDownloadFolder) {
+  //     onDownloadFolder(node.fullPath);
+  //   }
+  // };
 
-    const childPaths = node.children.flatMap(getAllChildPaths);
-    return node.isFolder ? childPaths : [node.fullPath, ...childPaths];
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    try {
+      const fileName = node.fullPath.split("\\").pop(); // ดึงชื่อโฟลเดอร์
+      const res = await callDocu.get(`/FileManager/DownloadZip?folderPath=${node.fullPath}`, {
+        responseType: 'blob', // ใส่เพื่อดาวน์โหลดไฟล์zipได้
+      });
+
+      saveAs(res.data, `${fileName || 'folder'}.zip`);
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: `Download failed for: "${node.fullPath}"`,
+        confirmButtonColor: '#d33',
+      });
+    }
   };
+
+
+  const getAllChildPaths = (node: TreeNode): string[] => {
+    const paths: string[] = [];
+
+    const collectPaths = (n: TreeNode) => {
+      if (n.children && n.children.length > 0) {
+        n.children.forEach(collectPaths); //ลูปซ้อนลึกไปเรื่อย ๆ
+      } else if (!n.isFolder) {
+        paths.push(n.fullPath); //เก็บเฉพาะ path ของไฟล์
+      }
+    };
+
+    collectPaths(node); //เริ่มโหนดนี้
+    return paths;
+  };
+
 
 
   const handleCheckboxClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -142,28 +184,43 @@ const TreeNodeItem: React.FC<{
         onToggleSelect(path);
       });
     } else {
-      onToggleSelect(node.fullPath);
+      const isSelected = selectedPaths.includes(node.fullPath);
+
+      const pathsToToggle = node.isFolder
+        ? getAllChildPaths(node) // ไม่รวมโฟลเดอร์เอง
+        : [node.fullPath];
+
+      pathsToToggle.forEach((path) => {
+        onToggleSelect(path);
+      });
+
       setLastSelectedIndex(currentIndex);
     }
   };
 
-  
+
+  const childPaths = getAllChildPaths(node);
+  const isChecked = node.isFolder
+    ? childPaths.length > 0 && childPaths.every((path) => selectedPaths.includes(path))
+    : selectedPaths.includes(node.fullPath);
+
+
 
   return (
     <>
       <ListItemButton onClick={handleClick} sx={{ pl: node.isFolder ? 2 : 4 }}>
-        <ListItemIcon sx={{ minWidth: 48 }}>
-          <Checkbox
-            edge="start"
-            size="small"
-            checked={selectedPaths.includes(node.fullPath)}
-            onClick={handleCheckboxClick}
-          />
-        </ListItemIcon>
+        {node.isFolder && (
+          <ListItemIcon sx={{ minWidth: 40 }}>
+            <DownloadIcon
+              onClick={handleDownload}
+              sx={{ color: '#2086c1ff', cursor: 'pointer', mr: 1, fontSize:'12' }}
+            />
+          </ListItemIcon>
+        )}
 
-        <ListItemIcon sx={{ minWidth: 40, ml: -3 }}>
+        <ListItemIcon sx={{ minWidth: 40, ml: node.isFolder ? 0 : -3 }}>
           {node.isFolder ? (
-            <FolderIcon sx={{ color: '#163299ff' }} />
+            <FolderRoundedIcon sx={{ color: '#163299ff' }} />
           ) : (
             getFileIcon(node.name)
           )}
@@ -185,24 +242,24 @@ const TreeNodeItem: React.FC<{
         {node.isFolder ? (open ? <ExpandLess /> : <ExpandMore />) : null}
       </ListItemButton>
 
-      {node.isFolder && (
-        <Collapse in={open} timeout="auto" unmountOnExit>
-          <List component="div" disablePadding>
-            {node.children?.map((child) => (
-              <TreeNodeItem
-                key={child.fullPath}
-                node={child}
-                selectedPaths={selectedPaths}
-                onToggleSelect={onToggleSelect}
-                flatNodes={flatNodes}
-                lastSelectedIndex={lastSelectedIndex}
-                setLastSelectedIndex={setLastSelectedIndex}
-              />
-            ))}
-          </List>
-        </Collapse>
-      )}
-    </>
+        {node.isFolder && (
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding sx={{pl:1}}>
+              {node.children?.map((child) => (
+                <TreeNodeItem
+                  key={child.fullPath}
+                  node={child}
+                  selectedPaths={selectedPaths}
+                  onToggleSelect={onToggleSelect}
+                  flatNodes={flatNodes}
+                  lastSelectedIndex={lastSelectedIndex}
+                  setLastSelectedIndex={setLastSelectedIndex}
+                />
+              ))}
+            </List>
+          </Collapse>
+        )}
+      </>
   );
 };
 
