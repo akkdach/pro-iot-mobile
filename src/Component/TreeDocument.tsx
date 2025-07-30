@@ -134,20 +134,33 @@ const TreeNodeItem: React.FC<{
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    try {
-      const fileName = node.fullPath.split("\\").pop(); // ดึงชื่อโฟลเดอร์
-      const res = await callDocu.get(`/FileManager/DownloadZip?folderPath=${node.fullPath}`, {
-        responseType: 'blob', // ใส่เพื่อดาวน์โหลดไฟล์zipได้
-      });
+    const confirm = await Swal.fire({
+      title: "คุณต้องการดาวน์โหลดโฟลเดอร์นี้หรือไม่",
+      text: `โฟลเดอร์ : "${node.name}"`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "ดาวน์โหลด",
+      cancelButtonText: "ยกเลิก",
+    })
 
-      saveAs(res.data, `${fileName || 'folder'}.zip`);
-    } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'เกิดข้อผิดพลาด',
-        text: `Download failed for: "${node.fullPath}"`,
-        confirmButtonColor: '#d33',
-      });
+    if (confirm.isConfirmed) {
+      try {
+        const fileName = node.fullPath.split("\\").pop(); // ดึงชื่อโฟลเดอร์
+        const res = await callDocu.get(`/FileManager/DownloadZip?folderPath=${node.fullPath}`, {
+          responseType: 'blob', // ใส่เพื่อดาวน์โหลดไฟล์zipได้
+        });
+
+        saveAs(res.data, `${fileName || 'folder'}.zip`);
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: `Download failed for: "${node.fullPath}"`,
+          confirmButtonColor: '#d33',
+        });
+      }
     }
   };
 
