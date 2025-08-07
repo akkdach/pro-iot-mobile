@@ -13,7 +13,7 @@ type Props = {
 
 const BatteryIndicator: React.FC<Props> = ({ level, isCharging = false }) => {
   // ปรับ level ให้เป็น 0, 5, 10, 15, ... 100
-  const steppedLevel = Math.min(Math.ceil(level * 100) / 5, 100);
+  const steppedLevel = Math.min(Math.ceil(level * 100) / 4.2, 100);
 
   let icon;
   if (isCharging) {
@@ -32,7 +32,7 @@ const BatteryIndicator: React.FC<Props> = ({ level, isCharging = false }) => {
     <Box display="flex" alignItems="center" gap={1} sx={{ minWidth: 120 }}>
       {icon}
       <Box sx={{ flex: 1 }}>
-        <Typography variant="body2">{steppedLevel}%</Typography>
+        <Typography variant="body2">{steppedLevel.toFixed(2)}%</Typography>
         <LinearProgress
           variant="determinate"
           value={steppedLevel}

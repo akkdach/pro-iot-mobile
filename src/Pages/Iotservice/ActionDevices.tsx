@@ -24,6 +24,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import Countdown from '../../Component/Countdown';
+import QRScanner from '../../Component/QRScanner';
 
 
 export default function DeviceAction() {
@@ -36,6 +37,9 @@ export default function DeviceAction() {
   const [StartAt, setStartAt] = useState<string | null >(null);
   const [FinishAt, setFinishAt] = useState<string | null >(null);
   const [countdownTarget, setCountdownTarget] = useState<string | null>(null);
+  const [openScanner, setOpenScanner] = useState(false);
+  const [orderId, setOrderId] = useState('');
+
 
 
   useEffect(() => {
@@ -195,14 +199,18 @@ export default function DeviceAction() {
                 </Box>
 
                 <Box sx={{ display: 'flex', justifyContent: 'center', }}>
-                <TextField name = "orderId"
-                  onBlur={handleInputChange}
+                <TextField
+                  name="orderId"
+                  value={orderId}
+                  onChange={(e) => {
+                    setOrderId(e.target.value);
+                    handleInputChange(e);
+                  }}
                   variant="outlined"
                   placeholder="Enter OrderID"
                   sx={{
                     height: 50,
                     fontWeight: 500,
-                    
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word',
                     maxWidth: '100%',
@@ -223,13 +231,26 @@ export default function DeviceAction() {
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
-                        <IconButton edge="end" size="small">
+                        <IconButton edge="end" size="small" onClick={() => setOpenScanner(true)}>
                           <QrCode2Icon />
                         </IconButton>
                       </InputAdornment>
                     ),
                   }}
-                /></Box>
+                />
+                </Box>
+
+                {openScanner && (
+                  <QRScanner
+                    open={openScanner}
+                    onClose={() => setOpenScanner(false)}
+                    onScan={(value) => {
+                      setOrderId(value);
+                      handleInputChange({ target: { name: 'orderId', value } });
+                    }}
+                  />
+                )}
+
 
                 <Box sx={{ display: 'flex', justifyContent: 'center',  mb: 1}}>
                 <TimePicker
