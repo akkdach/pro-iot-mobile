@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Box, Button, TextField, Typography, Card, CardContent, Stack, IconButton, Divider, } from "@mui/material";
+import { Box, Button, TextField, Typography, Card, CardContent, Stack, IconButton, Divider, InputAdornment, } from "@mui/material";
 import { PhotoCamera, UploadFile as UploadIcon, Folder } from "@mui/icons-material";
 import CameraModal from "../../Component/CameraModal";
 import { useUser } from "../../Context/userContext";
@@ -8,6 +8,8 @@ import Swal from "sweetalert2";
 import callDocu from "../../Services/callDocu";
 import { uploadFile } from "../../Services/callUpload";
 import CameraModalToFile from "../../Component/CameraToFileModal";
+import QrCode2Icon from '@mui/icons-material/QrCode2';
+import QRScanner from "../../Component/QRScanner";
 
 export default function UploadFile() {
   const { user } = useUser();
@@ -16,6 +18,8 @@ export default function UploadFile() {
   const [isOpenCamera, setIsOpenCamera] = useState(false);
   const [uploadedList, setUploadedList] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [openScanner, setOpenScanner] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState<{ orderId: string } | null>(null);
 
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +31,13 @@ export default function UploadFile() {
   const onCapture = (files: File[]) => {
     setFiles([...files, ...files]);
     setIsOpenCamera(false);
-  }; 
+  };
+  
+  const handleInputChange = async(e : any) => {
+    const {name, value} = e.target
+    var newData : any = {...deviceInfo,[name]:value}
+    setDeviceInfo(newData);
+  };
 
 
   const handleSubmit = async () => {
@@ -108,7 +118,27 @@ export default function UploadFile() {
               borderRadius: 5,  // <-- ใส่ตรงนี้เพื่อทำให้ขอบโค้ง
             },
           }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton edge="end" size="small" onClick={() => setOpenScanner(true)}>
+                  <QrCode2Icon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
+
+        {openScanner && (
+          <QRScanner
+            open={openScanner}
+            onClose={() => setOpenScanner(false)}
+            onScan={(value) => {
+              setOrderId(value);
+              handleInputChange({ target: { name: 'orderId', value } });
+            }}
+          />
+        )}
 
         <Stack spacing={1} direction="column">
           <Button

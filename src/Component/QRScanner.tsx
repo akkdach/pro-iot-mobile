@@ -61,7 +61,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ open, onClose, onScan }) => {
         <Box 
         sx={{
           borderRadius: '30px',
-          height: 300,
+          height: '100%',
           width: '100%'
         }}>
 
