@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Fab, Typography } from '@mui/material';
 import SensorsIcon from '@mui/icons-material/Sensors';
 import callDevice from '../../Services/callDevice';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from "react-router-dom";
 import WifiIndicator from '../../Component/WifiIndicator';
 import BatteryIndicator from '../../Component/BatteryIndicator';
 import AppHearder from '../../Component/AppHeader';
 import { AddBox, DeviceHub, DeviceHubOutlined, GifBox, Store, StoreMallDirectory } from '@mui/icons-material';
 import InventoryAction from './InventoryAction';
 import Swal from 'sweetalert2';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import InvenHeader from './Header';
 
 
 export default function InventoryList() {
@@ -17,6 +19,7 @@ export default function InventoryList() {
     const [rssiMap, setRssiMap] = useState<Record<string, number>>({});
     const [startAt, setStartAt] = useState<Record<string, string>>({});
     const [finishAt, setFinishAt] = useState<Record<string, string>>({});
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchDevices() {
@@ -87,11 +90,16 @@ export default function InventoryList() {
                 Swal.fire('ดำเนินการสำเร็จ','','success')
             }
         })
-    }   
+    }
+
+    const handleListClick = () => {
+        navigate("/NewInventoryCount"); // เปลี่ยนเป็น path ที่ต้องการไปหน้าอัพโหลดไฟล์
+    };
+
     return (
         <>
-            <InventoryAction handleNew={handleNew}/>
-            <AppHearder title="📊 Inventory Count List"  />
+            
+            <InvenHeader title="Inventory Counting" />
             <Box sx={{ p: 2, marginTop: 7, marginBottom: 8 }}>
                 <div
                     style={{
@@ -102,8 +110,8 @@ export default function InventoryList() {
                     }}
                 >
                     {deviceList.map((item: any, index: number) => (
-                        <Link
-                            to={`/Action/${item.simEmi}`}
+                        <Box
+                           
                             key={index}
                             style={{
                                 textDecoration: 'none',
@@ -148,8 +156,28 @@ export default function InventoryList() {
                                     <WifiIndicator strength={rssiMap[item.simEmi?.trim()] ?? 0} isConnected={true} />
                                 </Box>
 
+                                <Fab
+                                    aria-label="add"
+                                    sx={{
+                                        position: "fixed",
+                                        bottom: 78,
+                                        right: 20,
+                                        width: 45,
+                                        height: 45,
+                                        backgroundColor: '#163299ff',
+                                        color: '#ffffff',
+                                        '&:hover': {
+                                        backgroundColor: '#0f2569',
+                                        },
+                                        boxShadow: 1,
+                                    }}
+                                    onClick={handleListClick}
+                                    >
+                                    <AddRoundedIcon />
+                                </Fab>
+
                             </div>
-                        </Link>
+                        </Box>
                     ))}
                 </div>
             </Box>
