@@ -25,8 +25,6 @@ function App() {
     <div className="App">
               {/* <TopBar /> */}
         <div>
-      
-
         {token ? (<UserProvider><Layout ><Routes>
           <Route path="/" element={<Home />}></Route>
           <Route path="checkin" element={<CheckIn />}></Route>
