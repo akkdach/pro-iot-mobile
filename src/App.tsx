@@ -8,7 +8,7 @@ import Layout from './Layout/Layout';
 import Home from './Pages/Home';
 import ProfileCard from './Pages/Profile';
 import CarLoan from './Pages/Car';
-import { Login } from '@mui/icons-material';
+import { DeviceHub, Login } from '@mui/icons-material';
 import LoginPage from './Pages/Login/Login';
 import { UserProvider } from './Context/userContext';
 import TopBar from './Component/TopBar';
@@ -18,6 +18,7 @@ import FlatListDevice from './Pages/Iotservice/ListDevice';
 import DeviceAction from './Pages/Iotservice/ActionDevices';
 import Upload from './Pages/Upload/Upload';
 import MyDocument from './Pages/Upload/MyDocument';
+import EquipmentDashboard from './Pages/Equipment';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="NewInventoryCount" element={<NewInventoryCount />}></Route>
           <Route path="MyDocument" element={<MyDocument />}></Route>
           <Route path="UploadFile" element={<Upload />}></Route>
+          <Route path="EquipmentDashboard" element={<EquipmentDashboard />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
       </div>
