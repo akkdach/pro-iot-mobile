@@ -295,7 +295,7 @@ export default function DeviceAction() {
                   color="error"
                   size="large"
                   fullWidth
-                  sx={{ mb: 2, py: 0.2, fontSize: 18, borderRadius: 4, width: 300 }}
+                  sx={{ mb: 2, py: 0.2, fontSize: 18, borderRadius: 4, maxWidth: '100%', width: 300, }}
                   startIcon={<StopIcon />}
                   onClick={() => handleAction('Stop')}
                   disabled={!deviceInfo}
@@ -308,7 +308,7 @@ export default function DeviceAction() {
                   color="success"
                   size="large"
                   fullWidth
-                  sx={{ mb: 1, py: 0.2, fontSize: 18, borderRadius: 4, width: 300 }}
+                  sx={{ mb: 1, py: 0.2, fontSize: 18, borderRadius: 4, maxWidth: '100%', width: 300 }}
                   startIcon={<PowerSettingsNewIcon />}
                   onClick={() => handleAction('Start')}
                   disabled={!deviceInfo}

@@ -174,10 +174,10 @@ const NewInventoryCount: React.FC = () => {
                   {/* คอลัมที่ 1 */}
                   <ListItem key={item.id} sx={{ flexDirection: "column", alignItems: "flex-start" }}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="#000000">
                       {item.systemQty} in stock
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="#000000">
                       Order
                     </Typography>
                   </Box>
@@ -196,12 +196,11 @@ const NewInventoryCount: React.FC = () => {
                     sx={{ width: 120 }}
                   />
                 </Box>
-
               </Box>
             </Box>
           ))
         ) : (
-          <Box sx={{ mt: 4, textAlign: 'center', color: 'black' }}>
+          <Box sx={{ mt: 4, textAlign: 'center', color: 'text.secondary' }}>
             No product found.
           </Box>
         )}
