@@ -19,6 +19,7 @@ import DeviceAction from './Pages/Iotservice/ActionDevices';
 import Upload from './Pages/Upload/Upload';
 import MyDocument from './Pages/Upload/MyDocument';
 import EquipmentDashboard from './Pages/Equipment';
+import ReceiveEquipment from './Pages/Equipment/ReceiveEquipment';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -37,6 +38,7 @@ function App() {
           <Route path="MyDocument" element={<MyDocument />}></Route>
           <Route path="UploadFile" element={<Upload />}></Route>
           <Route path="EquipmentDashboard" element={<EquipmentDashboard />}></Route>
+          <Route path="EquipmentScan" element={<ReceiveEquipment />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
       </div>
