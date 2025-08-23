@@ -2,12 +2,15 @@
 import React, { useState } from 'react';
 import {Box, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, Avatar,} from '@mui/material';
 import AppHearder from '../../Component/AppHeader';
-import ReceiveEquipmentModal from './ReceiveEquipmentModal';
+import ReceiveEquipmentModal from './ReceiveEquipment';
 import { TrendingUp, Download, Upload, Delete } from '@mui/icons-material';
 import { Button, Stack } from '@mui/material';
+import { Link, useNavigate } from "react-router-dom";
 
 const EquipmentDashboard = () => {
   const [receiveEquipmentModalOpen, SetReceiveEquipmentModalOpen] = useState<boolean>(true);
+  const navigate = useNavigate();
+  
 
   const stats = [
     { title: 'จำนวน Onhand', value: 120, color: 'linear-gradient(135deg, #42a5f5, #1e88e5)', icon: <TrendingUp /> },
@@ -25,10 +28,14 @@ const EquipmentDashboard = () => {
 
   const onCloseReceiveModal = () => SetReceiveEquipmentModalOpen(false);
 
+  const handleScanClick = () => {
+    navigate("/EquipmentScan"); // เปลี่ยนเป็น path ที่ต้องการไปหน้าอัพโหลดไฟล์
+  };
+
   return (
     <>
       <AppHearder title="Equipment Control" />
-      <ReceiveEquipmentModal open={receiveEquipmentModalOpen} onClose={onCloseReceiveModal} />
+      
 
       <Box p={2} mt={8} marginBottom={8}>
         {/* Stats Cards - 2 Columns */}
@@ -57,7 +64,7 @@ const EquipmentDashboard = () => {
             fullWidth
             variant="contained"
             sx={{ borderRadius: 3, py: 1.5, fontWeight: 'bold', backgroundColor: '#acacacff' }}
-            onClick={() => alert('เบิกเครื่อง')}
+            onClick={handleScanClick}
         >
             เบิกเครื่อง
         </Button>

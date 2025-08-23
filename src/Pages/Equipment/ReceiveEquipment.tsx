@@ -26,32 +26,18 @@ const modalStyle = {
   p: 3,
 };
 
-interface ReceiveEquipmentModalProps {
-  open: boolean;
-  onClose: () => void;
-}
 
 interface FormData {
   orderId: string;
   equipment: string;
 }
 
-const ReceiveEquipmentModal: React.FC<ReceiveEquipmentModalProps> = ({ open, onClose }) => {
-  const [equipment, setEquipment] = useState('');
+export default function ReceiveEquipment() {
   const [openScanner, setOpenScanner] = useState<boolean>(true);
-  const [orderId, setOrderId] = useState<string>();
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<FormData>();
 
   const onFormSubmit = (data: FormData) => {
     onSubmit(data);
-    reset();
-    onClose();
   };
 
   const onSubmit = async (data: any) => {
@@ -72,10 +58,8 @@ const ReceiveEquipmentModal: React.FC<ReceiveEquipmentModalProps> = ({ open, onC
   return (
     <>
 
-
-
-      <Modal open={open} onClose={onClose}>
-        <Box sx={modalStyle}>
+      
+        <Box sx={{ p: 2, marginTop: 2, marginBottom: 5 }}>
           <Typography variant="h6" mb={2}>📥 รับเครื่อง</Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', }}>
             <TextField
@@ -116,12 +100,12 @@ const ReceiveEquipmentModal: React.FC<ReceiveEquipmentModalProps> = ({ open, onC
           </Box>
           <Box mt={3} display="flex" justifyContent="flex-end" gap={1}>
             <Box mt={3} display="flex" justifyContent="flex-end" gap={1}>
-              <Button variant="outlined" onClick={() => { reset(); onClose(); }}>ยกเลิก</Button>
-              <Button variant="contained" onClick={handleSubmit(onFormSubmit)}>บันทึก</Button>
+              <Button variant="outlined" >ยกเลิก</Button>
+              <Button variant="contained" >บันทึก</Button>
             </Box>
           </Box>
         </Box>
-      </Modal>
+      
       
             {openScanner && (
               <QRScanner
@@ -136,4 +120,4 @@ const ReceiveEquipmentModal: React.FC<ReceiveEquipmentModalProps> = ({ open, onC
   );
 };
 
-export default ReceiveEquipmentModal;
+export default ReceiveEquipment;
