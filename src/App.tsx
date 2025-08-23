@@ -25,7 +25,7 @@ const token = localStorage.getItem('token');
 function App() {
   return (
     <div className="App">
-              {/* <TopBar /> */}
+        
         <div>
         {token ? (<UserProvider><Layout ><Routes>
           <Route path="/" element={<Home />}></Route>
