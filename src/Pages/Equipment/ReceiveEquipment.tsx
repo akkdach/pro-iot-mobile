@@ -11,6 +11,7 @@ import {
 import { QrCode2 } from '@mui/icons-material';
 import QRScanner from '../../Component/QRScanner';
 import AppHearder from '../../Component/AppHeader';
+import Swal from 'sweetalert2';
 
 interface FormData {
   orderId: string;
@@ -29,10 +30,41 @@ export default function ReceiveEquipment() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ยกเลิก
+  const handleCancel = () => {
+    setFormData({
+      orderId: '',
+      equipment: '',
+    });
+    setShowScanner(false);
+    console.log("ยกเลิกการกรอกข้อมูล");
+  };
+
+  // บันทึก
+  const handleSave = () => {
+    if (!formData.orderId || !formData.equipment) {
+      Swal.fire("กรุณากรอกข้อมูลให้ครบ");
+      return;
+    }
+
+    console.log("บันทึกข้อมูล:", formData);
+
+    // TODO: call API ที่จะบันทึกลง backend ได้ เช่น:
+    // axios.post('/api/receive-equipment', formData)
+
+    alert("บันทึกสำเร็จ!");
+  };
+
   return (
     <>
       <AppHearder title="เบิกเครื่อง" />
-      <Box sx={{ p: 2, marginTop: 7, marginBottom: 8 }}>
+      <Box sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          marginTop: 25, marginBottom: 5,
+          p: 2,
+        }}>
 
         {/* ช่องกรอก Order ID */}
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
@@ -78,7 +110,7 @@ export default function ReceiveEquipment() {
           />
         </Box>
 
-        {/* ช่องกรอก Order ID */}
+        {/* ช่องกรอก Equiment Number */}
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
             name="equiment"
@@ -123,9 +155,17 @@ export default function ReceiveEquipment() {
         </Box>
 
         {/* ปุ่ม Action */}
-        <Box mt={3} display="flex" justifyContent="flex-end" gap={1}>
-          <Button variant="outlined" sx={{ mb: 2, py: 0.2,  borderRadius: 4, maxWidth: '100%', width: 50, height:60 }}>ยกเลิก</Button>
-          <Button variant="contained">บันทึก</Button>
+        <Box mt={3} display="flex" justifyContent="center" gap={1}>
+          <Button variant="outlined"
+            onClick={handleCancel}
+            sx={{ mb: 2, py: 0.2,  borderRadius: 4, maxWidth: '100%', width: 50, height: 45, color:'#999999', borderColor: '#b3b3b3' }}>
+            ยกเลิก
+          </Button>
+          <Button variant="contained"
+            onClick={handleSave}
+            sx={{ mb: 2, py: 0.2,  borderRadius: 4, maxWidth: '100%', width: 50, height: 45, backgroundColor: '#328a4b' }}>
+            บันทึก
+          </Button>
         </Box>
 
         {/* แสดง QRScanner แบบฝังในหน้า */}
