@@ -1,34 +1,71 @@
 // EquipmentDashboardMobileTwoColumn.tsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {Box, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, Avatar,} from '@mui/material';
 import AppHearder from '../../Component/AppHeader';
 import { TrendingUp, Download, Upload, Delete } from '@mui/icons-material';
 import { Button, Stack } from '@mui/material';
 import { Link, useNavigate } from "react-router-dom";
+import callApi from '../../Services/callApi';
+import Swal from 'sweetalert2';
+import dayjs from 'dayjs';
+import OutboundIcon from '@mui/icons-material/Outbound';
+import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
+import InventoryIcon from '@mui/icons-material/Inventory';
+
+export interface ListEqui{
+    equipmentSerialNo?: string
+    orderID?: string
+    activity?: string
+    status?: string
+    remarks?: string
+}
 
 const EquipmentDashboard = () => {
   const [receiveEquipmentModalOpen, SetReceiveEquipmentModalOpen] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [formData, setFormData] = useState<ListEqui>({});
   const navigate = useNavigate();
+  const [summary, setSummary] = useState<any>({});
   
+  useEffect(() => {
+  const fetchEquip = async () => {
+    try {
+      const EquipRes = await callApi.get('/EquipmentTransaction/list', { params: formData });
+      if (EquipRes?.data?.isSuccess && EquipRes?.data?.dataResult.line) {
+        console.log('API result:', EquipRes.data.dataResult.line);
+        setSummary(EquipRes.data.dataResult);
+        setHistory(EquipRes.data.dataResult.line);
+      } else {
+        Swal.fire('เกิดข้อผิดพลาด', EquipRes?.data?.message || 'ไม่สามารถโหลดข้อมูลได้', 'error');
+      }
+    } catch (error) {
+      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อ API ได้', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchEquip();
+}, [formData]);
+
 
   const stats = [
-    { title: 'จำนวน Onhand', value: 120, color: 'linear-gradient(135deg, #42a5f5, #1e88e5)', icon: <TrendingUp /> },
-    { title: 'ติดตั้งวันนี้', value: 15, color: 'linear-gradient(135deg, #66bb6a, #388e3c)', icon: <Upload /> },
-    { title: 'เบิกวันนี้', value: 20, color: 'linear-gradient(135deg, #ffca28, #f57c00)', icon: <Download /> },
-    { title: 'ถอนวันนี้', value: 5, color: 'linear-gradient(135deg, #ef5350, #c62828)', icon: <Delete /> },
+    { title: 'จำนวน Onhand', value: summary.onhand ?? 0, color: '#27aea0ff', icon: <InventoryIcon /> },
+    { title: 'รับวันนี้', value: summary.receive ?? 0, color: '#205a7aff', icon: <OutboundIcon /> },
+    { title: 'จ่ายวันนี้', value: summary.withdraw ?? 0, color: '#1b4b64ff', icon: <AssignmentReturnedIcon /> },
+    //{ title: 'ติดตั้งวันนี้', value: summary.install ?? 0, color: '#1b4b64ff', icon: <Download /> },
+    //{ title: 'ถอนวันนี้', value: summary.remove ?? 0, color: '#20545bff', icon: <Delete /> },
   ];
 
-  const history = [
-    { time: '08:30', type: 'เบิก', item: 'Router', quantity: 5 },
-    { time: '09:15', type: 'ตั้ง', item: 'Switch', quantity: 3 },
-    { time: '11:00', type: 'ถอน', item: 'Access Point', quantity: 2 },
-    { time: '13:45', type: 'เบิก', item: 'Cable', quantity: 10 },
-  ];
+  //รับเครื่อง
+  const handleReceiveClick = () => {
+    navigate("/ReceiveEquipmentScan");
+  };
 
-  const onCloseReceiveModal = () => SetReceiveEquipmentModalOpen(false);
-
-  const handleScanClick = () => {
-    navigate("/EquipmentScan"); // เปลี่ยนเป็น path ที่ต้องการไปหน้าอัพโหลดไฟล์
+  //จ่ายเครื่อง
+  const handleWithdrawClick = () => {
+    navigate("/WithdrawEquipmentScan");
   };
 
   return (
@@ -37,41 +74,98 @@ const EquipmentDashboard = () => {
       
 
       <Box p={2} mt={8} marginBottom={8}>
-        {/* Stats Cards - 2 Columns */}
-        <Box
-        display="flex"
-        flexWrap="wrap"
-        gap={2}
-        mb={3}
-        justifyContent="space-between"
-        >
-        {stats.map((stat, index) => (
-            <Box key={index} flexBasis="calc(50% - 8px)">
-            <StatCard
-                title={stat.title}
-                value={stat.value}
-                color={stat.color}
-                icon={stat.icon}
-            />
+        {/* Stats Cards */}
+        <Box display="flex" flexDirection="column" gap={2} mb={3}>
+          {/* Onhand กล่องเต็มแถว */}
+          <Card
+            sx={{
+              backgroundColor: stats[0].color,
+              color: "#fff",
+              borderRadius: 3,
+              height: 80,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              p: 2,
+              boxShadow: 3,
+            }}
+          >
+            <Box>
+              <Typography variant="body1">{stats[0].title}</Typography>
+              <Typography variant="h6" fontWeight="bold">
+                {stats[0].value}
+              </Typography>
             </Box>
-        ))}
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.25)" }}>
+              {stats[0].icon}
+            </Avatar>
+          </Card>
+
+          {/* สองกล่องล่างเป็น 2 คอลัมน์ */}
+          <Box display="flex" gap={2}>
+            {stats.slice(1).map((stat, index) => (
+              <Box key={index} flex={1}>
+                <Card
+                  sx={{
+                    backgroundColor: stat.color,
+                    color: "#fff",
+                    borderRadius: 3,
+                    height: 80,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    p: 2,
+                    boxShadow: 3,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body1">{stat.title}</Typography>
+                    <Typography variant="h6" fontWeight="bold">
+                      {stat.value}
+                    </Typography>
+                  </Box>
+                  <Avatar sx={{ bgcolor: "rgba(255,255,255,0.25)" }}>
+                    {stat.icon}
+                  </Avatar>
+                </Card>
+              </Box>
+            ))}
+          </Box>
         </Box>
+
+
 
         {/* Action Buttons */}
         <Stack direction="row" spacing={2} mb={3}>
         <Button
             fullWidth
             variant="contained"
-            sx={{ borderRadius: 3, py: 1.5, fontWeight: 'bold', backgroundColor: '#acacacff' }}
-            onClick={handleScanClick}
+            sx={{
+              borderRadius: 3,
+              py: 1.5,
+              fontWeight: 'bold',
+              background: 'linear-gradient(to right,#3184e1ff,#3184e1ff)',
+              '&:hover': {
+                background: 'linear-gradient(to right,rgba(20, 190, 220, 1), #3184e1ff)',
+              },
+            }}
+            onClick={handleReceiveClick}
         >
-            เบิกเครื่อง
+            รับเครื่อง
         </Button>
         <Button
             fullWidth
             variant="contained"
-            sx={{ borderRadius: 3, py: 1.5, fontWeight: 'bold', backgroundColor: '#003264' }}
-            onClick={() => alert('จ่ายเครื่อง')}
+            sx={{
+              borderRadius: 3,
+              py: 1.5,
+              fontWeight: 'bold',
+              background: 'linear-gradient(to right,#3184e1ff,#3184e1ff)',
+              '&:hover': {
+                background: 'linear-gradient(to right,rgba(20, 190, 220, 1), #3184e1ff)',
+              },
+            }}
+            onClick={handleWithdrawClick}
         >
             จ่ายเครื่อง
         </Button>
@@ -91,21 +185,39 @@ const EquipmentDashboard = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                    <TableCell><b>เวลา</b></TableCell>
-                    <TableCell><b>ประเภท</b></TableCell>
-                    <TableCell><b>อุปกรณ์</b></TableCell>
-                    <TableCell><b>จำนวน</b></TableCell>
+                    <TableCell><b>Trans ID</b></TableCell>
+                    <TableCell><b>Equipment Serial No</b></TableCell>
+                    <TableCell><b>Order ID</b></TableCell>
+                    <TableCell><b>Trans Type</b></TableCell>
+                    <TableCell><b>Activity</b></TableCell>
+                    <TableCell><b>Status</b></TableCell>
+                    <TableCell><b>Remarks</b></TableCell>
+                    <TableCell><b>Create At</b></TableCell>
+                    <TableCell><b>Wk_Ctr</b></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {history.map((entry, index) => (
+                  {history.length > 0 ? (
+                  history.map((entry, index) => (
                     <TableRow key={index} hover>
-                      <TableCell>{entry.time}</TableCell>
-                      <TableCell>{entry.type}</TableCell>
-                      <TableCell>{entry.item}</TableCell>
-                      <TableCell>{entry.quantity}</TableCell>
+                      <TableCell>{entry.transactionID}</TableCell>
+                      <TableCell>{entry.equipmentSerialNo}</TableCell>
+                      <TableCell>{entry.orderID}</TableCell>
+                      <TableCell>{entry.tran_Type}</TableCell>
+                      <TableCell>{entry.activity}</TableCell>
+                      <TableCell>{entry.status}</TableCell>
+                      <TableCell>{entry.remarks}</TableCell>
+                      <TableCell>{dayjs(entry.createAt).format("DD/MM/YYYY hh:mm:ss")}</TableCell>
+                      <TableCell>{entry.wk_Ctr}</TableCell>
                     </TableRow>
-                  ))}
+                  ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={4} align="center">
+                        {loading ? "กำลังโหลด..." : "ไม่มีข้อมูล"}
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </Box>

@@ -14,7 +14,7 @@ import AppHearder from '../../Component/AppHeader';
 import Swal from 'sweetalert2';
 import callApi from '../../Services/callApi';
 
-export interface Receive{
+export interface withdraw{
     equipmentSerialNo?: string
     orderID?: string
     activity?: string
@@ -23,14 +23,13 @@ export interface Receive{
 }
 
 export default function WithdrawEquipment() {
-  const [formData, setFormData] = useState<Receive>({
+  const [formData, setFormData] = useState<withdraw>({
     orderID: '',
     equipmentSerialNo: '',
   });
   const [showScanner, setShowScanner] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [scanField, setScanField] = useState<"equipmentSerialNo" | "orderID" | null>(null);
-  
 
   const handleInputChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
@@ -44,7 +43,7 @@ export default function WithdrawEquipment() {
       equipmentSerialNo: '',
     });
     setShowScanner(false);
-    console.log("ยกเลิกการกรอกข้อมูล");
+    console.log('ยกเลิกการกรอกข้อมูล');
   };
 
   // บันทึก (call API)
@@ -58,16 +57,16 @@ export default function WithdrawEquipment() {
 
     setLoading(true);
     try {
-      const res = await callApi.post('/EquipmentTransaction/receive', formData);
+      const res = await callApi.post('/EquipmentTransaction/withdraw', formData);
 
       if (res.data?.isSuccess) {
-        Swal.fire('รับเครื่องสำเร็จ', '', 'success');
+        Swal.fire(' จ่ายเครื่องสำเร็จ', '', 'success');
         setFormData({ orderID: '', equipmentSerialNo: '' });
       } else {
-        Swal.fire('รับเครื่องไม่สำเร็จ', res.data?.message || '', 'error');
+        Swal.fire('จ่ายเครื่องไม่สำเร็จ', res.data?.message || '', 'error');
       }
     } catch (error: any) {
-      console.error('Error withdraw:', error);
+      console.error(' Error withdraw:', error);
       Swal.fire('เกิดข้อผิดพลาด', error?.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
     } finally {
       setLoading(false);
@@ -76,7 +75,7 @@ export default function WithdrawEquipment() {
 
   return (
     <>
-      <AppHearder title="รับเครื่อง" />
+      <AppHearder title="จ่ายเครื่อง" />
       <Box sx={{
           display: 'flex',
           flexDirection: 'column',
