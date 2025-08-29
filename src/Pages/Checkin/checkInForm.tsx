@@ -133,35 +133,7 @@ export default function CheckINForm() {
         setIsOpenCamera(false)
     }
     return (<>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 15, margin: 15 }}>
-            {/* <Button
-                fullWidth
-                component="label"
-                role={undefined}
-                variant="contained"
-                tabIndex={-1}
-                startIcon={<UploadFile />}
-            >
-                อัปโหลดไฟล์
-                <VisuallyHiddenInput
-                    type="file"
-                    onChange={(event: any) => console.log(event.target.files)}
-                    multiple={false}
-                />
-            </Button> */}
-            <Button
-                fullWidth
-                onClick={() => setIsOpenCamera(true)}
-                component="label"
-                role={undefined}
-                variant="contained"
-                tabIndex={-1}
-                startIcon={<CameraAltSharp />}
-            >
-                ถ่ายรูป
-            </Button>
-            <CameraModal isOpen={isOpenCamera} onClose={() => setIsOpenCamera(false)} onCapture={(e: any) => { onCapture(e); }} />
-        </div>
+        
         <div style={{ display: 'flex', justifyContent: 'center', gap: 15, margin: 15 }}>
             <Button
                 fullWidth
@@ -190,6 +162,36 @@ export default function CheckINForm() {
       <button onClick={() => handleCheckOut()}
         style={{ display: 'flex', alignItems: 'center', flex: 2, justifyContent: 'center' }}
         className='btn btn-primary' title='ออกงาน'  ><WorkOff></WorkOff> ออกงาน</button> */}
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 15, margin: 15 }}>
+            {/* <Button
+                fullWidth
+                component="label"
+                role={undefined}
+                variant="contained"
+                tabIndex={-1}
+                startIcon={<UploadFile />}
+            >
+                อัปโหลดไฟล์
+                <VisuallyHiddenInput
+                    type="file"
+                    onChange={(event: any) => console.log(event.target.files)}
+                    multiple={false}
+                />
+            </Button> */}
+            <Button
+                fullWidth
+                onClick={() => setIsOpenCamera(true)}
+                component="label"
+                role={undefined}
+                variant="contained"
+                tabIndex={-1}
+                startIcon={<CameraAltSharp />}
+            >
+                ถ่ายรูป
+            </Button>
+            <CameraModal isOpen={isOpenCamera} onClose={() => setIsOpenCamera(false)} onCapture={(e: any) => { onCapture(e); }} />
         </div>
     </>)
 }

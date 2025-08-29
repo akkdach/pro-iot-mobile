@@ -154,9 +154,8 @@ export default function DeviceAction() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <>
-        <IotHeader title="Device Control" />
-        <Box sx={{ p: 2, marginTop: 2, marginBottom: 5 }}>
-          <Container maxWidth="sm" sx={{ py: 3 }}>
+        <Box sx={{ p: 2, mb:-6 }}>
+          <Container maxWidth="sm" sx={{ py: 3, mt:-8 }}>
             {loading ? (
               <CircularProgress />
             ) : (

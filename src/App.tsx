@@ -21,6 +21,7 @@ import MyDocument from './Pages/Upload/MyDocument';
 import EquipmentDashboard from './Pages/Equipment';
 import HandoutEquipment from './Pages/Equipment/ReceiveEquipment';
 import WithdrawEquipment from './Pages/Equipment/WithdrawEquipment';
+import ActionPages from './Pages/Iotservice/ActionPages';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -33,7 +34,7 @@ function App() {
           <Route path="checkin" element={<CheckIn />}></Route>
           <Route path="profile" element={<ProfileCard />}></Route>
           <Route path="List" element={<FlatListDevice />}></Route>
-          <Route path="Action/:simEmi" element={<DeviceAction />}></Route>
+          <Route path="Action/:simEmi" element={<ActionPages />}></Route>
           <Route path="InventoryList" element={<InventoryList />}></Route>
           <Route path="NewInventoryCount" element={<NewInventoryCount />}></Route>
           <Route path="MyDocument" element={<MyDocument />}></Route>
