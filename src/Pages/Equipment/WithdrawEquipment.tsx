@@ -1,5 +1,5 @@
 // ReceiveEquipment.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -14,12 +14,12 @@ import AppHearder from '../../Component/AppHeader';
 import Swal from 'sweetalert2';
 import callApi from '../../Services/callApi';
 
-export interface withdraw{
-    equipmentSerialNo?: string
-    orderID?: string
-    activity?: string
-    status?: string
-    remarks?: string
+export interface withdraw {
+  equipmentSerialNo?: string
+  orderID?: string
+  activity?: string
+  status?: string
+  remarks?: string
 }
 
 export default function WithdrawEquipment() {
@@ -30,6 +30,14 @@ export default function WithdrawEquipment() {
   const [showScanner, setShowScanner] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [scanField, setScanField] = useState<"equipmentSerialNo" | "orderID" | null>(null);
+
+  const orderIdRef = useRef<HTMLInputElement>(null);
+  const equipmentRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // focus ตอนเข้ามาหน้าแรก
+    orderIdRef.current?.focus();
+  }, []);
 
   const handleInputChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
@@ -44,6 +52,8 @@ export default function WithdrawEquipment() {
     });
     setShowScanner(false);
     console.log('ยกเลิกการกรอกข้อมูล');
+    //กดยกเลิกแล้วให้กลับไปfocusที่ช่องorderID
+    orderIdRef.current?.focus();
   };
 
   // บันทึก (call API)
@@ -51,7 +61,8 @@ export default function WithdrawEquipment() {
     if (!formData.orderID || !formData.equipmentSerialNo) {
       Swal.fire({
         icon: "error",
-        title: 'กรุณากรอกข้อมูลให้ครบ'});
+        title: 'กรุณากรอกข้อมูลให้ครบ'
+      });
       return;
     }
 
@@ -62,6 +73,8 @@ export default function WithdrawEquipment() {
       if (res.data?.isSuccess) {
         Swal.fire(' จ่ายเครื่องสำเร็จ', '', 'success');
         setFormData({ orderID: '', equipmentSerialNo: '' });
+        //หลังบันทึกเสร็จ focus ที่ orderID ใหม่
+        orderIdRef.current?.focus();
       } else {
         Swal.fire('จ่ายเครื่องไม่สำเร็จ', res.data?.message || '', 'error');
       }
@@ -77,16 +90,17 @@ export default function WithdrawEquipment() {
     <>
       <AppHearder title="จ่ายเครื่อง" />
       <Box sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          marginTop: 25, marginBottom: 5,
-          p: 2,
-        }}>
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        marginTop: 25, marginBottom: 5,
+        p: 2,
+      }}>
 
         {/* ช่องกรอก Order ID */}
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
+            inputRef={orderIdRef}
             name="orderID"
             onChange={handleInputChange}
             variant="outlined"
@@ -121,12 +135,18 @@ export default function WithdrawEquipment() {
                 </InputAdornment>
               ),
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                equipmentRef.current?.focus(); // ถ้ากด Enter ข้ามไปช่องถัดไป
+              }
+            }}
           />
         </Box>
 
         {/* ช่องกรอก Equiment Number */}
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
+            inputRef={equipmentRef}
             name="equipmentSerialNo"
             onChange={handleInputChange}
             variant="outlined"
@@ -168,12 +188,12 @@ export default function WithdrawEquipment() {
         <Box mt={3} display="flex" justifyContent="center" gap={1}>
           <Button variant="outlined"
             onClick={handleCancel}
-            sx={{ mb: 2, py: 0.2,  borderRadius: 4, maxWidth: '100%', width: 50, height: 45, color:'#999999', borderColor: '#b3b3b3' }}>
+            sx={{ mb: 2, py: 0.2, borderRadius: 4, maxWidth: '100%', width: 50, height: 45, color: '#999999', borderColor: '#b3b3b3' }}>
             ยกเลิก
           </Button>
           <Button variant="contained"
             onClick={handleSave}
-            sx={{ mb: 2, py: 0.2,  borderRadius: 4, maxWidth: '100%', width: 50, height: 45, backgroundColor: '#328a4b' }}>
+            sx={{ mb: 2, py: 0.2, borderRadius: 4, maxWidth: '100%', width: 50, height: 45, backgroundColor: '#328a4b' }}>
             บันทึก
           </Button>
         </Box>

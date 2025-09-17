@@ -22,6 +22,7 @@ import EquipmentDashboard from './Pages/Equipment';
 import HandoutEquipment from './Pages/Equipment/ReceiveEquipment';
 import WithdrawEquipment from './Pages/Equipment/WithdrawEquipment';
 import ActionPages from './Pages/Iotservice/ActionPages';
+import Chat from './Pages/Test/Chat';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="EquipmentDashboard" element={<EquipmentDashboard />}></Route>
           <Route path="WithdrawEquipmentScan" element={<WithdrawEquipment />}></Route>
           <Route path="ReceiveEquipmentScan" element={<HandoutEquipment />}></Route>
+          <Route path="Chat" element={<Chat />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
       </div>

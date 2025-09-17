@@ -1,8 +1,7 @@
 // ReceiveEquipment.tsx
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
-  Typography,
   TextField,
   Button,
   InputAdornment,
@@ -31,6 +30,13 @@ export default function WithdrawEquipment() {
   const [loading, setLoading] = useState<boolean>(false);
   const [scanField, setScanField] = useState<"equipmentSerialNo" | "orderID" | null>(null);
   
+  const orderIdRef = useRef<HTMLInputElement>(null);
+  const equipmentRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // focus ตอนเข้ามาหน้าแรก
+    orderIdRef.current?.focus();
+  }, []);
 
   const handleInputChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
@@ -45,6 +51,8 @@ export default function WithdrawEquipment() {
     });
     setShowScanner(false);
     console.log("ยกเลิกการกรอกข้อมูล");
+    //กดยกเลิกแล้วให้กลับไปfocusที่ช่องorderID
+    orderIdRef.current?.focus();
   };
 
   // บันทึก (call API)
@@ -63,6 +71,8 @@ export default function WithdrawEquipment() {
       if (res.data?.isSuccess) {
         Swal.fire('รับเครื่องสำเร็จ', '', 'success');
         setFormData({ orderID: '', equipmentSerialNo: '' });
+        //หลังบันทึกเสร็จ focus ที่ orderID ใหม่
+        orderIdRef.current?.focus();
       } else {
         Swal.fire('รับเครื่องไม่สำเร็จ', res.data?.message || '', 'error');
       }
@@ -88,6 +98,7 @@ export default function WithdrawEquipment() {
         {/* ช่องกรอก Order ID */}
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <TextField
+            inputRef={orderIdRef}
             name="orderID"
             onChange={handleInputChange}
             variant="outlined"
@@ -122,6 +133,11 @@ export default function WithdrawEquipment() {
                 </InputAdornment>
               ),
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                equipmentRef.current?.focus(); // ถ้ากด Enter ข้ามไปช่องถัดไป
+              }
+            }}
           />
         </Box>
 
@@ -130,6 +146,7 @@ export default function WithdrawEquipment() {
           <TextField
             name="equipmentSerialNo"
             onChange={handleInputChange}
+            inputRef={equipmentRef}
             variant="outlined"
             value={formData.equipmentSerialNo}
             placeholder="Enter Equipment"

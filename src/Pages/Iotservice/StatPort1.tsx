@@ -55,7 +55,11 @@ const StatPort1 = () => {
         console.error(err);
       }
     };
-    fetchData();
+
+
+      setInterval(() => {
+    fetchData();        
+      }, 15000);
   }, [simEmi]);
 
   const stats = [

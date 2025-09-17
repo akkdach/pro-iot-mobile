@@ -14,6 +14,7 @@ export default function FlatListDevice() {
   const [rssiMap, setRssiMap] = useState<Record<string, number>>({});
   const [startAt, setStartAt] = useState<Record<string, string>>({});
   const [finishAt, setFinishAt] = useState<Record<string, string>>({});
+  const [connect_at, setConnectAt] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function fetchDevices() {
@@ -28,6 +29,7 @@ export default function FlatListDevice() {
           const rssiValue: Record<string, number> = {};
           const startTemp: Record<string, string> = {};
           const finishTemp: Record<string, string> = {};
+          const connect_at: Record<string, string> = {};
 
           await Promise.all(
             list.map(async (item: any) => {
@@ -35,6 +37,7 @@ export default function FlatListDevice() {
 
               battValue[sim] = item.battValue ? parseFloat(item.battValue) : 0;
               rssiValue[sim] = item.rssiValue ? parseInt(item.rssiValue) : 0;
+              connect_at[sim] = item.connect_at;
 
 
               // ตรวจสอบ ID ก่อนเรียก API
@@ -59,7 +62,7 @@ export default function FlatListDevice() {
           setRssiMap(rssiValue);
           setStartAt(startTemp);
           setFinishAt(finishTemp);
-
+          setConnectAt(connect_at);
           // console.log('Start Map:', startTemp);
           // console.log('Finish Map:', finishTemp);
         }
@@ -125,6 +128,12 @@ export default function FlatListDevice() {
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Typography sx={{ fontWeight: 500 }}>
                     Finish Time : {finishAt[item.simEmi?.trim()] ? new Date(finishAt[item.simEmi.trim()]).toLocaleString('th-TH') : '-'}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography sx={{ fontWeight: 500 }}>
+                    Connect At : {connect_at[item.simEmi?.trim()] ? new Date(connect_at[item.simEmi.trim()]).toLocaleString('th-TH') : '-'}
                   </Typography>
                 </Box>
 

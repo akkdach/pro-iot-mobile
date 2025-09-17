@@ -1,25 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Fab, Typography } from '@mui/material';
 import SensorsIcon from '@mui/icons-material/Sensors';
-import callDevice from '../../Services/callDevice';
 import { Link, useNavigate } from "react-router-dom";
 import WifiIndicator from '../../Component/WifiIndicator';
 import BatteryIndicator from '../../Component/BatteryIndicator';
 import AppHearder from '../../Component/AppHeader';
 import { AddBox, DeviceHub, DeviceHubOutlined, GifBox, Store, StoreMallDirectory } from '@mui/icons-material';
-import InventoryAction from './InventoryAction';
 import Swal from 'sweetalert2';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import InvenHeader from './Header';
+import callApi from '../../Services/callApi';
+import callDevice from '../../Services/callDevice';
+import { useUser } from '../../Context/userContext';
 
 
 export default function InventoryList() {
+    const {user} = useUser()
     const [deviceList, setDeviceList] = useState<any[]>([]);
     const [battMap, setBattMap] = useState<Record<string, number>>({});
     const [rssiMap, setRssiMap] = useState<Record<string, number>>({});
     const [startAt, setStartAt] = useState<Record<string, string>>({});
     const [finishAt, setFinishAt] = useState<Record<string, string>>({});
     const navigate = useNavigate();
+    const [formdata, setFormdata] = useState<any>({});
+    
+    useEffect(() => {
+        console.log(user);
+        var newFormData = {
+            wk_ctr:user?.wk_ctr,
+            count_movement :true
+        }
+        setFormdata(newFormData);
+    },[])
 
     useEffect(() => {
         async function fetchDevices() {
@@ -47,7 +59,7 @@ export default function InventoryList() {
                             if (!item.id) return;
 
                             try {
-                                const detailRes = await callDevice.get(`/get_Devices/${item.id}`);
+                                const detailRes = await callApi.get(`/get_Devices/${item.id}`);
                                 const deviceData = detailRes.data.dataResult;
                                 const lastOrder = deviceData?.lastOrder;
 
@@ -77,23 +89,31 @@ export default function InventoryList() {
         fetchDevices();
     }, []);
 
-    const handleNew = ()=>{
+    const handleClick = () => {
         Swal.fire({
-            title:'ยืนยันการสร้างรายการตรวจนับสต๊อก?',
-            confirmButtonText:'ยืนยัน',
-            showConfirmButton:true,
-            showCancelButton:true,
-            cancelButtonText:'ยกเลิก',
-            icon:'question'
-        }).then((result)=>{
-            if(result.isConfirmed){
-                Swal.fire('ดำเนินการสำเร็จ','','success')
-            }
-        })
-    }
+            title: "ยืนยันการสร้างรายการตรวจนับสต๊อก?",
+            confirmButtonText: "ยืนยัน",
+            showConfirmButton: true,
+            showCancelButton: true,
+            cancelButtonText: "ยกเลิก",
+            icon: "question",
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await callApi.post("/Inventory/Create_counting", formdata);
 
-    const handleListClick = () => {
-        navigate("/NewInventoryCount"); // เปลี่ยนเป็น path ที่ต้องการไปหน้าอัพโหลดไฟล์
+                    if (res.data?.dataResult?.count_no) {
+                        Swal.fire("ดำเนินการสำเร็จ", "", "success").then(() => {
+                            navigate("/NewInventoryCount", { state: { countNo: res.data.dataResult.count_no } });
+                        });
+                    } else {
+                        Swal.fire("ไม่สามารถสร้างรายการได้", "", "error");
+                    }
+                } catch (err) {
+                    Swal.fire("เกิดข้อผิดพลาด", String(err), "error");
+                }
+            }
+        });
     };
 
     return (
@@ -171,7 +191,7 @@ export default function InventoryList() {
                                         },
                                         boxShadow: 1,
                                     }}
-                                    onClick={handleListClick}
+                                    onClick={handleClick}
                                     >
                                     <AddRoundedIcon />
                                 </Fab>
