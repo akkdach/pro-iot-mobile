@@ -170,6 +170,12 @@ export default function DeviceAction() {
 
                 <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1}}>
                   <Typography color="textSecondary" sx={{ fontWeight: 500, }}>
+                    Order ID : {deviceInfo?.orderId || '-'}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1}}>
+                  <Typography color="textSecondary" sx={{ fontWeight: 500, }}>
                     Start Time : {StartAt ? new Date(StartAt).toLocaleString('th-TH') : '-'}
                   </Typography>
                 </Box>

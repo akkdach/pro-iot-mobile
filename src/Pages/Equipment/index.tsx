@@ -1,59 +1,57 @@
 // EquipmentDashboardMobileTwoColumn.tsx
 import React, { useEffect, useState } from 'react';
-import {Box, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, Avatar,} from '@mui/material';
+import { Box, Card, CardContent, Typography, Table, TableHead, TableRow, TableCell, TableBody, Paper, Avatar, } from '@mui/material';
 import AppHearder from '../../Component/AppHeader';
-import { TrendingUp, Download, Upload, Delete } from '@mui/icons-material';
 import { Button, Stack } from '@mui/material';
-import { Link, useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import callApi from '../../Services/callApi';
 import Swal from 'sweetalert2';
 import dayjs from 'dayjs';
-import OutboundIcon from '@mui/icons-material/Outbound';
-import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import ArrowCircleUpRoundedIcon from '@mui/icons-material/ArrowCircleUpRounded';
+import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown'
 
-export interface ListEqui{
-    equipmentSerialNo?: string
-    orderID?: string
-    activity?: string
-    status?: string
-    remarks?: string
+export interface ListEqui {
+  equipmentSerialNo?: string
+  orderID?: string
+  activity?: string
+  status?: string
+  remarks?: string
 }
 
 const EquipmentDashboard = () => {
-  const [receiveEquipmentModalOpen, SetReceiveEquipmentModalOpen] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [history, setHistory] = useState<any[]>([]);
   const [formData, setFormData] = useState<ListEqui>({});
   const navigate = useNavigate();
   const [summary, setSummary] = useState<any>({});
-  
-  useEffect(() => {
-  const fetchEquip = async () => {
-    try {
-      const EquipRes = await callApi.get('/EquipmentTransaction/list', { params: formData });
-      if (EquipRes?.data?.isSuccess && EquipRes?.data?.dataResult.line) {
-        console.log('API result:', EquipRes.data.dataResult.line);
-        setSummary(EquipRes.data.dataResult);
-        setHistory(EquipRes.data.dataResult.line);
-      } else {
-        Swal.fire('เกิดข้อผิดพลาด', EquipRes?.data?.message || 'ไม่สามารถโหลดข้อมูลได้', 'error');
-      }
-    } catch (error) {
-      Swal.fire('Error', 'ไม่สามารถเชื่อมต่อ API ได้', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  fetchEquip();
-}, [formData]);
+  useEffect(() => {
+    const fetchEquip = async () => {
+      try {
+        const EquipRes = await callApi.get('/EquipmentTransaction/list', { params: formData });
+        if (EquipRes?.data?.isSuccess && EquipRes?.data?.dataResult.line) {
+          console.log('API result:', EquipRes.data.dataResult.line);
+          setSummary(EquipRes.data.dataResult);
+          setHistory(EquipRes.data.dataResult.line);
+        } else {
+          Swal.fire('เกิดข้อผิดพลาด', EquipRes?.data?.message || 'ไม่สามารถโหลดข้อมูลได้', 'error');
+        }
+      } catch (error) {
+        Swal.fire('Error', 'ไม่สามารถเชื่อมต่อ API ได้', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEquip();
+  }, [formData]);
 
 
   const stats = [
     { title: 'จำนวน Onhand', value: summary.onhand ?? 0, color: '#27aea0ff', icon: <InventoryIcon /> },
-    { title: 'รับวันนี้', value: summary.receive ?? 0, color: '#205a7aff', icon: <OutboundIcon /> },
-    { title: 'จ่ายวันนี้', value: summary.withdraw ?? 0, color: '#1b4b64ff', icon: <AssignmentReturnedIcon /> },
+    { title: 'รับวันนี้', value: summary.receive ?? 0, color: '#205a7aff', icon: <ArrowCircleDownIcon /> },
+    { title: 'จ่ายวันนี้', value: summary.withdraw ?? 0, color: '#1b4b64ff', icon: <ArrowCircleUpRoundedIcon /> },
     //{ title: 'ติดตั้งวันนี้', value: summary.install ?? 0, color: '#1b4b64ff', icon: <Download /> },
     //{ title: 'ถอนวันนี้', value: summary.remove ?? 0, color: '#20545bff', icon: <Delete /> },
   ];
@@ -68,10 +66,20 @@ const EquipmentDashboard = () => {
     navigate("/WithdrawEquipmentScan");
   };
 
+  //รับหลายเครื่อง
+  const handleManyReceiveClick = () => {
+    navigate("/ReceiveManyEquipmentScan");
+  };
+
+  //จ่ายหลายเครื่อง
+  const handleManyWithdrawClick = () => {
+    navigate("/WithdrawManyEquipmentScan");
+  };
+
   return (
     <>
       <AppHearder title="Equipment Control" />
-      
+
 
       <Box p={2} mt={8} marginBottom={8}>
         {/* Stats Cards */}
@@ -138,8 +146,8 @@ const EquipmentDashboard = () => {
 
 
         {/* Action Buttons */}
-        <Stack direction="row" spacing={2} mb={3}>
-        <Button
+        <Stack direction="row" spacing={2} mb={1}>
+          <Button
             fullWidth
             variant="contained"
             sx={{
@@ -152,10 +160,10 @@ const EquipmentDashboard = () => {
               },
             }}
             onClick={handleReceiveClick}
-        >
+          >
             รับเครื่อง
-        </Button>
-        <Button
+          </Button>
+          <Button
             fullWidth
             variant="contained"
             sx={{
@@ -168,9 +176,44 @@ const EquipmentDashboard = () => {
               },
             }}
             onClick={handleWithdrawClick}
-        >
+          >
             จ่ายเครื่อง
-        </Button>
+          </Button>
+        </Stack>
+        <Stack direction="row" spacing={2} mb={3}>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{
+              borderRadius: 3,
+              py: 1.5,
+              fontWeight: 'bold',
+              background: 'linear-gradient(to right,#7726c8ff,#7726c8ff)',
+              '&:hover': {
+                background: 'linear-gradient(to right,rgba(195, 135, 255, 1), #7726c8ff)',
+              },
+            }}
+            onClick={handleManyReceiveClick}
+          >
+            รับหลายเครื่อง
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{
+              borderRadius: 3,
+              py: 1.5,
+              fontWeight: 'bold',
+              background: 'linear-gradient(to right,#7726c8ff,#7726c8ff)',
+              '&:hover': {
+                background: 'linear-gradient(to right,rgba(195, 135, 255, 1), #7726c8ff)',
+
+              },
+            }}
+            onClick={handleManyWithdrawClick}
+          >
+            จ่ายหลายเครื่อง
+          </Button>
         </Stack>
 
 
@@ -200,19 +243,19 @@ const EquipmentDashboard = () => {
                 </TableHead>
                 <TableBody>
                   {history.length > 0 ? (
-                  history.map((entry, index) => (
-                    <TableRow key={index} hover>
-                      <TableCell>{entry.transactionID}</TableCell>
-                      <TableCell>{entry.equipmentSerialNo}</TableCell>
-                      <TableCell>{entry.orderID}</TableCell>
-                      <TableCell>{entry.tran_Type}</TableCell>
-                      <TableCell>{entry.activity}</TableCell>
-                      <TableCell>{entry.status}</TableCell>
-                      <TableCell>{entry.remarks}</TableCell>
-                      <TableCell>{dayjs(entry.createAt).format("DD/MM/YYYY hh:mm:ss")}</TableCell>
-                      <TableCell>{entry.wk_Ctr}</TableCell>
-                    </TableRow>
-                  ))
+                    history.map((entry, index) => (
+                      <TableRow key={index} hover>
+                        <TableCell>{entry.transactionID}</TableCell>
+                        <TableCell>{entry.equipmentSerialNo}</TableCell>
+                        <TableCell>{entry.orderID}</TableCell>
+                        <TableCell>{entry.tran_Type}</TableCell>
+                        <TableCell>{entry.activity}</TableCell>
+                        <TableCell>{entry.status}</TableCell>
+                        <TableCell>{entry.remarks}</TableCell>
+                        <TableCell>{dayjs(entry.createAt).format("DD/MM/YYYY hh:mm:ss")}</TableCell>
+                        <TableCell>{entry.wk_Ctr}</TableCell>
+                      </TableRow>
+                    ))
                   ) : (
                     <TableRow>
                       <TableCell colSpan={4} align="center">

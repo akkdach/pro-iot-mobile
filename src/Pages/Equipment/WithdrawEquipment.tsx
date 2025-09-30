@@ -205,8 +205,10 @@ export default function WithdrawEquipment() {
               open={showScanner} // ถ้า QRScanner ยัง require prop `open`
               onClose={() => setShowScanner(false)}
               onScan={(value) => {
+                const cleaned = value.replace(/[\r\n]+/g, '').trim();
+
                 if (scanField) {
-                  handleInputChange({ target: { name: scanField, value } });
+                  handleInputChange({ target: { name: scanField, value : cleaned } });
                 }
                 setShowScanner(false);
                 setScanField(null);

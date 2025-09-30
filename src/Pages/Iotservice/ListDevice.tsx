@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import WifiIndicator from '../../Component/WifiIndicator';
 import BatteryIndicator from '../../Component/BatteryIndicator';
 import IotHeader from './HeaderIot';
-
+import PowerOffIcon from '@mui/icons-material/PowerOff';
 
 export default function FlatListDevice() {
   const [deviceList, setDeviceList] = useState<any[]>([]);
@@ -121,6 +121,12 @@ export default function FlatListDevice() {
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Typography sx={{ fontWeight: 500 }}>
+                    Order ID : {item.orderId}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography sx={{ fontWeight: 500 }}>
                     Start Time : {startAt[item.simEmi?.trim()] ? new Date(startAt[item.simEmi.trim()]).toLocaleString('th-TH') : '-'}
                   </Typography>
                 </Box>
@@ -139,7 +145,26 @@ export default function FlatListDevice() {
 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                   <BatteryIndicator level={battMap[item.simEmi?.trim()] ?? 0} />
-                  <WifiIndicator strength={rssiMap[item.simEmi?.trim()] ?? 0} isConnected={true} />
+                  {(() => {
+                    const lastConnect = connect_at[item.simEmi?.trim()];
+                    let isDisconnected = false;
+
+                    if (lastConnect) {
+                      const lastTime = new Date(lastConnect).getTime();
+                      const now = Date.now();
+                      const diff = now - lastTime;
+                      if (diff > 5*60*1000) {
+                        isDisconnected = true;
+                      }
+                    } else {
+                      isDisconnected = true;
+                    }
+                    return isDisconnected ? (
+                      <PowerOffIcon style={{fontSize: 28, color:'red'}} />
+                    ): (
+                    <WifiIndicator strength={rssiMap[item.simEmi?.trim()] ?? 0} isConnected={true} /> 
+                  );
+                  }) ()}
                 </Box>
                 
               </div>

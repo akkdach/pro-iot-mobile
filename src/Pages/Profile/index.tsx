@@ -11,6 +11,7 @@ import {
 import { LockOutlined } from '@mui/icons-material';
 import Swal from 'sweetalert2';
 import { useUser } from '../../Context/userContext';
+import avatar from "./avatar.png";
 
 const ProfileCard = () => {
   const { user } = useUser();
@@ -50,8 +51,7 @@ const ProfileCard = () => {
         }}
       >
         <Avatar
-          alt={user?.fullname}
-          src="https://i.pravatar.cc/150?img=47"
+          src={avatar} alt='avatar'
           sx={{ width: 100, height: 100, mx: 'auto', mb: 2 }}
         />
 

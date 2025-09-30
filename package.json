@@ -21,6 +21,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.126",
+    "@zxing/library": "^0.21.3",
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",

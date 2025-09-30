@@ -21,7 +21,7 @@ export interface Receive{
     remarks?: string
 }
 
-export default function WithdrawEquipment() {
+export default function ReceiveEquipment() {
   const [formData, setFormData] = useState<Receive>({
     orderID: '',
     equipmentSerialNo: '',
@@ -77,7 +77,7 @@ export default function WithdrawEquipment() {
         Swal.fire('รับเครื่องไม่สำเร็จ', res.data?.message || '', 'error');
       }
     } catch (error: any) {
-      console.error('Error withdraw:', error);
+      console.error('Error Receive:', error);
       Swal.fire('เกิดข้อผิดพลาด', error?.message || 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้', 'error');
     } finally {
       setLoading(false);
@@ -203,8 +203,11 @@ export default function WithdrawEquipment() {
               open={showScanner} // ถ้า QRScanner ยัง require prop `open`
               onClose={() => setShowScanner(false)}
               onScan={(value) => {
+
+                const cleaned = value.replace(/[\r\n]+/g, '').trim();
+
                 if (scanField) {
-                  handleInputChange({ target: { name: scanField, value } });
+                  handleInputChange({ target: { name: scanField, value: cleaned } });
                 }
                 setShowScanner(false);
                 setScanField(null);

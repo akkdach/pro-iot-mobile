@@ -19,10 +19,12 @@ import DeviceAction from './Pages/Iotservice/ActionDevices';
 import Upload from './Pages/Upload/Upload';
 import MyDocument from './Pages/Upload/MyDocument';
 import EquipmentDashboard from './Pages/Equipment';
-import HandoutEquipment from './Pages/Equipment/ReceiveEquipment';
+import ReceiveEquipment from './Pages/Equipment/ReceiveEquipment';
 import WithdrawEquipment from './Pages/Equipment/WithdrawEquipment';
 import ActionPages from './Pages/Iotservice/ActionPages';
 import Chat from './Pages/Test/Chat';
+import ReceiveManyEquipment from './Pages/Equipment/ReceiveManyEquipment';
+import WithdrawManyEquipment from './Pages/Equipment/WithdrawManyEquipment';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -42,7 +44,9 @@ function App() {
           <Route path="UploadFile" element={<Upload />}></Route>
           <Route path="EquipmentDashboard" element={<EquipmentDashboard />}></Route>
           <Route path="WithdrawEquipmentScan" element={<WithdrawEquipment />}></Route>
-          <Route path="ReceiveEquipmentScan" element={<HandoutEquipment />}></Route>
+          <Route path="ReceiveEquipmentScan" element={<ReceiveEquipment />}></Route>
+          <Route path="ReceiveManyEquipmentScan" element={<ReceiveManyEquipment />}></Route>
+          <Route path="WithdrawManyEquipmentScan" element={<WithdrawManyEquipment/>}></Route>
           <Route path="Chat" element={<Chat />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
