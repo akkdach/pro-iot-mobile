@@ -26,23 +26,23 @@ interface LoginResponse {
 
 const msalInstance = new PublicClientApplication(msalConfig);
 
-function SignInButton() {
-    const { instance } = useMsal();
-    return (
-        <button onClick={() => instance.loginRedirect(loginRequest)}>
-            Sign in with Microsoft
-        </button>
-    );
-}
+// function SignInButton() {
+//     const { instance } = useMsal();
+//     return (
+//         <button onClick={() => instance.loginRedirect(loginRequest)}>
+//             Sign in with Microsoft
+//         </button>
+//     );
+// }
 
-function AppContent() {
-    const isAuthenticated = useIsAuthenticated();
-    return (
-        <div>
-            {isAuthenticated ? <p>Signed in!</p> : <SignInButton />}
-        </div>
-    );
-}
+// function AppContent() {
+//     const isAuthenticated = useIsAuthenticated();
+//     return (
+//         <div>
+//             {isAuthenticated ? <p>Signed in!</p> : <SignInButton />}
+//         </div>
+//     );
+// }
 
 export default function LoginPage() {
 
@@ -145,9 +145,9 @@ export default function LoginPage() {
                     >
                         Log In
                     </Button>
-                    <MsalProvider instance={msalInstance}>
+                    {/* <MsalProvider instance={msalInstance}>
                         <AppContent />
-                    </MsalProvider>
+                    </MsalProvider> */}
                 </form>
             </Paper>
         </Box>

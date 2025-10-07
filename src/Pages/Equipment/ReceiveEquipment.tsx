@@ -11,7 +11,7 @@ import { QrCode2 } from '@mui/icons-material';
 import QRScanner from '../../Component/QRScanner';
 import AppHearder from '../../Component/AppHeader';
 import Swal from 'sweetalert2';
-import callApi from '../../Services/callApi';
+import callApiProd from '../../Services/callApiProd';
 
 export interface Receive{
     equipmentSerialNo?: string
@@ -66,7 +66,7 @@ export default function ReceiveEquipment() {
 
     setLoading(true);
     try {
-      const res = await callApi.post('/EquipmentTransaction/receive', formData);
+      const res = await callApiProd.post('/EquipmentTransaction/receive', formData);
 
       if (res.data?.isSuccess) {
         Swal.fire('รับเครื่องสำเร็จ', '', 'success');

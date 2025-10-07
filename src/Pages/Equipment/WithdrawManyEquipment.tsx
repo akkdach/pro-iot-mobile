@@ -4,7 +4,7 @@ import { QrCode2, Delete } from "@mui/icons-material";
 import QRScanner from "../../Component/QRScanner";
 import AppHearder from "../../Component/AppHeader";
 import Swal from "sweetalert2";
-import callApi from "../../Services/callApi";
+import callApiProd from "../../Services/callApiProd";
 
 export interface Withdraw {
   equipmentSerialNo?: string;
@@ -85,7 +85,7 @@ export default function WithdrawManyEquipment() {
         isSendSap: false   // fix เป็น false
       }));
 
-      const res = await callApi.post('/EquipmentTransaction/Withdraw_multi', payload);
+      const res = await callApiProd.post('/EquipmentTransaction/Withdraw_multi', payload);
 
       if (res.data?.isSuccess) {
         Swal.fire('จ่ายเครื่องสำเร็จ', '', 'success');

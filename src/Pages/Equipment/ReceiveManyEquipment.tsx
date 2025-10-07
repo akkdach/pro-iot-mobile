@@ -4,7 +4,7 @@ import { QrCode2, Delete } from "@mui/icons-material";
 import QRScanner from "../../Component/QRScanner";
 import AppHearder from "../../Component/AppHeader";
 import Swal from "sweetalert2";
-import callApi from "../../Services/callApi";
+import callApiProd from "../../Services/callApiProd";
 
 export interface Receive {
   equipmentSerialNo?: string;
@@ -74,7 +74,7 @@ export default function ReceiveManyEquipment() {
         isSendSap: false   // fix เป็น false
       }));
 
-      const res = await callApi.post('/EquipmentTransaction/Receive_multi', payload);
+      const res = await callApiProd.post('/EquipmentTransaction/Receive_multi', payload);
 
       if (res.data?.isSuccess) {
         Swal.fire('รับเครื่องสำเร็จ', '', 'success');

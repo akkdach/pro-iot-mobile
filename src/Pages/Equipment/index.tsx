@@ -4,7 +4,7 @@ import { Box, Card, CardContent, Typography, Table, TableHead, TableRow, TableCe
 import AppHearder from '../../Component/AppHeader';
 import { Button, Stack } from '@mui/material';
 import {  useNavigate } from "react-router-dom";
-import callApi from '../../Services/callApi';
+import callApiProd from '../../Services/callApiProd';
 import Swal from 'sweetalert2';
 import dayjs from 'dayjs';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -29,7 +29,7 @@ const EquipmentDashboard = () => {
   useEffect(() => {
     const fetchEquip = async () => {
       try {
-        const EquipRes = await callApi.get('/EquipmentTransaction/list', { params: formData });
+        const EquipRes = await callApiProd.get('/EquipmentTransaction/list', { params: formData });
         if (EquipRes?.data?.isSuccess && EquipRes?.data?.dataResult.line) {
           console.log('API result:', EquipRes.data.dataResult.line);
           setSummary(EquipRes.data.dataResult);

@@ -12,7 +12,7 @@ import { QrCode2 } from '@mui/icons-material';
 import QRScanner from '../../Component/QRScanner';
 import AppHearder from '../../Component/AppHeader';
 import Swal from 'sweetalert2';
-import callApi from '../../Services/callApi';
+import callApiProd from '../../Services/callApiProd';
 
 export interface withdraw {
   equipmentSerialNo?: string
@@ -68,7 +68,7 @@ export default function WithdrawEquipment() {
 
     setLoading(true);
     try {
-      const res = await callApi.post('/EquipmentTransaction/withdraw', formData);
+      const res = await callApiProd.post('/EquipmentTransaction/withdraw', formData);
 
       if (res.data?.isSuccess) {
         Swal.fire(' จ่ายเครื่องสำเร็จ', '', 'success');
