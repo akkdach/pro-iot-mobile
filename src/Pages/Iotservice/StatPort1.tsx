@@ -16,9 +16,25 @@ const StatPort1 = () => {
   const { simEmi } = useParams();
   const [summary, setSummary] = useState<any>({});
   const [chartData, setChartData] = useState<any[]>([]);
-
+  const [device,setDevice] = useState<any[]>([]);
+  
   useEffect(() => {
-    const fetchData = async () => {
+
+
+    fetchData();
+    setInterval(() => {
+      fetchData();
+    }, 1000 * 60);
+  }, [simEmi]);
+
+  const stats = [
+    { title: 'อุณหภูมิที่วัดได้ล่าสุด', value: summary.temp ?? 0, color: '#27aea0ff', icon: <ThermostatRoundedIcon /> },
+    { title: 'อุณหภูมิต่ำสุด', value: summary.min ?? 0, color: '#205a7aff', icon: <AcUnitRoundedIcon /> },
+    { title: 'อุณหภูมิสูงสุด', value: summary.max ?? 0, color: '#1b4b64ff', icon: <LightModeRoundedIcon /> },
+    { title: 'อุณหภูมิเฉลี่ยทั้งหมด', value: summary.avg ?? 0, color: '#174863ff', icon: <TimelineRoundedIcon /> },
+  ];
+
+      const fetchData = async () => {
       try {
         // ดึง device list เพื่อหา orderId ของ simEmi ปัจจุบัน
         const allDevices = await callDevice.get('/List_Devices');
@@ -37,37 +53,24 @@ const StatPort1 = () => {
           const portData = res.data.dataResult.find((d: any) => d.port === 1); // port1
           const history = portData.history;
           // สร้าง chartData
-        const formattedChart = history.map((item: any) => ({
-          time: new Date(item.time).toLocaleTimeString(),
-          value: item.temp,
-        }));
-        setChartData(formattedChart);
+          const formattedChart = history.map((item: any) => ({
+            time: new Date(item.time).toLocaleTimeString(),
+            value: item.temp,
+          }));
+          setChartData(formattedChart);
 
-        // สรุปค่า
-        setSummary({
-          temp: history.at(-1)?.temp ?? 0,
-          min: portData.min,
-          max: portData.max,
-          avg: portData.avg,
-        });
+          // สรุปค่า
+          setSummary({
+            temp: history.at(-1)?.temp ?? 0,
+            min: portData.min,
+            max: portData.max,
+            avg: portData.avg,
+          });
         }
       } catch (err) {
         console.error(err);
       }
     };
-
-
-      setInterval(() => {
-    fetchData();        
-      }, 15000);
-  }, [simEmi]);
-
-  const stats = [
-    { title: 'อุณหภูมิที่วัดได้ล่าสุด', value: summary.temp ?? 0, color: '#27aea0ff', icon: <ThermostatRoundedIcon /> },
-    { title: 'อุณหภูมิต่ำสุด', value: summary.min ?? 0, color: '#205a7aff', icon: <AcUnitRoundedIcon /> },
-    { title: 'อุณหภูมิสูงสุด', value: summary.max ?? 0, color: '#1b4b64ff', icon: <LightModeRoundedIcon /> },
-    { title: 'อุณหภูมิเฉลี่ยทั้งหมด', value: summary.avg ?? 0, color: '#174863ff', icon: <TimelineRoundedIcon /> },
-  ];
 
   return (
     <Box p={2} mt={-4} marginBottom={-6}>
@@ -160,7 +163,7 @@ const StatPort1 = () => {
       </Box>
 
       {/* กราฟด้านบน */}
-      <Box sx={{ height: 250, mb: 3, alignItems: "start",  }}>
+      <Box sx={{ height: 250, mb: 3, alignItems: "start", }}>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 5, right: 20, bottom: 5, left: -30, }} >
             <CartesianGrid strokeDasharray="3 3" />

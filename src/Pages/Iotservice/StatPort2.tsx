@@ -37,27 +37,28 @@ const StatPort2 = () => {
           const portData = res.data.dataResult.find((d: any) => d.port === 2); // port1
           const history = portData.history;
           // สร้าง chartData
-        const formattedChart = history.map((item: any) => ({
-          time: new Date(item.time).toLocaleTimeString(),
-          value: item.temp,
-        }));
-        setChartData(formattedChart);
+          const formattedChart = history.map((item: any) => ({
+            time: new Date(item.time).toLocaleTimeString(),
+            value: item.temp,
+          }));
+          setChartData(formattedChart);
 
-        // สรุปค่า
-        setSummary({
-          temp: history.at(-1)?.temp ?? 0,       // ล่าสุดจาก history
-          min: portData.min,                     // min จาก dataResult
-          max: portData.max,                     // max จาก dataResult
-          avg: portData.avg,                     // avg จาก dataResult
-        });
+          // สรุปค่า
+          setSummary({
+            temp: history.at(-1)?.temp ?? 0,       // ล่าสุดจาก history
+            min: portData.min,                     // min จาก dataResult
+            max: portData.max,                     // max จาก dataResult
+            avg: portData.avg,                     // avg จาก dataResult
+          });
         }
       } catch (err) {
         console.error(err);
       }
     };
+    fetchData();
     setInterval(() => {
-    fetchData();        
-      }, 15000);
+      fetchData();
+    }, 1000 * 60);
   }, [simEmi]);
 
   const stats = [
@@ -69,7 +70,7 @@ const StatPort2 = () => {
 
   return (
     <Box p={2} mt={-4} marginBottom={-6}>
-      
+
 
       {/* Stats Cards */}
       <Box display="flex" flexDirection="column" gap={2} mb={3}>
@@ -166,7 +167,7 @@ const StatPort2 = () => {
             <XAxis dataKey="time" />
             <YAxis />
             <Tooltip />
-            <Line type="monotone" dataKey="value" stroke="#27aea0ff" strokeWidth={2} dot = {false} />
+            <Line type="monotone" dataKey="value" stroke="#27aea0ff" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </Box>
