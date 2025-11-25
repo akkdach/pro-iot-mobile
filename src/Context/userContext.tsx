@@ -8,7 +8,9 @@ interface User {
   fullname:string;
   department:string;
   position:string;
-  wk_ctr:string
+  wk_ctr:string;
+  image_url:string;
+  role : string;
 }
 interface ILocation {
   latitude:number

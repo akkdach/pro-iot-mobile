@@ -25,6 +25,7 @@ import ActionPages from './Pages/Iotservice/ActionPages';
 import Chat from './Pages/Test/Chat';
 import ReceiveManyEquipment from './Pages/Equipment/ReceiveManyEquipment';
 import WithdrawManyEquipment from './Pages/Equipment/WithdrawManyEquipment';
+import StandardTimeDashboard from './Pages/StandardTimeDashboard/StandardTimeDashboard';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -34,6 +35,7 @@ function App() {
         <div>
         {token ? (<UserProvider><Layout ><Routes>
           <Route path="/" element={<Home />}></Route>
+          <Route path="StandardTimeDashboard" element={<StandardTimeDashboard />}></Route>
           <Route path="checkin" element={<CheckIn />}></Route>
           <Route path="profile" element={<ProfileCard />}></Route>
           <Route path="List" element={<FlatListDevice />}></Route>

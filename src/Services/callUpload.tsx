@@ -18,11 +18,8 @@ export async function uploadFile(file:File[], url:string, fieldName = 'contents'
       form.append(`files${i}`, file);
   });
 
-    // form.append(fieldName, fs.createReadStream(filePath));
-
     const response = await axios.post(baseURL, form, {
       headers: {
-        // ...form.getHeaders(),
         'accept': '*/*'
       }
     });
