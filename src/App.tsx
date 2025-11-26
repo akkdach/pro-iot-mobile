@@ -26,6 +26,12 @@ import Chat from './Pages/Test/Chat';
 import ReceiveManyEquipment from './Pages/Equipment/ReceiveManyEquipment';
 import WithdrawManyEquipment from './Pages/Equipment/WithdrawManyEquipment';
 import StandardTimeDashboard from './Pages/StandardTimeDashboard/StandardTimeDashboard';
+import SetupAndRefurbish from './Pages/workStation/SetupAndRefurbish';
+import DashboardRefurbish from './Pages/workStation/DashboardRefurbish';
+import WorkOrderDetail from './Pages/workStation/WorkOrderDetail';
+import SparePartList from './Pages/workStation/WorkStation';
+import ActionPage from './Pages/workStation/ActionPage';
+import WorkStation from './Pages/workStation/WorkStation';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -50,6 +56,11 @@ function App() {
           <Route path="ReceiveManyEquipmentScan" element={<ReceiveManyEquipment />}></Route>
           <Route path="WithdrawManyEquipmentScan" element={<WithdrawManyEquipment/>}></Route>
           <Route path="Chat" element={<Chat />}></Route>
+          <Route path="SetupAndRefurbish" element={<SetupAndRefurbish />}></Route>
+          <Route path="DashboardRefurbish" element={<DashboardRefurbish />}></Route>
+          <Route path="WorkOrderDetail" element={<WorkOrderDetail />}></Route>
+          <Route path="WorkStation" element={<WorkStation />}></Route>
+          <Route path="ActionPage" element={<ActionPage />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
       </div>

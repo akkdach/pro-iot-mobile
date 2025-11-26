@@ -7,6 +7,7 @@ import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import QuestionAnswerRoundedIcon from '@mui/icons-material/QuestionAnswerRounded';
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
 
 
 export default function Home() {
@@ -67,6 +68,13 @@ export default function Home() {
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <QuestionAnswerRoundedIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Chat</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/SetupAndRefurbish'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <HomeWorkIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Station</span>
                         </Box>
                     </Link>
                 </Grid>
