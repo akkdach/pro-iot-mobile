@@ -29,6 +29,8 @@ import qc from "./PNG/qc.png";
 import DashboardRefurbish from "./DashboardRefurbish";
 import { Link, useNavigate} from "react-router-dom";
 import Modal from '@mui/material/Modal';
+import AppHeader from "../../Component/AppHeader"
+import HomeWorkIcon from '@mui/icons-material/HomeWork';
 
 
 const steps = [
@@ -61,7 +63,7 @@ export default function SetupAndRefurbish() {
       flexDirection="column"
       alignItems="center"
       mx={5}
-      onClick={() => navigate("/DashboardRefurbish", {state:index})}
+      onClick={() => navigate("/DashboardRefurbish", {state:step})}
     >
       
       <Box
@@ -84,7 +86,7 @@ export default function SetupAndRefurbish() {
           src={step.icon}
           alt={step.title}
           sx={{
-            width: "60%", // <<< ลดจาก 100% → 80%
+            width: "60%", // <<< ลดจาก 100% → 80% 
             height: "60%",
             objectFit: "cover",
             margin: "auto",
@@ -115,7 +117,7 @@ export default function SetupAndRefurbish() {
       </Box>
 
       <Box mt={1} textAlign="center" width="8rem" fontSize="0.875rem">
-        {step.title}
+        {step.title} 
       </Box>
     </Box>
     
@@ -146,6 +148,7 @@ export default function SetupAndRefurbish() {
 
   return (
     <>
+    <AppHeader title={"SETUP / REFURBISH"} icon={<HomeWorkIcon />}/>
       <Box
         sx={{
           padding: 4,
@@ -153,6 +156,7 @@ export default function SetupAndRefurbish() {
           minHeight: "100vh",
           marginLeft: "63px",
           transition: "margin-left 0.3s ease",
+          paddingTop: 10,
         }}
       >
         <Paper
@@ -185,7 +189,7 @@ export default function SetupAndRefurbish() {
             </Box>
 
             {/* Bottom Row (เลื่อนครึ่งช่อง) */}
-            <Box display="flex" justifyContent="center" mt={-6} ml={18} onClick={handleClickOpen}>
+            <Box display="flex" justifyContent="center" mt={-6} ml={18} >
               {bottomRow.map((step, index) => (
                 <Hex key={index} step={step} index={index} />
               ))}

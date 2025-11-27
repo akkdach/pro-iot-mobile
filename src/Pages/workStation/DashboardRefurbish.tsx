@@ -11,7 +11,7 @@ import {
   Select,
 } from "@mui/material";
 import { Description, Filter } from "@mui/icons-material";
-import React, { use, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { useNavigate, Link, useParams, useLocation } from "react-router-dom";
 import AppHeader from "../../Component/AppHeader"
 import BackupTableIcon from '@mui/icons-material/BackupTable';
@@ -19,9 +19,8 @@ import BackupTableIcon from '@mui/icons-material/BackupTable';
 const DashboardRefurbish = () => {
   
   const location = useLocation();
-  const step = location.state;
-  console.log(step);
   const navigate = useNavigate();
+  const [step,setStep] = useState<any>(location?.state);
   const [workOrderFilter, setWorkOrderFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [orderTypeFilter, setOrderTypeFilter] = useState("");
@@ -30,6 +29,10 @@ const DashboardRefurbish = () => {
   const today = new Date().toISOString().split("T")[0];
   const [dateFilter, setDateFilter] = useState(today);
 
+  useEffect(()=>{
+      setStep(location.state);
+      console.log(location.state);
+  },[location?.state])
   const columns: GridColDef[] = [
     {
       field: "State",
@@ -265,7 +268,7 @@ const DashboardRefurbish = () => {
 
   return (
     <div style={{height: "100%"}}>
-      <AppHeader title="Dashboard" icon={<BackupTableIcon />} />
+      <AppHeader title={step?.title} icon={<BackupTableIcon />} />
       <Stack direction="row" spacing={2} mb={2} mt={10} px={5}>
         <TextField
           label="ค้นหา Work Order"

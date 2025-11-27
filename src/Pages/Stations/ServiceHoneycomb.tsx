@@ -141,7 +141,7 @@ const ServiceHoneycomb: React.FC = () => {
         ))}
       </Box>
 
-      {/* legend */}
+    
       <Stack
         direction="row"
         spacing={2}
