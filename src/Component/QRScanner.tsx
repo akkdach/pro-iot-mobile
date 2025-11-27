@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { Box, Dialog, DialogContent, Typography } from '@mui/material';
-import { Html5QrcodeScanner } from 'html5-qrcode';
-import { Html5Qrcode } from "html5-qrcode";
+"use client";
+
+import React, { useEffect, useRef, useId } from "react";
+import { Box, Dialog, DialogContent, Typography } from "@mui/material";
+import { Html5QrcodeScanner } from "html5-qrcode";
 
 interface QRScannerProps {
   open: boolean;
@@ -10,66 +11,89 @@ interface QRScannerProps {
 }
 
 const QRScanner: React.FC<QRScannerProps> = ({ open, onClose, onScan }) => {
-  const readerRef = useRef<HTMLDivElement | null>(null);
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const readerId = useId();
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      if (scannerRef.current) {
+        scannerRef.current
+          .clear()
+          .catch((err) => console.error("Failed to clear scanner", err))
+          .finally(() => {
+            scannerRef.current = null;
+          });
+      }
+      return;
+    }
 
-    // สร้าง scanner หลังจาก div render แล้ว
-    const delayInit = setTimeout(() => {
-      const scanner = new Html5QrcodeScanner("reader", {
-        fps: 10,
-        qrbox: 250,
-      }, false);
+    // 🟢 รอให้ DOM render ก่อน แล้วค่อย init scanner
+    const timeout = setTimeout(() => {
+      const element = document.getElementById(readerId);
+      if (!element) {
+        console.error("DIV reader ยังไม่ถูก render");
+        return;
+      }
+
+      const scanner = new Html5QrcodeScanner(
+        readerId,
+        { fps: 10, qrbox: 250 },
+        false
+      );
+      scannerRef.current = scanner;
 
       scanner.render(
         (decodedText) => {
-          // สแกนเสร็จ → คืนค่าให้ parent
           onScan(decodedText);
-          console.log("decodedText", decodedText);
-
-          // ล้าง scanner และปิด dialog
-          scanner.clear().then(() => {
-            onClose();
-          }).catch((err) => console.error('Failed to clear scanner', err));
+          scanner
+            .clear()
+            .then(() => {
+              scannerRef.current = null;
+              onClose();
+            })
+            .catch((err) => console.error("Failed to clear scanner", err));
         },
         (error) => {
-          // scan fail → ไม่ต้องทำอะไร
+          console.log(error);
         }
       );
-    }, 500); // รอ div render คร่าว ๆ
+    }, 10); // 👈 Delay 10ms พอ (สำคัญมาก!)
 
     return () => {
-      clearTimeout(delayInit);
+      clearTimeout(timeout);
+      if (scannerRef.current) {
+        scannerRef.current
+          .clear()
+          .catch((err) =>
+            console.error("Failed to clear scanner on unmount", err)
+          )
+          .finally(() => {
+            scannerRef.current = null;
+          });
+      }
     };
-  }, [open, onClose, onScan]);
-
+  }, [open, onClose, onScan, readerId]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
       <DialogContent>
-        <Box
-          sx={{
-            borderRadius: '30px',
-            height: '100%',
-            width: '100%'
-          }}>
-
+        <Box sx={{ borderRadius: "30px", height: "100%", width: "100%" }}>
           <Typography
             variant="h6"
             sx={{
               mb: 2,
-              backgroundColor: '#ff4848ff',
-              color: 'white',
+              backgroundColor: "#ff4848ff",
+              color: "white",
               p: 1,
-              borderRadius: '10px',
-              textAlign: 'center'
+              borderRadius: "10px",
+              textAlign: "center",
             }}
           >
             SCAN
           </Typography>
 
-          <div id="reader" style={{ width: '100%' }} />
+          {/* ควรใช้ id ที่ unique */}
+          <div id={readerId} style={{ width: "100%" }} />
         </Box>
       </DialogContent>
     </Dialog>

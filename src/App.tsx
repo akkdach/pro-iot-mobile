@@ -29,9 +29,9 @@ import StandardTimeDashboard from './Pages/StandardTimeDashboard/StandardTimeDas
 import SetupAndRefurbish from './Pages/workStation/SetupAndRefurbish';
 import DashboardRefurbish from './Pages/workStation/DashboardRefurbish';
 import WorkOrderDetail from './Pages/workStation/WorkOrderDetail';
-import SparePartList from './Pages/workStation/WorkStation';
 import ActionPage from './Pages/workStation/ActionPage';
 import WorkStation from './Pages/workStation/WorkStation';
+import SparePart from './Pages/workStation/SparePart';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -61,6 +61,7 @@ function App() {
           <Route path="WorkOrderDetail" element={<WorkOrderDetail />}></Route>
           <Route path="WorkStation" element={<WorkStation />}></Route>
           <Route path="ActionPage" element={<ActionPage />}></Route>
+          <Route path="SparePart" element={<SparePart />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
       </div>

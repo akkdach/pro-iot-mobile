@@ -72,7 +72,7 @@ const CameraCaptureFile: React.FC<CameraCaptureProps> = ({ onCapture }) => {
           onClick={captureImage}
           className="bg-green-500 text-white px-4 py-2 rounded"
         >
-          📸 ถ่ายภาพ
+          ถ่ายภาพ
         </button>
 
         <button
@@ -81,7 +81,7 @@ const CameraCaptureFile: React.FC<CameraCaptureProps> = ({ onCapture }) => {
           }
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
-          🔄 สลับกล้อง
+          สลับกล้อง
         </button>
       </div>
     </div>
@@ -89,3 +89,6 @@ const CameraCaptureFile: React.FC<CameraCaptureProps> = ({ onCapture }) => {
 };
 
 export default CameraCaptureFile;
+
+
+

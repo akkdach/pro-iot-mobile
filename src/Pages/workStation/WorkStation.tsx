@@ -16,6 +16,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Tab,
+  Tabs,
 } from "@mui/material";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -30,7 +32,20 @@ import AppHeader from "../../Component/AppHeader";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { useParams, useLocation  } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
+import SparePart from "./SparePart";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import CameraCaptureFile from "../../Component/CameraCaptureToFile";
+import DriveFolderUploadIcon from "@mui/icons-material/DriveFolderUpload";
+import UploadPicture from "./UploadPicture";
+import QRScanner from "../../Component/QRScanner";
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
 
 const rows = [
   {
@@ -157,17 +172,17 @@ const style = {
   backgroundColor: "background.paper",
 };
 
-const styleModal = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
+// const styleModal = {
+//   position: "absolute",
+//   top: "50%",
+//   left: "50%",
+//   transform: "translate(-50%, -50%)",
+//   width: 400,
+//   bgcolor: "background.paper",
+//   border: "2px solid #000",
+//   boxShadow: 24,
+//   p: 4,
+// };
 
 export default function WorkStation() {
   const location = useLocation();
@@ -186,6 +201,11 @@ export default function WorkStation() {
   const handleCloseAdd = () => setOpenAdd(false);
   const [selectedRow, setSelectedRow] = React.useState(null);
   const [count, setCount] = useState(0);
+  const [partName, setPartName] = useState("");
+  const [value, setValue] = useState(0);
+  const [openCamera, setOpenCamera] = useState(false);
+  const [openUpload, setOpenUpload] = useState(false);
+  const [openQrScanner, setOpenQrScanner] = useState(false);
 
   const columns: GridColDef[] = [
     {
@@ -258,227 +278,352 @@ export default function WorkStation() {
     });
   };
 
+  function CustomTabPanel(props: TabPanelProps) {
+    const { children, value, index, ...other } = props;
+
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      </div>
+    );
+  }
+
+  function a11yProps(index: number) {
+    return {
+      id: `simple-tab-${index}`,
+      "aria-controls": `simple-tabpanel-${index}`,
+    };
+  }
+
+  const handleTab = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+
+  const handleCamera = () => {
+    setOpenCamera(true);
+  };
+
+  const onCapture = (files: File[]) => {
+    console.log("HHH ", files);
+  };
+
+  const handleUpload = () => {
+    setOpenUpload(true);
+  };
+
+  const handleQrScanner = () => {
+    setOpenQrScanner(true);
+  };
+
+  const handleCloseScanner = () => {
+    setOpenQrScanner(false);
+  };
+
+  const handleScanResult = (value: string) => {
+    console.log("สแกนได้ : ", value);
+  };
+
   return (
     <div className="scrollable-div bigBox">
-      <AppHeader title="Work Order" icon={<BusinessCenterIcon />} />
-      <div className="boxInside">
-        <div>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              width: "100%",
-              flexWrap: "wrap",
-              gap: 2,
-              padding: 3,
-              borderRadius: 5,
-            }}
+      <Box sx={{ width: "100%" }}>
+        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+          <Tabs
+            value={value}
+            onChange={handleTab}
+            aria-label="basic tabs example"
           >
-            <Box sx={{ minWidth: 250, maxWidth: 600, flexShrink: 0 }}>
-              <FormControl fullWidth size="small">
-                <InputLabel id="demo-simple-select-label">Part</InputLabel>
-                <Select
-                  labelId="demo-simple-select-label"
-                  id="demo-simple-select"
-                  value={part}
-                  label="Part"
-                  onChange={handleChange}
-                >
-                  <MenuItem value={10}>Ten</MenuItem>
-                  <MenuItem value={20}>Twenty</MenuItem>
-                  <MenuItem value={30}>Thirty</MenuItem>
-                </Select>
-              </FormControl>
+            <Tab
+              label="Work Order"
+              {...a11yProps(0)}
+              sx={{
+                fontSize: "1.1rem",
+                padding: "12px 24px",
+                minHeight: 60,
+              }}
+            />
+            <Tab
+              label="Work Order List"
+              {...a11yProps(1)}
+              sx={{
+                fontSize: "1.1rem",
+                padding: "12px 24px",
+                minHeight: 60,
+              }}
+            />
+          </Tabs>
+        </Box>
+        <CustomTabPanel value={value} index={0}>
+          <div>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+              <DriveFolderUploadIcon
+                sx={{ fontSize: 40 }}
+                onClick={handleUpload}
+              />
+              <CameraAltIcon sx={{ fontSize: 40 }} onClick={handleCamera} />
+              {openUpload && (
+                <UploadPicture open={openUpload} setOpen={setOpenUpload} />
+              )}
             </Box>
-
             <Box
               sx={{
                 display: "flex",
-                gap: 1.5,
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: "100%",
                 flexWrap: "wrap",
+                gap: 2,
                 padding: 3,
+                borderRadius: 5,
               }}
             >
-              {Array.from({ length: 8 }).map((_, index) => (
-                <FormControlLabel
-                  key={index}
-                  control={
-                    <Checkbox
-                      size="small"
-                      sx={{
-                        color: "#1976d2",
-                        "&.Mui-checked": {
-                          color: "#0d47a1",
-                        },
-                      }}
-                    />
-                  }
-                  label={listCheck[index]}
-                  sx={{
-                    m: 0,
-                    p: 1,
-                    px: 2,
-                    borderRadius: "8px",
-                    border: "1px solid #e0e0e0",
-                    backgroundColor: "#fafafa",
+              <Box sx={{ minWidth: 250, maxWidth: 600, flexShrink: 0 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="demo-simple-select-label">Part</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={part}
+                    label="Part"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value={10}>Ten</MenuItem>
+                    <MenuItem value={20}>Twenty</MenuItem>
+                    <MenuItem value={30}>Thirty</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
 
-                    transition: "0.2s",
-                    "&:hover": {
-                      backgroundColor: "#f0f7ff",
-                      borderColor: "#90caf9",
-                    },
-                  }}
-                />
-              ))}
-            </Box>
-          </Box>
-        </div>
-        <div>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              width: "100%",
-            }}
-          >
-            {/* LEFT LIST */}
-            <List sx={{ flex: 1 }}>
-              <ListItem
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <ListItemText primary="SLA Time" />
-                <Typography>30 min</Typography>
-              </ListItem>
-              <Divider component="li" />
-
-              <ListItem
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <ListItemText primary="Start Date" />
-                <Typography>03.04.2025</Typography>
-              </ListItem>
-              <Divider component="li" />
-
-              <ListItem
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <ListItemText primary="Finish Date" />
-                <Typography>05.04.2025</Typography>
-              </ListItem>
-            </List>
-
-            {/* RIGHT LIST */}
-            <List sx={{ flex: 1 }}>
-              <ListItem
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <ListItemText primary="Use Time" />
-                <Typography>30 min</Typography>
-              </ListItem>
-              <Divider component="li" />
-
-              <ListItem
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <ListItemText primary="Start Time" />
-                <Typography>30 Min</Typography>
-              </ListItem>
-              <Divider component="li" />
-
-              <ListItem
-                sx={{ display: "flex", justifyContent: "space-between" }}
-              >
-                <ListItemText primary="Finish Time" />
-                <Typography>30 Min</Typography>
-              </ListItem>
-            </List>
-          </Box>
-        </div>
-
-        <div>
-          <Stack
-            spacing={3}
-            direction="row"
-            sx={{
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: 3,
-            }}
-          >
-            {[
-              { label: "Start", color: "#2ecc71" },
-              { label: "Pause", color: "#f1c40f" },
-              { label: "Finish", color: "#3498db" },
-              { label: "Check List", color: "#9b59b6" },
-              { label: "Completed", color: "#2980b9" },
-              { label: "Return", color: "#e74c3c" },
-            ].map((btn, index) => (
-              <Button
-                key={index}
-                variant="contained"
+              <Box
                 sx={{
-                  backgroundColor: btn.color,
-                  borderRadius: "50%",
-                  width: 120,
-                  height: 120,
-                  minWidth: 0,
-                  padding: 0,
-                  fontSize: 18,
-                  fontWeight: 600,
-                  color: "#fff",
-                  textTransform: "none",
-
-                  boxShadow: "0 6px 15px rgba(0,0,0,0.25)",
-
-                  transition: "0.2s",
-                  "&:hover": {
-                    backgroundColor: btn.color,
-                    transform: "scale(1.08)",
-                    boxShadow: "0 10px 25px rgba(0,0,0,0.35)",
-                  },
+                  display: "flex",
+                  gap: 1.5,
+                  flexWrap: "wrap",
+                  padding: 3,
                 }}
               >
-                {btn.label}
-              </Button>
-            ))}
-          </Stack>
-        </div>
-      </div>
+                {Array.from({ length: 8 }).map((_, index) => (
+                  <FormControlLabel
+                    key={index}
+                    control={
+                      <Checkbox
+                        size="small"
+                        sx={{
+                          color: "#1976d2",
+                          "&.Mui-checked": {
+                            color: "#0d47a1",
+                          },
+                        }}
+                      />
+                    }
+                    label={listCheck[index]}
+                    sx={{
+                      m: 0,
+                      p: 1,
+                      px: 2,
+                      borderRadius: "8px",
+                      border: "1px solid #e0e0e0",
+                      backgroundColor: "#fafafa",
 
-      <div className="boxInside">
-        <Paper sx={{ height: 740, width: "100%" }}>
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            initialState={{ pagination: { paginationModel } }}
-            pageSizeOptions={[5, 10]}
-            checkboxSelection={false}
-            sx={{ border: 0 }}
-          />
-        </Paper>
-      </div>
+                      transition: "0.2s",
+                      "&:hover": {
+                        backgroundColor: "#f0f7ff",
+                        borderColor: "#90caf9",
+                      },
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          </div>
+          <div>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                width: "100%",
+              }}
+            >
+              {/* LEFT LIST */}
+              <List sx={{ flex: 1 }}>
+                <ListItem
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <ListItemText primary="SLA Time" />
+                  <Typography>30 min</Typography>
+                </ListItem>
+                <Divider component="li" />
+
+                <ListItem
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <ListItemText primary="Start Date" />
+                  <Typography>03.04.2025</Typography>
+                </ListItem>
+                <Divider component="li" />
+
+                <ListItem
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <ListItemText primary="Finish Date" />
+                  <Typography>05.04.2025</Typography>
+                </ListItem>
+              </List>
+
+              {/* RIGHT LIST */}
+              <List sx={{ flex: 1 }}>
+                <ListItem
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <ListItemText primary="Use Time" />
+                  <Typography>30 min</Typography>
+                </ListItem>
+                <Divider component="li" />
+
+                <ListItem
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <ListItemText primary="Start Time" />
+                  <Typography>30 Min</Typography>
+                </ListItem>
+                <Divider component="li" />
+
+                <ListItem
+                  sx={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <ListItemText primary="Finish Time" />
+                  <Typography>30 Min</Typography>
+                </ListItem>
+              </List>
+            </Box>
+          </div>
+
+          <div>
+            <Stack
+              spacing={3}
+              direction="row"
+              sx={{
+                flexWrap: "wrap",
+                justifyContent: "center",
+                gap: 3,
+                padding: 2,
+              }}
+            >
+              {[
+                { label: "Start", from: "#2ecc71", to: "#27ae60" },
+                { label: "Pause", from: "#f1c40f", to: "#f39c12" },
+                { label: "Finish", from: "#3498db", to: "#2980b9" },
+                { label: "Check List", from: "#9b59b6", to: "#8e44ad" },
+                { label: "Completed", from: "#2980b9", to: "#2471a3" },
+                { label: "Return", from: "#e74c3c", to: "#c0392b" },
+              ].map((btn, index) => (
+                <Button
+                  key={index}
+                  variant="contained"
+                  sx={{
+                    background: `linear-gradient(135deg, ${btn.from}, ${btn.to})`,
+                    borderRadius: "16px", // มุมโค้งสวย ๆ
+                    width: 180,
+                    height: 70,
+                    padding: 0,
+                    fontSize: 20,
+                    fontWeight: 700,
+                    color: "#fff",
+                    textTransform: "none",
+
+                    boxShadow: `
+            0px 4px 15px rgba(0,0,0,0.25),
+            inset 0px 1px 4px rgba(255,255,255,0.25),
+            inset 0px -3px 6px rgba(0,0,0,0.2)
+          `,
+
+                    transition: "0.25s ease",
+                    "&:hover": {
+                      transform: "translateY(-4px) scale(1.03)",
+                      boxShadow: `
+              0px 10px 25px rgba(0,0,0,0.35),
+              inset 0px 1px 4px rgba(255,255,255,0.3),
+              inset 0px -3px 6px rgba(0,0,0,0.25)
+            `,
+                    },
+
+                    "&:active": {
+                      transform: "scale(0.98)",
+                      boxShadow: `
+              0px 2px 10px rgba(0,0,0,0.25),
+              inset 0px 3px 8px rgba(0,0,0,0.3)
+            `,
+                    },
+                  }}
+                >
+                  {btn.label}
+                </Button>
+              ))}
+            </Stack>
+          </div>
+        </CustomTabPanel>
+
+        <CustomTabPanel value={value} index={1}>
+          <Paper sx={{ height: 740, width: "100%" }}>
+            <DataGrid
+              rows={rows}
+              columns={columns}
+              initialState={{ pagination: { paginationModel } }}
+              pageSizeOptions={[5, 10]}
+              checkboxSelection={false}
+              sx={{ border: 0 }}
+            />
+          </Paper>
+        </CustomTabPanel>
+      </Box>
+      <AppHeader title="Work Order" icon={<BusinessCenterIcon />} />
 
       <div>
-        <Dialog
-          open={openAdd}
-          onClose={handleCloseAdd}
-          fullWidth
-          maxWidth="xs" // ทำให้ dialog ไม่ใหญ่เกินไป
-        >
+        <Dialog open={openAdd} onClose={handleCloseAdd} fullWidth maxWidth="xs">
           <DialogTitle>เพิ่มรายการอะไหล่</DialogTitle>
 
           <DialogContent>
-            <Typography sx={{ mb: 2 }}>จำนวนอะไหล่ที่ต้องการเพิ่ม</Typography>
+            <Typography sx={{ mb: 2 }}>Enter Spare Part</Typography>
 
-            <TextField
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 7,
+              }}
+            >
+              <TextField
+                sx={{ mb: 2 }}
+                type="text"
+                fullWidth
+                variant="outlined"
+                value={partName}
+                onChange={(e) => setPartName(e.target.value)}
+              />
+
+              <QrCodeScannerIcon
+                sx={{ fontSize: 30 }}
+                onClick={handleQrScanner}
+              />
+              {openQrScanner && <QRScanner open={openQrScanner} onClose={handleCloseScanner} onScan={handleScanResult} />}
+            </div>
+
+            {/* <TextField
               type="number"
               label="Quantity"
               fullWidth
               variant="outlined"
               value={count}
               onChange={(e) => setCount(Number(e.target.value))}
-            />
+            /> */}
+
+            <SparePart />
           </DialogContent>
 
           <DialogActions>
@@ -514,6 +659,28 @@ export default function WorkStation() {
             >
               ยืนยันลบ
             </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Camera */}
+        <Dialog
+          open={openCamera}
+          onClose={() => setOpenCamera(false)}
+          fullWidth
+        >
+          <DialogTitle>ถ่ายภาพ</DialogTitle>
+          <DialogContent>
+            <CameraCaptureFile
+              // onCapture={(files) => {
+              //   console.log("Captured:", files);
+              //   setOpenCamera(false);
+              // }}
+              onCapture={onCapture}
+            />
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={() => setOpenCamera(false)}>ปิด</Button>
           </DialogActions>
         </Dialog>
       </div>
