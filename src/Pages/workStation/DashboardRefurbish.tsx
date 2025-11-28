@@ -11,16 +11,32 @@ import {
   Select,
 } from "@mui/material";
 import { Description, Filter } from "@mui/icons-material";
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect, useState , createContext, useContext } from "react";
 import { useNavigate, Link, useParams, useLocation } from "react-router-dom";
-import AppHeader from "../../Component/AppHeader"
-import BackupTableIcon from '@mui/icons-material/BackupTable';
+import AppHeader from "../../Component/AppHeader";
+import BackupTableIcon from "@mui/icons-material/BackupTable";
+
+export interface User {
+  id: number;
+  lastName: string;
+  firstName: string;
+  age: number;
+  WorkOrder: string;
+  OrderType: string;
+  Description: string;
+  Equipment: string;
+  Status: string;
+  CurrentStation: string;
+  StartDate: Date;
+  StartTime: string;
+  FinishDate: Date;
+  State: string;
+}
 
 const DashboardRefurbish = () => {
-  
   const location = useLocation();
   const navigate = useNavigate();
-  const [step,setStep] = useState<any>(location?.state);
+  const [step, setStep] = useState<any>(location?.state);
   const [workOrderFilter, setWorkOrderFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [orderTypeFilter, setOrderTypeFilter] = useState("");
@@ -29,10 +45,10 @@ const DashboardRefurbish = () => {
   const today = new Date().toISOString().split("T")[0];
   const [dateFilter, setDateFilter] = useState(today);
 
-  useEffect(()=>{
-      setStep(location.state);
-      console.log(location.state);
-  },[location?.state])
+  useEffect(() => {
+    setStep(location.state);
+    console.log(location.state);
+  }, [location?.state]);
   const columns: GridColDef[] = [
     {
       field: "State",
@@ -267,7 +283,7 @@ const DashboardRefurbish = () => {
   });
 
   return (
-    <div style={{height: "100%"}}>
+    <div style={{ height: "100%" }}>
       <AppHeader title={step?.title} icon={<BackupTableIcon />} />
       <Stack direction="row" spacing={2} mb={2} mt={10} px={5}>
         <TextField
@@ -400,7 +416,7 @@ const DashboardRefurbish = () => {
         </FormControl>
       </Stack>
 
-      <Paper sx={{ height: "100%", width: "100%" }} >
+      <Paper sx={{ height: "100%", width: "100%" }}>
         <DataGrid
           checkboxSelection={false}
           rows={filteredRows}
@@ -411,7 +427,7 @@ const DashboardRefurbish = () => {
           onRowClick={(params) => {
             // console.log(params.row);
             // navigate(`/WorkOrderDetail`, {state:params.row});
-            navigate(`/WorkStation`, {state:params.row});
+            navigate(`/WorkStation`, { state: params.row });
           }}
         />
       </Paper>

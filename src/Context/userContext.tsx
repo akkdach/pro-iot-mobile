@@ -4,7 +4,7 @@ interface User {
   id: number;
   employee_id: string;
   username: string;
-  last_login: string; // หรือใช้ Date ถ้า API ส่งมาเป็น timestamp
+  last_login: string; 
   fullname:string;
   department:string;
   position:string;

@@ -8,7 +8,6 @@ import {
   DialogActions,
   Typography,
 } from "@mui/material";
-import AddBoxOutlinedIcon from "@mui/icons-material/AddBoxOutlined";
 import Swal from "sweetalert2";
 
 const UploadPicture = ({ open, setOpen }: any) => {

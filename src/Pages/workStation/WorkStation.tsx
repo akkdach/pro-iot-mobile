@@ -4,7 +4,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Checkbox,
@@ -40,6 +40,7 @@ import CameraCaptureFile from "../../Component/CameraCaptureToFile";
 import DriveFolderUploadIcon from "@mui/icons-material/DriveFolderUpload";
 import UploadPicture from "./UploadPicture";
 import QRScanner from "../../Component/QRScanner";
+import { useWork } from "../../Context/WorkStationContext";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -172,19 +173,8 @@ const style = {
   backgroundColor: "background.paper",
 };
 
-// const styleModal = {
-//   position: "absolute",
-//   top: "50%",
-//   left: "50%",
-//   transform: "translate(-50%, -50%)",
-//   width: 400,
-//   bgcolor: "background.paper",
-//   border: "2px solid #000",
-//   boxShadow: 24,
-//   p: 4,
-// };
-
 export default function WorkStation() {
+  const { addPart, deletePart, work, setWork } = useWork();
   const location = useLocation();
   const row = location.state;
   console.log(row.id);
@@ -199,13 +189,20 @@ export default function WorkStation() {
   };
   const handleOpenAdd = () => setOpenAdd(true);
   const handleCloseAdd = () => setOpenAdd(false);
-  const [selectedRow, setSelectedRow] = React.useState(null);
   const [count, setCount] = useState(0);
   const [partName, setPartName] = useState("");
   const [value, setValue] = useState(0);
   const [openCamera, setOpenCamera] = useState(false);
   const [openUpload, setOpenUpload] = useState(false);
   const [openQrScanner, setOpenQrScanner] = useState(false);
+  const [countDel, setCountDel] = useState(0);
+
+  useEffect(() => {
+    console.log("Something happend")
+    
+  }, [work])
+
+ 
 
   const columns: GridColDef[] = [
     {
@@ -255,25 +252,43 @@ export default function WorkStation() {
     { field: "qtvShip", headerName: "QTV SHIP", width: 130 },
   ];
 
+  // const rows = useMemo(
+  //   () =>
+  //     work
+  //       ? [
+  //           {
+  //             id: work.id ?? 1, 
+  //             ...work,
+  //           },
+  //         ]
+  //       : [],
+  //   [work]
+  // );
+
+  // console.log("work ที่หน้า WorkStation : ", work)
+
   const handleChange = (event: SelectChangeEvent) => {
     setPart(event.target.value as string);
   };
 
-  const handleSubmit = () => {
+  const handleAddSubmit = () => {
     setOpenAdd(false);
+    addPart("Something", count);
     Swal.fire({
       title: "Successfully",
       text: `Submit Already ${count} part`,
       icon: "success",
     });
+    setCount(0);
   };
 
   const handleConfirmDelete = () => {
     console.log("ลบอะไหล่แล้ว");
     setOpenDelete(false);
+    deletePart("more part", 4);
     Swal.fire({
       title: "Successfully",
-      text: `Part is Already Delete`,
+      text: `Part is Already ${count} Delete`,
       icon: "success",
     });
   };
@@ -455,7 +470,7 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="SLA Time" />
-                  <Typography>30 min</Typography>
+                  <Typography>{work?.slaTime} min</Typography>
                 </ListItem>
                 <Divider component="li" />
 
@@ -481,7 +496,7 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="Use Time" />
-                  <Typography>30 min</Typography>
+                  <Typography>{work?.useTime} min</Typography>
                 </ListItem>
                 <Divider component="li" />
 
@@ -489,7 +504,7 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="Start Time" />
-                  <Typography>30 Min</Typography>
+                  <Typography>{work?.startTime} Min</Typography>
                 </ListItem>
                 <Divider component="li" />
 
@@ -497,7 +512,7 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="Finish Time" />
-                  <Typography>30 Min</Typography>
+                  <Typography>{work?.finishTime} Min</Typography>
                 </ListItem>
               </List>
             </Box>
@@ -611,26 +626,23 @@ export default function WorkStation() {
                 sx={{ fontSize: 30 }}
                 onClick={handleQrScanner}
               />
-              {openQrScanner && <QRScanner open={openQrScanner} onClose={handleCloseScanner} onScan={handleScanResult} />}
+              {openQrScanner && (
+                <QRScanner
+                  open={openQrScanner}
+                  onClose={handleCloseScanner}
+                  onScan={handleScanResult}
+                />
+              )}
             </div>
 
-            {/* <TextField
-              type="number"
-              label="Quantity"
-              fullWidth
-              variant="outlined"
-              value={count}
-              onChange={(e) => setCount(Number(e.target.value))}
-            /> */}
-
-            <SparePart />
+            <SparePart setCount={setCount} count={count} />
           </DialogContent>
 
           <DialogActions>
             <Button onClick={handleCloseAdd} color="inherit">
               ยกเลิก
             </Button>
-            <Button variant="contained" onClick={handleSubmit}>
+            <Button variant="contained" onClick={handleAddSubmit}>
               ยืนยันการเพิ่มอะไหล่
             </Button>
           </DialogActions>
