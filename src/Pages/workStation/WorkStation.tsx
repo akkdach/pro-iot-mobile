@@ -239,23 +239,41 @@ export default function WorkStation() {
   };
 
   const onLoad2 = async () => {
-    let res = await callApi.get(`/workOrderList/workOrderList/${row.orderid}`);
+    let res = await callApi.get(`/WorkOrderList/workOrder/${row.orderid}`);
     const data = res.data.dataResult;
-    console.log("Each order in fontend : ", data);
-    setItemEach(data)
+    if (!data) return;
+    console.log("Each order in frontend : ", data);
+    const item = Array.isArray(data) ? data[0] : data;
+
+    setWork(() => ({
+      orderid: item.orderid ?? item.ORDERID,
+      ordeR_TYPE: item.ordeR_TYPE ?? item.ORDER_TYPE,
+      shorT_TEXT: item.shorT_TEXT ?? item.SHORT_TEXT,
+      equipment: item.equipment ?? item.EQUIPMENT,
+      weB_STATUS: item.weB_STATUS ?? item.WEB_STATUS,
+      slA_FINISH_TIME: item.slA_FINISH_TIME ?? item.SLA_FINISH_TIME,
+      actuaL_FINISH_DATE: item.actuaL_FINISH_DATE ?? item.ACTUAL_FINISH_DATE,
+      servicE_TIME: item.servicE_TIME ?? item.SERVICE_TIME,
+      actuaL_START_TIME: item.actuaL_START_TIME ?? item.ACTUAL_START_TIME,
+      actuaL_FINISH_TIME: item.actuaL_FINISH_TIME ?? item.ACTUAL_FINISH_TIME,
+      currenT_STATION: item.currenT_STATION ?? item.CURRENT_OPERATION,
+    }));
   };
 
   // useEffect(() => {
-  //   onLoadEachStation();
-  // }, []);
-
-  // const onLoadEachStation = async () => {
-  //   let res = await callApi.get(
-  //     `/WorkOrderList/workOrderListStation/${station}`
-  //   );
-  //   const data = res.data;
-  //   console.log("Each Station : ", data);
-  // };
+  //   setWork({
+  //     orderid: row.orderid,
+  //     ordeR_TYPE: row.ordeR_TYPE,
+  //     shorT_TEXT: row.shorT_TEXT,
+  //     equipment: row.equipment,
+  //     weB_STATUS: row.weB_STATUS,
+  //     slA_FINISH_TIME: row.slA_FINISH_TIME,
+  //     actuaL_FINISH_DATE: row.actuaL_FINISH_DATE,
+  //     servicE_TIME: row.servicE_TIME,
+  //     actuaL_START_TIME: row.actuaL_START_TIME,
+  //     actuaL_FINISH_TIME: row.actuaL_FINISH_TIME,
+  //   });
+  // }, [row]);
 
   useEffect(() => {
     console.log("before useEffect : ", item_component);
@@ -271,21 +289,6 @@ export default function WorkStation() {
   //     ACTUAL_QUANTITY_UNIT: item_component?.ACTUAL_QUANTITY_UNIT,
   //   });
   // }, [item_component]);
-
-  useEffect(() => {
-    setWork({
-      orderid: row.orderid,
-      ordeR_TYPE: row.ordeR_TYPE,
-      shorT_TEXT: row.shorT_TEXT,
-      equipment: row.equipment,
-      weB_STATUS: row.weB_STATUS,
-      slA_FINISH_TIME: row.slA_FINISH_TIME,
-      actuaL_FINISH_DATE: row.actuaL_FINISH_DATE,
-      servicE_TIME: row.servicE_TIME,
-      actuaL_START_TIME: row.actuaL_START_TIME,
-      actuaL_FINISH_TIME: row.actuaL_FINISH_TIME,
-    });
-  }, [row]);
 
   const columns: GridColDef[] = [
     {
@@ -334,38 +337,6 @@ export default function WorkStation() {
     { field: "actuaL_QUANTITY", headerName: "QTY", width: 130 },
     { field: "actuaL_QUANTITY_UNIT", headerName: "QTV SHIP", width: 130 },
   ];
-
-  // const rows: GridRowsProp = useMemo(
-  //   () =>
-  //     work
-  //       ? [
-  //           {
-  //             ...item_component,
-  //             id: item_component?.orderid ?? 1,
-  //           },
-  //         ]
-  //       : [],
-  //   [work]
-  // );
-
-  // let rows: readonly any[] | undefined = [];
-
-  // useEffect(() => {
-  //   rows = useMemo(
-  //     () =>
-  //       work
-  //         ? [
-  //             {
-  //               id: work.id ?? 1,
-  //               ...work,
-  //             },
-  //           ]
-  //         : [],
-  //     [work]
-  //   );
-  // }, [work]);
-
-  // console.log("work ที่หน้า WorkStation : ", work)
 
   const handleChange = (event: SelectChangeEvent) => {
     setPart(event.target.value as string);

@@ -9,6 +9,7 @@ import {
   Menu,
   MenuItem,
   Select,
+  Button,
 } from "@mui/material";
 import { Description, Filter } from "@mui/icons-material";
 import React, {
@@ -25,6 +26,8 @@ import callApi from "../../Services/callApi";
 import { set } from "react-hook-form";
 import { formatDate, formatTime } from "../../Utility/DatetimeService";
 import { useWork } from "../../Context/WorkStationContext";
+import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
+import Swal from "sweetalert2";
 
 const DashboardRefurbish = () => {
   const { work, setWork } = useWork();
@@ -58,23 +61,16 @@ const DashboardRefurbish = () => {
       setItems(res.data.dataResult);
       setWork(res.data.dataResult);
     } else {
+      console.log("step : ", step.station);
       let res = await callApi.get(
-        `/workOrderList/workOrderList/${step.Station}`
+        `/WorkOrderList/workOrderList/${step.station}`
       );
-      const data = res.data.dataResult;
-      console.log("Each order in fontend : ", data);
-      //setItemEach(data);
+      console.log("Each order in fontend : ", res.data.dataResult);
+      setItems(res.data.dataResult);
       setWork(res.data.dataResult);
+      //setItemEach(data);
     }
   };
-
-  // const onLoad2 = async () => {
-  //   let res = await callApi.get(`/workOrderList/workOrderList/${step.Station}`);
-  //   const data = res.data.dataResult;
-  //   console.log("Each order in fontend : ", data);
-  //   //setItemEach(data);
-  //   setWork(res.data.dataResult);
-  // };
 
   const columns: GridColDef[] = [
     // {
@@ -119,12 +115,39 @@ const DashboardRefurbish = () => {
     //     );
     //   },
     // },
+    {
+      field: "action",
+      headerName: "Action",
+      width: 120,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => {
+        const row = params.row;
+        if (step.station != null) {
+          return;
+        }
+
+        return (
+          <Button
+            variant="contained"
+            size="small"
+            color="success"
+            startIcon={<PlayCircleFilledWhiteIcon />}
+            onClick={(e) => {
+              e.stopPropagation();
+              startWork();
+            }}
+          >
+            Start
+          </Button>
+        );
+      },
+    },
     { field: "orderid", headerName: "Work Order", width: 130, flex: 1 },
     { field: "ordeR_TYPE", headerName: "Order Type", width: 130, flex: 1 },
     { field: "shorT_TEXT", headerName: "Description", width: 200, flex: 1 },
     { field: "equipment", headerName: "Equipment", width: 100, flex: 1 },
     { field: "weB_STATUS", headerName: "Status", width: 100, flex: 1 },
-    // { field: "CurrentStation", headerName: "Current Station", width: 130 },
     {
       field: "actuaL_START_DATE",
       headerName: "Start Date",
@@ -147,6 +170,30 @@ const DashboardRefurbish = () => {
       flex: 1,
     },
   ];
+
+  const startWork = () => {
+    Swal.fire({
+      title: "Start Work?",
+      text: "Are you sure you want to start this work order?",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes, Start",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#27ae60",
+      cancelButtonColor: "#e74c3c",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        //confirmStartWork(); 
+        Swal.fire({
+          title: "Started!",
+          text: "Work order has been started successfully.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
 
   const paginationModel = { page: 0, pageSize: 5 };
 
