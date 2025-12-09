@@ -1,4 +1,4 @@
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -32,7 +32,7 @@ import AppHeader from "../../Component/AppHeader";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import AddTaskIcon from "@mui/icons-material/AddTask";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useFetcher } from "react-router-dom";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import SparePart from "./SparePart";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
@@ -41,6 +41,8 @@ import DriveFolderUploadIcon from "@mui/icons-material/DriveFolderUpload";
 import UploadPicture from "./UploadPicture";
 import QRScanner from "../../Component/QRScanner";
 import { useWork } from "../../Context/WorkStationContext";
+import callApi from "../../Services/callApi";
+import { formatDate, formatTime } from "../../Utility/DatetimeService";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -48,107 +50,107 @@ interface TabPanelProps {
   value: number;
 }
 
-const rows = [
-  {
-    id: 1,
-    lastName: "Snow",
-    firstName: "Jon",
-    age: 35,
-    item: "1",
-    itemNo: "M01011",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-  {
-    id: 2,
-    lastName: "Lannister",
-    firstName: "Cersei",
-    age: 42,
-    item: "2",
-    itemNo: "M01012",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-  {
-    id: 3,
-    lastName: "Lannister",
-    firstName: "Jaime",
-    age: 45,
-    item: "3",
-    itemNo: "M01013",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-  {
-    id: 4,
-    lastName: "Stark",
-    firstName: "Arya",
-    age: 16,
-    item: "4",
-    itemNo: "M01014",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-  {
-    id: 5,
-    lastName: "Targaryen",
-    firstName: "Daenerys",
-    age: null,
-    item: "5",
-    itemNo: "M01015",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-  {
-    id: 6,
-    lastName: "Melisandre",
-    firstName: null,
-    age: 150,
-    item: "6",
-    itemNo: "M01016",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-  {
-    id: 7,
-    lastName: "Clifford",
-    firstName: "Ferrara",
-    age: 44,
-    item: "7",
-    itemNo: "M01017",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-  {
-    id: 8,
-    lastName: "Frances",
-    firstName: "Rossini",
-    age: 36,
-    item: "8",
-    itemNo: "M01018",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-  {
-    id: 9,
-    lastName: "Roxie",
-    firstName: "Harvey",
-    age: 65,
-    item: "9",
-    itemNo: "M01019",
-    itemDes: "คอยน์เย็น",
-    qtv: "11",
-    qtvShip: "11",
-  },
-];
+// const rows = [
+//   {
+//     id: 1,
+//     lastName: "Snow",
+//     firstName: "Jon",
+//     age: 35,
+//     item: "1",
+//     itemNo: "M01011",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+//   {
+//     id: 2,
+//     lastName: "Lannister",
+//     firstName: "Cersei",
+//     age: 42,
+//     item: "2",
+//     itemNo: "M01012",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+//   {
+//     id: 3,
+//     lastName: "Lannister",
+//     firstName: "Jaime",
+//     age: 45,
+//     item: "3",
+//     itemNo: "M01013",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+//   {
+//     id: 4,
+//     lastName: "Stark",
+//     firstName: "Arya",
+//     age: 16,
+//     item: "4",
+//     itemNo: "M01014",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+//   {
+//     id: 5,
+//     lastName: "Targaryen",
+//     firstName: "Daenerys",
+//     age: null,
+//     item: "5",
+//     itemNo: "M01015",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+//   {
+//     id: 6,
+//     lastName: "Melisandre",
+//     firstName: null,
+//     age: 150,
+//     item: "6",
+//     itemNo: "M01016",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+//   {
+//     id: 7,
+//     lastName: "Clifford",
+//     firstName: "Ferrara",
+//     age: 44,
+//     item: "7",
+//     itemNo: "M01017",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+//   {
+//     id: 8,
+//     lastName: "Frances",
+//     firstName: "Rossini",
+//     age: 36,
+//     item: "8",
+//     itemNo: "M01018",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+//   {
+//     id: 9,
+//     lastName: "Roxie",
+//     firstName: "Harvey",
+//     age: 65,
+//     item: "9",
+//     itemNo: "M01019",
+//     itemDes: "คอยน์เย็น",
+//     qtv: "11",
+//     qtvShip: "11",
+//   },
+// ];
 
 const paginationModel = { page: 0, pageSize: 5 };
 
@@ -174,10 +176,19 @@ const style = {
 };
 
 export default function WorkStation() {
-  const { addPart, deletePart, work, setWork } = useWork();
+  const {
+    addPart,
+    deletePart,
+    work,
+    setWork,
+    item_component,
+    setItem_Component,
+    startWork,
+    finishWork,
+  } = useWork();
   const location = useLocation();
   const row = location.state;
-  console.log(row.id);
+  // console.log(row.id);
   const [part, setPart] = useState("");
   const [openAdd, setOpenAdd] = React.useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -196,13 +207,85 @@ export default function WorkStation() {
   const [openUpload, setOpenUpload] = useState(false);
   const [openQrScanner, setOpenQrScanner] = useState(false);
   const [countDel, setCountDel] = useState(0);
+  //const [station, setStation] = useState("0010");
+  const [itemEach, setItemEach] = useState();
 
   useEffect(() => {
-    console.log("Something happend")
-    
-  }, [work])
+    onLoad();
+    onLoad2();
+  }, []);
 
- 
+  const onLoad = async () => {
+    let res = await callApi.get(
+      `/WorkOrderList/items_component/${row.orderid}`
+    );
+    console.log("data Result No 1 : ", res.data.dataResult);
+    const data = res.data.dataResult;
+    // setItem_Component(res.data);
+    if (data != null) {
+      let newData = data.map((item: any) => {
+        return {
+          worK_ORDER_COMPONENT_ID: item?.worK_ORDER_COMPONENT_ID,
+          orderid: item?.orderid,
+          reserV_NO: item?.reserV_NO,
+          reS_ITEM: item?.reS_ITEM,
+          matL_DESC: item?.matL_DESC,
+          actuaL_QUANTITY: item?.actuaL_QUANTITY,
+          actuaL_QUANTITY_UNIT: item?.actuaL_QUANTITY_UNIT,
+        };
+      });
+      setItem_Component(newData);
+    }
+  };
+
+  const onLoad2 = async () => {
+    let res = await callApi.get(`/workOrderList/workOrderList/${row.orderid}`);
+    const data = res.data.dataResult;
+    console.log("Each order in fontend : ", data);
+    setItemEach(data)
+  };
+
+  // useEffect(() => {
+  //   onLoadEachStation();
+  // }, []);
+
+  // const onLoadEachStation = async () => {
+  //   let res = await callApi.get(
+  //     `/WorkOrderList/workOrderListStation/${station}`
+  //   );
+  //   const data = res.data;
+  //   console.log("Each Station : ", data);
+  // };
+
+  useEffect(() => {
+    console.log("before useEffect : ", item_component);
+  }, [item_component]);
+
+  // useEffect(() => {
+  //   setItem_Component({
+  //     orderid: item_component?.orderid,
+  //     RESERV_NO: item_component?.RESERV_NO,
+  //     RES_ITEM: item_component?.RES_ITEM,
+  //     MATL_DESC: item_component?.MATL_DESC,
+  //     ACTUAL_QUANTITY: item_component?.ACTUAL_QUANTITY,
+  //     ACTUAL_QUANTITY_UNIT: item_component?.ACTUAL_QUANTITY_UNIT,
+  //   });
+  // }, [item_component]);
+
+  useEffect(() => {
+    setWork({
+      orderid: row.orderid,
+      ordeR_TYPE: row.ordeR_TYPE,
+      shorT_TEXT: row.shorT_TEXT,
+      equipment: row.equipment,
+      weB_STATUS: row.weB_STATUS,
+      slA_FINISH_TIME: row.slA_FINISH_TIME,
+      actuaL_FINISH_DATE: row.actuaL_FINISH_DATE,
+      servicE_TIME: row.servicE_TIME,
+      actuaL_START_TIME: row.actuaL_START_TIME,
+      actuaL_FINISH_TIME: row.actuaL_FINISH_TIME,
+    });
+  }, [row]);
 
   const columns: GridColDef[] = [
     {
@@ -245,25 +328,42 @@ export default function WorkStation() {
         );
       },
     },
-    { field: "item", headerName: "No", width: 130 },
-    { field: "itemNo", headerName: "Item No", width: 130 },
-    { field: "itemDes", headerName: "Item Des", width: 300 },
-    { field: "qtv", headerName: "QTY", width: 130 },
-    { field: "qtvShip", headerName: "QTV SHIP", width: 130 },
+    { field: "reS_ITEM", headerName: "No", width: 130 },
+    { field: "reserV_NO", headerName: "Item No", width: 130 },
+    { field: "matL_DESC", headerName: "Item Des", width: 300 },
+    { field: "actuaL_QUANTITY", headerName: "QTY", width: 130 },
+    { field: "actuaL_QUANTITY_UNIT", headerName: "QTV SHIP", width: 130 },
   ];
 
-  // const rows = useMemo(
+  // const rows: GridRowsProp = useMemo(
   //   () =>
   //     work
   //       ? [
   //           {
-  //             id: work.id ?? 1, 
-  //             ...work,
+  //             ...item_component,
+  //             id: item_component?.orderid ?? 1,
   //           },
   //         ]
   //       : [],
   //   [work]
   // );
+
+  // let rows: readonly any[] | undefined = [];
+
+  // useEffect(() => {
+  //   rows = useMemo(
+  //     () =>
+  //       work
+  //         ? [
+  //             {
+  //               id: work.id ?? 1,
+  //               ...work,
+  //             },
+  //           ]
+  //         : [],
+  //     [work]
+  //   );
+  // }, [work]);
 
   // console.log("work ที่หน้า WorkStation : ", work)
 
@@ -285,7 +385,7 @@ export default function WorkStation() {
   const handleConfirmDelete = () => {
     console.log("ลบอะไหล่แล้ว");
     setOpenDelete(false);
-    deletePart("more part", 4);
+    deletePart("more part", 4, 1);
     Swal.fire({
       title: "Successfully",
       text: `Part is Already ${count} Delete`,
@@ -343,6 +443,8 @@ export default function WorkStation() {
   const handleScanResult = (value: string) => {
     console.log("สแกนได้ : ", value);
   };
+
+  console.log("Item component : ", item_component);
 
   return (
     <div className="scrollable-div bigBox">
@@ -470,7 +572,9 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="SLA Time" />
-                  <Typography>{work?.slaTime} min</Typography>
+                  <Typography>
+                    {formatTime(Number(work?.slA_FINISH_TIME))}
+                  </Typography>
                 </ListItem>
                 <Divider component="li" />
 
@@ -478,7 +582,7 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="Start Date" />
-                  <Typography>03.04.2025</Typography>
+                  <Typography>{formatDate(work?.actuaL_START_DATE)}</Typography>
                 </ListItem>
                 <Divider component="li" />
 
@@ -486,7 +590,9 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="Finish Date" />
-                  <Typography>05.04.2025</Typography>
+                  <Typography>
+                    {formatDate(work?.actuaL_FINISH_DATE)}
+                  </Typography>
                 </ListItem>
               </List>
 
@@ -496,7 +602,9 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="Use Time" />
-                  <Typography>{work?.useTime} min</Typography>
+                  <Typography>
+                    {formatTime(Number(work?.servicE_TIME))}
+                  </Typography>
                 </ListItem>
                 <Divider component="li" />
 
@@ -504,7 +612,9 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="Start Time" />
-                  <Typography>{work?.startTime} Min</Typography>
+                  <Typography>
+                    {formatTime(Number(work?.actuaL_START_TIME))}
+                  </Typography>
                 </ListItem>
                 <Divider component="li" />
 
@@ -512,7 +622,9 @@ export default function WorkStation() {
                   sx={{ display: "flex", justifyContent: "space-between" }}
                 >
                   <ListItemText primary="Finish Time" />
-                  <Typography>{work?.finishTime} Min</Typography>
+                  <Typography>
+                    {formatTime(Number(work?.actuaL_FINISH_TIME))}
+                  </Typography>
                 </ListItem>
               </List>
             </Box>
@@ -530,19 +642,30 @@ export default function WorkStation() {
               }}
             >
               {[
-                { label: "Start", from: "#2ecc71", to: "#27ae60" },
-                { label: "Pause", from: "#f1c40f", to: "#f39c12" },
-                { label: "Finish", from: "#3498db", to: "#2980b9" },
+                {
+                  label: "Start",
+                  from: "#2ecc71",
+                  to: "#27ae60",
+                  onClick: startWork,
+                },
+                // { label: "Pause", from: "#f1c40f", to: "#f39c12" },
+                {
+                  label: "Finish",
+                  from: "#3498db",
+                  to: "#2980b9",
+                  onClick: finishWork,
+                },
                 { label: "Check List", from: "#9b59b6", to: "#8e44ad" },
                 { label: "Completed", from: "#2980b9", to: "#2471a3" },
                 { label: "Return", from: "#e74c3c", to: "#c0392b" },
               ].map((btn, index) => (
                 <Button
                   key={index}
+                  onClick={btn.onClick}
                   variant="contained"
                   sx={{
                     background: `linear-gradient(135deg, ${btn.from}, ${btn.to})`,
-                    borderRadius: "16px", // มุมโค้งสวย ๆ
+                    borderRadius: "16px",
                     width: 180,
                     height: 70,
                     padding: 0,
@@ -586,16 +709,18 @@ export default function WorkStation() {
         <CustomTabPanel value={value} index={1}>
           <Paper sx={{ height: 740, width: "100%" }}>
             <DataGrid
-              rows={rows}
+              rows={item_component ?? []}
               columns={columns}
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
               checkboxSelection={false}
               sx={{ border: 0 }}
+              getRowId={(row) => row.worK_ORDER_COMPONENT_ID}
             />
           </Paper>
         </CustomTabPanel>
       </Box>
+
       <AppHeader title="Work Order" icon={<BusinessCenterIcon />} />
 
       <div>
@@ -622,7 +747,7 @@ export default function WorkStation() {
                 onChange={(e) => setPartName(e.target.value)}
               />
 
-              <QrCodeScannerIcon
+              {/* <QrCodeScannerIcon
                 sx={{ fontSize: 30 }}
                 onClick={handleQrScanner}
               />
@@ -632,7 +757,7 @@ export default function WorkStation() {
                   onClose={handleCloseScanner}
                   onScan={handleScanResult}
                 />
-              )}
+              )} */}
             </div>
 
             <SparePart setCount={setCount} count={count} />

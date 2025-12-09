@@ -15,7 +15,16 @@ export default function Home() {
     const { user } = useUser();
 
     return (
+
         <Box sx={{ p: 2, marginTop: 1, marginBottom: 8 }}>
+            <div>
+                <h1>
+                    {user?.wk_ctr}
+                </h1>
+                <h1>
+                    {user?.role}
+                </h1>
+            </div>
             <Header />
             <Grid container spacing={2} sx={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
                 <Grid size={50}>

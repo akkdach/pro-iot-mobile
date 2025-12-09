@@ -8,6 +8,7 @@ const CameraCaptureFile: React.FC<CameraCaptureProps> = ({ onCapture }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
+  const [photos, setPhotos] = useState<File[]>([]);
 
   // Start camera
   const startCamera = async () => {

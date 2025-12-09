@@ -27,7 +27,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ open, onClose, onScan }) => {
       return;
     }
 
-    // 🟢 รอให้ DOM render ก่อน แล้วค่อย init scanner
     const timeout = setTimeout(() => {
       const element = document.getElementById(readerId);
       if (!element) {
@@ -92,7 +91,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ open, onClose, onScan }) => {
             SCAN
           </Typography>
 
-          {/* ควรใช้ id ที่ unique */}
+         
           <div id={readerId} style={{ width: "100%" }} />
         </Box>
       </DialogContent>

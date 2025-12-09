@@ -1,10 +1,22 @@
 import { useWork } from "../../Context/WorkStationContext";
 import { Button, Box } from "@mui/material";
+import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import callApi from "../../Services/callApi";
 
 const TestContextPage = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [items, setItems] = useState<any[]>([]);
+
+  useEffect(() => {
+    onLoad();
+  }, []);
+
+  const onLoad = async () => {
+    let res = await callApi.get("/WorkOrderList/workOrderList");
+    setItems(res.data);
+  }
 
   const {
     addPart,
@@ -23,19 +35,19 @@ const TestContextPage = () => {
 
   const handleClick = () => {
     addPart("Some part", 6);
-    deletePart("KT", 9);
+    deletePart("KT", 9, 2);
     setScannedCode("codecodecode");
     submitWork();
     startWork();
     finishWork();
-    console.log(work?.itemDes);
+    // console.log(work?.MATL_DESC);
   };
 
   const handleSetWork = () => {
     console.log("set work");
 
     const newWork = {
-      id: 200,
+      id: 204,
       lastName: "Doe",
       firstName: "John",
       age: 28,
@@ -60,8 +72,8 @@ const TestContextPage = () => {
 
     setWork(newWork);
 
-    console.log("newWork ที่เพิ่ง set:", work);
-    navigate("/WorkStation")
+    console.log("newWork ที่เพิ่ง set:", newWork);
+    navigate("/WorkStation");
   };
 
   return (
@@ -86,6 +98,14 @@ const TestContextPage = () => {
         >
           set Work
         </Button>
+      </div>
+
+      <div>
+        {items.map((item) => (
+          <p key={item.orderid}>
+            {item.equipment} - {item.shorT_TEXT}
+          </p>
+        ))}
       </div>
     </div>
   );

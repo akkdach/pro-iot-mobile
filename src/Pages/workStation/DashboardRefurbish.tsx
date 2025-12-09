@@ -11,29 +11,23 @@ import {
   Select,
 } from "@mui/material";
 import { Description, Filter } from "@mui/icons-material";
-import React, { use, useEffect, useState , createContext, useContext } from "react";
+import React, {
+  use,
+  useEffect,
+  useState,
+  createContext,
+  useContext,
+} from "react";
 import { useNavigate, Link, useParams, useLocation } from "react-router-dom";
 import AppHeader from "../../Component/AppHeader";
 import BackupTableIcon from "@mui/icons-material/BackupTable";
-
-export interface User {
-  id: number;
-  lastName: string;
-  firstName: string;
-  age: number;
-  WorkOrder: string;
-  OrderType: string;
-  Description: string;
-  Equipment: string;
-  Status: string;
-  CurrentStation: string;
-  StartDate: Date;
-  StartTime: string;
-  FinishDate: Date;
-  State: string;
-}
+import callApi from "../../Services/callApi";
+import { set } from "react-hook-form";
+import { formatDate, formatTime } from "../../Utility/DatetimeService";
+import { useWork } from "../../Context/WorkStationContext";
 
 const DashboardRefurbish = () => {
+  const { work, setWork } = useWork();
   const location = useLocation();
   const navigate = useNavigate();
   const [step, setStep] = useState<any>(location?.state);
@@ -44,235 +38,130 @@ const DashboardRefurbish = () => {
 
   const today = new Date().toISOString().split("T")[0];
   const [dateFilter, setDateFilter] = useState(today);
+  const [items, setItems] = useState<any[]>([]);
+  const [itemEach, setItemEach] = useState();
 
   useEffect(() => {
     setStep(location.state);
     console.log(location.state);
   }, [location?.state]);
+
+  useEffect(() => {
+    onLoad();
+    //onLoad2();
+  }, []);
+
+  const onLoad = async () => {
+    if (step.station == null) {
+      let res = await callApi.get("/WorkOrderList/workOrderList");
+      console.log("work order list", res.data.dataResult);
+      setItems(res.data.dataResult);
+      setWork(res.data.dataResult);
+    } else {
+      let res = await callApi.get(
+        `/workOrderList/workOrderList/${step.Station}`
+      );
+      const data = res.data.dataResult;
+      console.log("Each order in fontend : ", data);
+      //setItemEach(data);
+      setWork(res.data.dataResult);
+    }
+  };
+
+  // const onLoad2 = async () => {
+  //   let res = await callApi.get(`/workOrderList/workOrderList/${step.Station}`);
+  //   const data = res.data.dataResult;
+  //   console.log("Each order in fontend : ", data);
+  //   //setItemEach(data);
+  //   setWork(res.data.dataResult);
+  // };
+
   const columns: GridColDef[] = [
+    // {
+    //   field: "State",
+    //   headerName: "State",
+    //   width: 130,
+    //   renderCell: (params) => {
+    //     const level = params.value;
+    //     const dotCount =
+    //       level === "high"
+    //         ? 3
+    //         : level === "medium"
+    //         ? 2
+    //         : level === "low"
+    //         ? 1
+    //         : 0;
+
+    //     return (
+    //       <Box
+    //         sx={{
+    //           display: "flex",
+    //           alignItems: "center",
+    //           justifyContent: "flex-start",
+    //           height: "100%",
+    //           width: "100%",
+    //           gap: 0.8,
+    //         }}
+    //       >
+    //         {[1, 2, 3].map((i) => (
+    //           <Box
+    //             key={i}
+    //             sx={{
+    //               width: 10,
+    //               height: 10,
+    //               borderRadius: "50%",
+    //               backgroundColor: i <= dotCount ? "#1565c0" : "#e0e0e0",
+    //               transition: "0.2s",
+    //             }}
+    //           />
+    //         ))}
+    //       </Box>
+    //     );
+    //   },
+    // },
+    { field: "orderid", headerName: "Work Order", width: 130, flex: 1 },
+    { field: "ordeR_TYPE", headerName: "Order Type", width: 130, flex: 1 },
+    { field: "shorT_TEXT", headerName: "Description", width: 200, flex: 1 },
+    { field: "equipment", headerName: "Equipment", width: 100, flex: 1 },
+    { field: "weB_STATUS", headerName: "Status", width: 100, flex: 1 },
+    // { field: "CurrentStation", headerName: "Current Station", width: 130 },
     {
-      field: "State",
-      headerName: "State",
+      field: "actuaL_START_DATE",
+      headerName: "Start Date",
+      // type: "date",
       width: 130,
       renderCell: (params) => {
-        const level = params.value;
-        const dotCount =
-          level === "high"
-            ? 3
-            : level === "medium"
-            ? 2
-            : level === "low"
-            ? 1
-            : 0;
-
-        return (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              height: "100%",
-              width: "100%",
-              gap: 0.8,
-            }}
-          >
-            {[1, 2, 3].map((i) => (
-              <Box
-                key={i}
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  backgroundColor: i <= dotCount ? "#1565c0" : "#e0e0e0",
-                  transition: "0.2s",
-                }}
-              />
-            ))}
-          </Box>
-        );
+        return formatDate(params.value);
       },
+      flex: 1,
     },
-    { field: "WorkOrder", headerName: "Work Order", width: 130 },
-    { field: "OrderType", headerName: "Order Type", width: 100 },
-    { field: "Description", headerName: "Description", width: 100 },
-    { field: "Equipment", headerName: "Equipment", width: 100 },
-    { field: "Status", headerName: "Status", width: 100 },
-    { field: "CurrentStation", headerName: "Current Station", width: 130 },
-    {
-      field: "StartDate",
-      headerName: "Start Date",
-      type: "date",
-      width: 130,
-    },
-    { field: "StartTime", headerName: "Start Time", width: 130 },
-    {
-      field: "FinishDate",
-      headerName: "Finish Date",
-      type: "date",
-      width: 130,
-    },
-  ];
 
-  const rows = [
     {
-      id: 1,
-      lastName: "Snow",
-      firstName: "Jon",
-      age: 35,
-      WorkOrder: "001",
-      OrderType: "ZC15",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "high",
-    },
-    {
-      id: 2,
-      lastName: "Lannister",
-      firstName: "Cersei",
-      age: 42,
-      WorkOrder: "002",
-      OrderType: "ZC15",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "low",
-    },
-    {
-      id: 3,
-      lastName: "Lannister",
-      firstName: "Jaime",
-      age: 45,
-      WorkOrder: "003",
-      OrderType: "ZC16",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "medium",
-    },
-    {
-      id: 4,
-      lastName: "Stark",
-      firstName: "Arya",
-      age: 16,
-      WorkOrder: "004",
-      OrderType: "ZC16",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "low",
-    },
-    {
-      id: 5,
-      lastName: "Targaryen",
-      firstName: "Daenerys",
-      age: null,
-      WorkOrder: "005",
-      OrderType: "ZC15",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "high",
-    },
-    {
-      id: 6,
-      lastName: "Melisandre",
-      firstName: null,
-      age: 150,
-      WorkOrder: "006",
-      OrderType: "ZC16",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "high",
-    },
-    {
-      id: 7,
-      lastName: "Clifford",
-      firstName: "Ferrara",
-      age: 44,
-      WorkOrder: "007",
-      OrderType: "ZC15",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "low",
-    },
-    {
-      id: 8,
-      lastName: "Frances",
-      firstName: "Rossini",
-      age: 36,
-      WorkOrder: "008",
-      OrderType: "ZC16",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "low",
-    },
-    {
-      id: 9,
-      lastName: "Roxie",
-      firstName: "Harvey",
-      age: 65,
-      WorkOrder: "009",
-      OrderType: "ZC16",
-      Description: "TEST",
-      Equipment: "TEST",
-      Status: "PENDING",
-      CurrentStation: "TEST",
-      StartDate: new Date("2025-01-01"),
-      StartTime: "08:30",
-      FinishDate: new Date("2025-01-01"),
-      State: "medium",
+      field: "actuaL_FINISH_DATE",
+      headerName: "Finish Date",
+      // type: "date",
+      width: 130,
+      renderCell: (params) => {
+        return formatDate(params.value);
+      },
+      flex: 1,
     },
   ];
 
   const paginationModel = { page: 0, pageSize: 5 };
 
-  const orderTypes = Array.from(new Set(rows.map((row) => row.OrderType)));
+  const orderTypes = Array.from(new Set(items.map((row) => row.ordeR_TYPE)));
 
-  const filteredRows = rows.filter((row) => {
-    const matchWorkOrder = row.WorkOrder?.toString()
+  const filteredRows = items.filter((row) => {
+    const matchWorkOrder = row.orderid
+      ?.toString()
       .toLowerCase()
       .includes(workOrderFilter.toLowerCase());
 
-    const matchStatus = statusFilter === "" || row.Status === statusFilter;
+    const matchStatus = statusFilter === "" || row.weB_STATUS === statusFilter;
 
     const matchOrderType =
-      orderTypeFilter === "" || row.OrderType === orderTypeFilter;
+      orderTypeFilter === "" || row.ordeR_TYPE === orderTypeFilter;
 
     // const matchDate =
     //   !dateFilter ||
@@ -316,10 +205,10 @@ const DashboardRefurbish = () => {
             <MenuItem value="">
               <em>ทั้งหมด</em>
             </MenuItem>
-            <MenuItem value="PENDING">Pending</MenuItem>
-            <MenuItem value="IN_PROGRESS">In progress</MenuItem>
-            <MenuItem value="COMPLETED">Completed</MenuItem>
-            <MenuItem value="CANCELED">Cancelled</MenuItem>
+            <MenuItem value="1">1</MenuItem>
+            <MenuItem value="2">2</MenuItem>
+            <MenuItem value="3">3</MenuItem>
+            <MenuItem value="4">4</MenuItem>
           </Select>
         </FormControl>
 
@@ -416,17 +305,20 @@ const DashboardRefurbish = () => {
         </FormControl>
       </Stack>
 
-      <Paper sx={{ height: "100%", width: "100%" }}>
+      <Paper sx={{ height: "100vh", width: "100%", paddingBottom: 8 }}>
         <DataGrid
           checkboxSelection={false}
           rows={filteredRows}
+          getRowId={(items) => items.orderid}
           columns={columns}
-          initialState={{ pagination: { paginationModel } }}
-          pageSizeOptions={[5, 10]}
-          sx={{ border: 0 }}
+          initialState={{
+            pagination: {
+              paginationModel: { pageSize: 30, page: 0 },
+            },
+          }}
+          pageSizeOptions={[10, 20, 30]}
+          sx={{ border: 0, width: "100%" }}
           onRowClick={(params) => {
-            // console.log(params.row);
-            // navigate(`/WorkOrderDetail`, {state:params.row});
             navigate(`/WorkStation`, { state: params.row });
           }}
         />

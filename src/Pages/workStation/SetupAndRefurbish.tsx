@@ -36,20 +36,21 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 const steps = [
   { id: 0, title: "Work Order List", icon: workorder },
   { id: 0.1, title: "Stock Report", icon: stock },
-  { id: 1, title: "Inspector", icon: inspector },
-  { id: 2, title: "Remove Part", icon: remove },
-  { id: 3, title: "Clean", icon: clean },
-  { id: 4, title: "Color", icon: color },
-  { id: 5, title: "Fix Cooling", icon: fix },
-  { id: 6, title: "Assembly Part", icon: assembly },
-  { id: 7, title: "Test", icon: test },
-  { id: 8, title: "QC", icon: qc },
+  { id: 1, title: "Inspector", icon: inspector, station: "0010" },
+  { id: 2, title: "Remove Part", icon: remove, station: "0020" },
+  { id: 3, title: "Clean", icon: clean, station: "0030" },
+  { id: 4, title: "Color", icon: color, station: "0040" },
+  { id: 5, title: "Fix Cooling", icon: fix, station: "0050" },
+  { id: 6, title: "Assembly Part", icon: assembly, station: "0060" },
+  { id: 7, title: "Test", icon: test, station: "0070" },
+  { id: 8, title: "QC", icon: qc, station: "0080" },
 ];
 
 export default function SetupAndRefurbish() {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState(false);
   const [work, setWork] = React.useState("");
+  const [current, setCurrent] = useState<any[]>([]);
 
   // แยก steps เป็น 2 แถว
   const topRow = steps.filter((_, i) => i % 2 === 0);
