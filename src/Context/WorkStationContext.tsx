@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { createContext, useContext, useState } from "react";
 import callApi from "../Services/callApi";
 import Header from "../Layout/Header";
+import Swal from "sweetalert2";
+import { steps } from "../Pages/workStation/SetupAndRefurbish";
 
 interface Work {
   // id?: number;
@@ -21,7 +23,7 @@ interface Work {
   actuaL_START_TIME?: String;
   actuaL_FINISH_TIME?: String;
 
-  currenT_STATION?: String;
+  current_operation?: String;
 }
 
 interface Item_Component {
@@ -70,25 +72,61 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (!work?.orderid) return;
 
+      const confirm = await Swal.fire({
+        title: "Start Work?",
+        text: `Start Work Order: ${work.orderid}?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Start",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#27ae60",
+        cancelButtonColor: "#e74c3c",
+      });
+
+      if (!confirm.isConfirmed) return;
+
       const res = await callApi.post(
         "/WorkOrderList/Start",
-        { ORDERID: work?.orderid },
+        { ORDERID: work?.orderid, current_operation: work?.current_operation },
         { headers: { "Content-Type": "application/json" } }
       );
 
       const data = res.data;
       console.log("Start Work : ", data);
 
+      if (!data.isSuccess) {
+        await Swal.fire({
+          title: "Failed",
+          text: data.Message ?? "Cannot start this work order",
+          icon: "error",
+        });
+        return;
+      }
+
       setWork((prev) => ({
         ...prev!,
-        orderid: data.DataResult?.ORDERID,
-        actuaL_START_DATE: data.DataResult?.ACTUAL_START_DATE,
-        actuaL_START_TIME: data.DataResult?.ACTUAL_START_TIME,
-        weB_STATUS: data.DataResult?.WEB_STATUS,
+        orderid: data.dataResult?.ORDERID,
+        actuaL_START_DATE: data.dataResult?.actuaL_START_DATE,
+        actuaL_START_TIME: data.dataResult?.ACTUAL_START_TIME,
+        weB_STATUS: data.dataResult?.WEB_STATUS,
+        current_operation: data.dataResult?.current_operation,
       }));
-      alert(data.message);
-    } catch (err) {
-      console.log(err);
+
+      await Swal.fire({
+        title: "Success!",
+        text: "Work order has been started.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (err: any) {
+      console.error("Start Work Error:", err);
+
+      await Swal.fire({
+        title: "Error",
+        text: err.response?.data?.Message || "Something went wrong.",
+        icon: "error",
+      });
     }
   };
 
@@ -101,25 +139,61 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (!work?.orderid) return;
 
+      const confirm = await Swal.fire({
+        title: "Finish Work?",
+        text: `Are you sure you want to finish Work Order: ${work.orderid}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Finish",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3498db",
+        cancelButtonColor: "#e74c3c",
+      });
+
+      if (!confirm.isConfirmed) return;
+
       const res = await callApi.post(
         "/WorkOrderList/Finish",
-        { ORDERID: work?.orderid },
+        { ORDERID: work?.orderid, current_operation: work?.current_operation },
         { headers: { "Content-Type": "application/json" } }
       );
 
       const data = res.data;
       console.log("Finish Work : ", data);
 
+      if (!data.isSuccess) {
+        await Swal.fire({
+          title: "Failed",
+          text: data.Message ?? data.message ?? "Cannot finish this work order",
+          icon: "error",
+        });
+        return;
+      }
+
       setWork((prev) => ({
         ...prev!,
-        orderid: data.DataResult?.ORDERID,
-        actuaL_FINISH_DATE: data.DataResult?.ACTUAL_FINISH_DATE,
-        actuaL_FINISH_TIME: data.DataResult?.ACTUAL_FINISH_TIME,
-        weB_STATUS: data.DataResult?.WEB_STATUS,
+        orderid: data.dataResult?.ORDERID,
+        actuaL_FINISH_DATE: data.dataResult?.ACTUAL_FINISH_DATE,
+        actuaL_FINISH_TIME: data.dataResult?.ACTUAL_FINISH_TIME,
+        weB_STATUS: data.dataResult?.WEB_STATUS,
+        current_operation: data.dataResult?.current_operation,
       }));
+
+      await Swal.fire({
+        title: "Finished!",
+        text: "Work order has been finished successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
       alert(data.message);
-    } catch (err) {
-      console.log(err);
+    } catch (err: any) {
+      console.error("FinishWork Error:", err);
+      await Swal.fire({
+        title: "Error",
+        text: err.response?.data?.Message || "Something went wrong.",
+        icon: "error",
+      });
     }
   };
 
@@ -132,6 +206,21 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (!work?.orderid) return;
 
+      const confirm = await Swal.fire({
+        title: "Completed Work?",
+        text: `Are you sure you want to Completed Work Order: ${work.orderid}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Completed",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#3498db",
+        cancelButtonColor: "#e74c3c",
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      //const currentOp = work.current_operation ?? "0010";
+
       const res = await callApi.post(
         "/WorkOrderList/Completed",
         { ORDERID: work?.orderid },
@@ -140,15 +229,37 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       const data = res.data;
       console.log("Completed Work : ", data);
 
+      if (!data.isSuccess) {
+        await Swal.fire({
+          title: "Failed",
+          text:
+            data.Message ?? data.message ?? "Cannot completed this work order",
+          icon: "error",
+        });
+        return;
+      }
+
       setWork((prev) => ({
         ...prev!,
-        orderid: data.DataResult?.ORDERID,
-        weB_STATUS: data.DataResult?.WEB_STATUS,
+        orderid: data.dataResult?.ORDERID,
+        weB_STATUS: data.dataResult?.WEB_STATUS,
+        current_operation: data.dataResult?.current_operation,
       }));
 
-      alert(data.message);
-    } catch (err) {
-      console.log(err);
+      await Swal.fire({
+        title: "Finished!",
+        text: "Work order has been completed successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (err: any) {
+      console.error("CompletedWork Error:", err);
+      await Swal.fire({
+        title: "Error",
+        text: err.response?.data?.Message || "Something went wrong.",
+        icon: "error",
+      });
     }
   };
 
@@ -157,19 +268,101 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (!work?.orderid) return;
 
+      const getReturnableStations = (currentStation?: string | String) => {
+        if (!currentStation) return {};
+
+        const stationCode = currentStation.toString().padStart(4, "0");
+        console.log(
+          "currentStation raw >>>",
+          currentStation,
+          "normalized >>>",
+          stationCode
+        );
+
+        const stationSteps = steps.filter((s) => s.station);
+
+        const currentIndex = stationSteps.findIndex(
+          (s) => s.station === stationCode
+        );
+
+        console.log("currentIndex >>>", currentIndex);
+
+        if (currentIndex <= 0) return {};
+
+        const available: Record<string, string> = {};
+
+        for (let i = 0; i < currentIndex; i++) {
+          const item = stationSteps[i];
+          if (item.station) {
+            available[item.station] = item.title;
+          }
+        }
+
+        return available;
+      };
+
+      const visitedStations = getReturnableStations(work.current_operation);
+
+      if (!visitedStations || Object.keys(visitedStations).length === 0) {
+        await Swal.fire({
+          title: "Cannot Return",
+          text: "This work order cannot be returned to any previous station.",
+          icon: "info",
+        });
+        return;
+      }
+
+      const confirm = await Swal.fire({
+        title: "Return Work Order",
+        text: "Select station to rollback:",
+        icon: "warning",
+        input: "select",
+        inputOptions: visitedStations,
+        inputPlaceholder: "Choose station...",
+        showCancelButton: true,
+        confirmButtonText: "Confirm",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#e67e22",
+        cancelButtonColor: "#95a5a6",
+      });
+
+      if (!confirm.isConfirmed) return;
+
       const res = await callApi.post(
         "/WorkOrderList/Return",
         {
           ORDERID: work?.orderid,
-          current_station: work?.currenT_STATION,
+          current_station: work?.current_operation,
         },
         { headers: { "Content-Type": "application/json" } }
       );
 
       const data = res.data;
       console.log("Return Work : ", data);
-    } catch (err) {
-      console.log(err);
+
+      if (!data.isSuccess) {
+        await Swal.fire({
+          title: "Failed",
+          text: data.Message ?? data.message ?? "Cannot return this work order",
+          icon: "error",
+        });
+        return;
+      }
+
+      await Swal.fire({
+        title: "Finished!",
+        text: "Work order has been returned successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (err: any) {
+      console.error("ReturnWork Error:", err);
+      await Swal.fire({
+        title: "Error",
+        text: err.response?.data?.Message || "Something went wrong.",
+        icon: "error",
+      });
     }
   };
 
@@ -269,10 +462,10 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
   const submitWork = () => {
     console.log("submit Work is working");
-    try{
+    try {
       console.log("in try catch");
-    }catch(err){
-      console.log(err)
+    } catch (err) {
+      console.log(err);
     }
   };
 

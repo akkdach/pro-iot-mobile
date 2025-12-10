@@ -135,7 +135,7 @@ const DashboardRefurbish = () => {
             startIcon={<PlayCircleFilledWhiteIcon />}
             onClick={(e) => {
               e.stopPropagation();
-              startWork();
+              startWork(row.orderid);
             }}
           >
             Start
@@ -171,7 +171,7 @@ const DashboardRefurbish = () => {
     },
   ];
 
-  const startWork = () => {
+  const startWork = (orderid: string) => {
     Swal.fire({
       title: "Start Work?",
       text: "Are you sure you want to start this work order?",
@@ -181,15 +181,37 @@ const DashboardRefurbish = () => {
       cancelButtonText: "Cancel",
       confirmButtonColor: "#27ae60",
       cancelButtonColor: "#e74c3c",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        //confirmStartWork(); 
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+      try {
+        const res = await callApi.post("/WorkOrderList/StartWorkOrder", {
+          ORDERID: orderid,
+        });
+        const data = res.data;
+        console.log("Start Work Order : ", data);
+
+        if (!data.isSuccess) {
+          await Swal.fire({
+            title: "Failed",
+            text: data.Message ?? "Cannot start this work order.",
+            icon: "error",
+          });
+          return;
+        }
+
         Swal.fire({
           title: "Started!",
           text: "Work order has been started successfully.",
           icon: "success",
           timer: 2000,
           showConfirmButton: false,
+        });
+      } catch (err: any) {
+        console.error("StartWorkOrder error:", err);
+        await Swal.fire({
+          title: "Error",
+          text: err.response?.data?.Message || "Something went wrong.",
+          icon: "error",
         });
       }
     });

@@ -185,6 +185,9 @@ export default function WorkStation() {
     setItem_Component,
     startWork,
     finishWork,
+    returnWork,
+    completed,
+    checkListWork,
   } = useWork();
   const location = useLocation();
   const row = location.state;
@@ -256,7 +259,7 @@ export default function WorkStation() {
       servicE_TIME: item.servicE_TIME ?? item.SERVICE_TIME,
       actuaL_START_TIME: item.actuaL_START_TIME ?? item.ACTUAL_START_TIME,
       actuaL_FINISH_TIME: item.actuaL_FINISH_TIME ?? item.ACTUAL_FINISH_TIME,
-      currenT_STATION: item.currenT_STATION ?? item.CURRENT_OPERATION,
+      current_station: item.current_station ?? item.CURRENT_OPERATION,
     }));
   };
 
@@ -626,9 +629,24 @@ export default function WorkStation() {
                   to: "#2980b9",
                   onClick: finishWork,
                 },
-                { label: "Check List", from: "#9b59b6", to: "#8e44ad" },
-                { label: "Completed", from: "#2980b9", to: "#2471a3" },
-                { label: "Return", from: "#e74c3c", to: "#c0392b" },
+                {
+                  label: "Check List",
+                  from: "#9b59b6",
+                  to: "#8e44ad",
+                  onClick: checkListWork,
+                },
+                {
+                  label: "Completed",
+                  from: "#2980b9",
+                  to: "#2471a3",
+                  onClick: completed,
+                },
+                {
+                  label: "Return",
+                  from: "#e74c3c",
+                  to: "#c0392b",
+                  onClick: returnWork,
+                },
               ].map((btn, index) => (
                 <Button
                   key={index}

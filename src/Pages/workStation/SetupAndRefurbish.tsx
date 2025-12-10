@@ -33,7 +33,7 @@ import AppHeader from "../../Component/AppHeader"
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
 
 
-const steps = [
+export const steps = [
   { id: 0, title: "Work Order List", icon: workorder, station: null },
   { id: 0.1, title: "Stock Report", icon: stock, station: null },
   { id: 1, title: "Inspector", icon: inspector, station: "0010" },
