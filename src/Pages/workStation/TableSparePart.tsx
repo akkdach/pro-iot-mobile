@@ -26,10 +26,12 @@ import callApi from "../../Services/callApi";
 import HideImageIcon from "@mui/icons-material/HideImage";
 import SafeImage from "./SafeImage";
 import Swal from "sweetalert2";
+import { useLocation } from "react-router-dom";
 
 const uid = () => Math.random().toString(36).slice(2, 8);
 
 type SparePartApi = {
+  workOrderComponentId: number;
   imageUrl?: string;
   material: string;
   materialDescription?: string;
@@ -43,20 +45,23 @@ type CartItem = {
   qty: number;
 };
 
-type EditItem = {
-  id: string | number | null;
-  material: string;
-  qty: number;
-  max?: number;
-  imageUrl?: string;
-  materialDescription?: string;
-  onWithdraw?: boolean;
-  znew?: number | string | boolean;
-} | null;
+// type EditItem = {
+//   //   id: string | number | null;
+//   material: string;
+//   qty: number;
+//   max?: number;
+//   //   imageUrl?: string;
+//   //   materialDescription?: string;
+//   //   onWithdraw?: boolean;
+//   //   znew?: number | string | boolean;
+// } | null;
 
 export default function TableSparePart() {
   const { work, item_component } = useWork();
 
+  const location = useLocation();
+  const row = location.state;
+  console.log("location row : ", row);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [dataSparePart, setDataSparePart] = useState<SparePartApi[]>([]);
@@ -68,9 +73,9 @@ export default function TableSparePart() {
   // Edit QTY
   const [openEditQty, setOpenEditQty] = useState(false);
   const [editItem, setEditItem] = useState<{
-    id: string | number | null;
     material: string;
-    qty: number;
+    materialDescription: string;
+    qty: string;
     max?: number;
   } | null>(null);
 
@@ -78,12 +83,11 @@ export default function TableSparePart() {
 
   // Delete QTY
   type DeleteState = {
-    id: string | number | null;
-    name: string;
+    material: string | number | null;
+    materialDescription: string;
   } | null;
 
-  const [openDelete, setOpenDelete] = useState<boolean>(false);
-  const [deleteItem, setDeleteItem] = useState<DeleteState>(null);
+  useEffect(() => console.log("cart:", cart), [cart]);
 
   useEffect(() => {
     onLoad();
@@ -130,40 +134,6 @@ export default function TableSparePart() {
     // if (!confirm("ต้องการลบรายการนี้หรือไม่?")) return;
     // setParts((prev) => prev.filter((p) => p.id !== id));
   };
-
-  // const submit = () => {
-  //   if (mode === "add") {
-  //     setParts((prev) => [
-  //       { worK_ORDER_COMPONENT_ID: uid(), ...form },
-  //       ...prev,
-  //     ]);
-  //   } else {
-  //     if (!editingId) return;
-  //     setParts((prev) =>
-  //       prev.map((p) =>
-  //         p.worK_ORDER_COMPONENT_ID === editingId
-  //           ? { worK_ORDER_COMPONENT_ID: uid(), ...form }
-  //           : p
-  //       )
-  //     );
-  //   }
-
-  //   setOpen(false);
-  // };
-
-  // const addOne = (sp: SparePartApi) => {
-  //   setCart((prev) => {
-  //     const key = sp.material;
-  //     const currentQty = prev[key]?.qty ?? 0;
-  //     const max = sp.quotaStock ?? Infinity;
-  //     const nextQty = Math.min(currentQty + 1, max);
-
-  //     return {
-  //       ...prev,
-  //       [key]: { item: sp, qty: nextQty },
-  //     };
-  //   });
-  // };
 
   const addOne = (sp: any) => {
     setCart((prev) => {
@@ -222,18 +192,30 @@ export default function TableSparePart() {
     });
 
     if (!confirm.isConfirmed) return;
+    const payload = Object.values(cart).map(({ item, qty }) => ({
+      workOrderComponentId: 0,
+      workOrder: row?.orderid,
+      material: item.material,
+      matlDesc: item.materialDescription,
+      requirementQuantity: qty,
+      requirementQuantityUnit: row.actuaL_QUANTITY_UNIT,
+      moveType: true,
+    }));
+
+    if (payload.length === 0) return;
 
     try {
-      // const selectedItems = Object.values(cart).map(
-      //   ({ item, qty }) => ({
-      //     material: item.material,
-      //     materialDescription: item.materialDescription,
-      //     qty,
-      //     unit: item.znew,
-      //   })
-      // );
+      Swal.fire({
+        title: "กำลังบันทึก...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
 
-      // console.log("selectedItems:", selectedItems);
+      console.log("payload : ", payload);
+
+      const res = await callApi.post("/Mobile/SetWorkOrderSparePart", payload);
+
+      console.log("save result:", res.data);
 
       await Swal.fire({
         icon: "success",
@@ -241,12 +223,96 @@ export default function TableSparePart() {
         text: "บันทึกข้อมูลเรียบร้อย",
         confirmButtonText: "ตกลง",
       });
+
+      setCart({});
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "ผิดพลาด",
         text: "ไม่สามารถบันทึกข้อมูลได้",
         confirmButtonText: "ปิด",
+      });
+    }
+  };
+
+  const handleEditQty = async () => {
+    try {
+      if (!editItem) return;
+
+      const raw = Number(editQty);
+      if (!Number.isFinite(raw) || raw < 1) {
+        await Swal.fire({
+          icon: "warning",
+          title: "จำนวนไม่ถูกต้อง",
+          text: "กรุณากรอกจำนวนที่มากกว่า 0",
+        });
+        return;
+      }
+
+      // ✅ เช็คคงเหลือ
+      if (editItem.max !== undefined && raw > editItem.max) {
+        await Swal.fire({
+          icon: "warning",
+          title: "จำนวนเกินคงเหลือ",
+          text: `คงเหลือในคลัง ${editItem.max} เท่านั้น`,
+        });
+        return;
+      }
+
+      // 🔥 ยืนยันการแก้ไข
+      const confirm = await Swal.fire({
+        title: "ยืนยันการแก้ไข?",
+        html: `
+        <div style="text-align:left">
+          <p><b>อะไหล่:</b> ${editItem.material}</p>
+          <p><b>จำนวนใหม่:</b> ${raw}</p>
+        </div>
+      `,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "บันทึก",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#1976D2",
+        reverseButtons: true,
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      //   setEditItem({
+      //     qty: selectedQty ?? "0",
+      //     max,
+      //   });
+
+      // update cart (หรือ state ของคุณ)
+      setCart((prev) => {
+        const current = prev[editItem.material];
+        if (!current) return prev;
+
+        return {
+          ...prev,
+          [editItem.material]: {
+            ...current,
+            qty: raw,
+          },
+        };
+      });
+
+      await Swal.fire({
+        icon: "success",
+        title: "บันทึกสำเร็จ",
+        text: "อัปเดตจำนวนเรียบร้อยแล้ว",
+        timer: 1400,
+        showConfirmButton: false,
+      });
+
+      setOpenEditQty(false);
+    } catch (err) {
+      console.error("Error editing quantity:", err);
+
+      await Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถแก้ไขจำนวนได้ กรุณาลองใหม่อีกครั้ง",
       });
     }
   };
@@ -278,6 +344,7 @@ export default function TableSparePart() {
       //     name: p.reS_ITEM ?? "",
       //   });
       //setOpenDelete(true);
+      console.log("Deleting item with ID: ", itemId);
 
       await Swal.fire({
         icon: "success",
@@ -407,7 +474,7 @@ export default function TableSparePart() {
                             sx={{ lineHeight: 1.25, color: "#1976D2" }}
                             noWrap
                           >
-                            {p.reS_ITEM}
+                            {p.matL_DESC}
                           </Typography>
                           <Typography
                             variant="body2"
@@ -418,40 +485,6 @@ export default function TableSparePart() {
                           </Typography>
                         </Box>
                         <Stack direction="row" spacing={0.5}>
-                          {/* <IconButton
-                            size="small"
-                            sx={{
-                              color: "#1976D2",
-                              bgcolor: "#E3F2FD",
-                              border: "1px solid #BBDEFB",
-                              "&:hover": { bgcolor: "#BBDEFB" },
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton> */}
-
-                          {/* <IconButton
-                            size="small"
-                            sx={{
-                              color: "#1976D2",
-                              bgcolor: "#E3F2FD",
-                              border: "1px solid #BBDEFB",
-                              "&:hover": { bgcolor: "#BBDEFB" },
-                            }}
-                            onClick={() => {
-                              setEditItem({
-                                id: p.worK_ORDER_COMPONENT_ID ?? null,
-                                material: p.reS_ITEM ?? "",
-                                qty: p.actuaL_QUANTITY ?? 0,
-                              
-                              });
-                              setEditQty(String(p.actuaL_QUANTITY));
-                              setOpenEditQty(true);
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton> */}
-
                           <IconButton
                             size="small"
                             sx={{
@@ -462,8 +495,14 @@ export default function TableSparePart() {
                             }}
                             onClick={() => {
                               const spare = (dataSparePart ?? []).find(
-                                (s: any) => s.material === p.reS_ITEM
+                                (s: any) => s.material === s.material
                               );
+
+                              console.log(
+                                "materialDescription : ",
+                                p.matL_DESC
+                              );
+                              console.log("spare found : ", spare);
 
                               const max =
                                 typeof spare?.znew === "number"
@@ -472,31 +511,13 @@ export default function TableSparePart() {
                                   ? Number(spare.znew)
                                   : undefined;
 
-                              setEditItem({
-                                id: p.worK_ORDER_COMPONENT_ID ?? null,
-                                material: p.reS_ITEM ?? "",
-                                qty: p.actuaL_QUANTITY ?? 0,
-                                max,
-                              });
-
-                              setEditQty(String(p.actuaL_QUANTITY ?? 0));
                               setOpenEditQty(true);
+                              handleEditQty();
                             }}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
 
-                          {/* <IconButton
-                            size="small"
-                            sx={{
-                              color: "#D32F2F",
-                              bgcolor: "#FFEBEE",
-                              border: "1px solid #FFCDD2",
-                              "&:hover": { bgcolor: "#FFCDD2" },
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton> */}
                           <IconButton
                             size="small"
                             sx={{
@@ -512,6 +533,10 @@ export default function TableSparePart() {
                               //   });
                               //setOpenDelete(true);
                               handleDeleteItem(p.worK_ORDER_COMPONENT_ID!);
+                              console.log(
+                                "work order component ID in delete item function : ",
+                                p.worK_ORDER_COMPONENT_ID
+                              );
                             }}
                           >
                             <DeleteIcon fontSize="small" />
@@ -524,7 +549,7 @@ export default function TableSparePart() {
                         alignItems="center"
                       >
                         <Chip
-                          label={`Qty: ${p.actuaL_QUANTITY} ${p.actuaL_QUANTITY_UNIT}`}
+                          label={`Qty: ${selectedQty} `} //${p.actuaL_QUANTITY_UNIT}
                           size="small"
                           sx={{
                             bgcolor: "#E3F2FD",
@@ -538,7 +563,7 @@ export default function TableSparePart() {
                         </Typography>
                       </Stack>
                       <Typography variant="caption" sx={{ color: "#B0BEC5" }}>
-                        ID: {p.worK_ORDER_COMPONENT_ID}
+                        ID: {p.reserV_NO}
                       </Typography>
                     </Stack>
                   </CardContent>
@@ -807,7 +832,7 @@ export default function TableSparePart() {
                               -
                             </Button>
 
-                            {/* ✅ input กรอกจำนวนของรายการนี้ */}
+                            {/* input กรอกจำนวนของรายการนี้ */}
                             <TextField
                               value={String(qty)}
                               onChange={(e) => {
@@ -935,20 +960,8 @@ export default function TableSparePart() {
             <Button
               variant="contained"
               disabled={Object.keys(cart).length === 0}
-              onClick={() => {
-                // const selectedItems = Object.values(cart).map(
-                //   ({ item, qty }) => ({
-                //     material: item.material,
-                //     materialDescription: item.materialDescription,
-                //     qty,
-                //     unit: item.znew,
-                //   })
-                // );
-
-                // console.log("selectedItems:", selectedItems);
-
-                handleSave();
-
+              onClick={async () => {
+                await handleSave();
                 setOpen(false);
               }}
               sx={{

@@ -137,6 +137,7 @@ export default function WorkStation() {
           matL_DESC: item?.matL_DESC,
           actuaL_QUANTITY: item?.actuaL_QUANTITY,
           actuaL_QUANTITY_UNIT: item?.actuaL_QUANTITY_UNIT,
+          
         };
       });
       setItem_Component(newData);
@@ -630,8 +631,7 @@ export default function WorkStation() {
               <Button
                 variant="contained"
                 onClick={() => {
-                  
-                  navigate("/TableSparePart");
+                  navigate("/TableSparePart", {state: {item_component}});
                 }}
                 sx={{
                   textTransform: "none",
