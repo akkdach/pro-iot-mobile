@@ -62,14 +62,12 @@ const DashboardRefurbish = () => {
       setWork(res.data.dataResult);
     } else {
       console.log("step : ", step.station);
-      console.log(work?.orderid);
       let res = await callApi.get(
         `/WorkOrderList/workOrderList/${step.station}`
       );
       console.log("Each order in fontend : ", res.data.dataResult);
       setItems(res.data.dataResult);
       setWork(res.data.dataResult);
-      console.log(work)
       //setItemEach(data);
     }
   };
@@ -221,13 +219,9 @@ const DashboardRefurbish = () => {
 
   const paginationModel = { page: 0, pageSize: 5 };
 
-  const safeItems = Array.isArray(items) ? items : [];
+  const orderTypes = Array.from(new Set(items.map((row) => row.ordeR_TYPE)));
 
-  const orderTypes = Array.from(
-    new Set(safeItems.map((row) => row.order_TYPE))
-  );
-
-  const filteredRows = safeItems.filter((row) => {
+  const filteredRows = items.filter((row) => {
     const matchWorkOrder = row.orderid
       ?.toString()
       .toLowerCase()
@@ -394,7 +388,6 @@ const DashboardRefurbish = () => {
           pageSizeOptions={[10, 20, 30]}
           sx={{ border: 0, width: "100%" }}
           onRowClick={(params) => {
-            if (step.station == null) return;
             navigate(`/WorkStation`, { state: params.row });
           }}
         />

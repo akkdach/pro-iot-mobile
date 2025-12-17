@@ -50,50 +50,16 @@ export const formatDate = (
 
 
 
-// export const formatTime = (timeStr: string | number | null | undefined) : String => {
-//   if (!timeStr) return "ไม่มีข้อมูล";
-
-//   const str = String(timeStr).padStart(6, "0"); 
-
-//   if (!/^\d{6}$/.test(str)) return "ไม่มีข้อมูล";
-
-//   const hh = str.substring(0, 2);
-//   const mm = str.substring(2, 4);
-//   const ss = str.substring(4, 6);
-
-//   return `${hh}:${mm}:${ss}`;
-// };
-
-// export const formatTime = (timeStr: string | number | Date | null | undefined): string => {
-//   if (!timeStr) return "ไม่มีข้อมูล";
-
-//   if (timeStr instanceof Date) {
-//     const hh = timeStr.getHours().toString().padStart(2, "0");
-//     const mm = timeStr.getMinutes().toString().padStart(2, "0");
-//     const ss = timeStr.getSeconds().toString().padStart(2, "0");
-//     return `${hh}:${mm}:${ss}`;
-//   }
-
-//   const str = String(timeStr).padStart(6, "0");
-
-//   if (!/^\d{6}$/.test(str)) return "ไม่มีข้อมูล";
-
-//   const hh = str.substring(0, 2);
-//   const mm = str.substring(2, 4);
-//   const ss = str.substring(4, 6);
-
-//   return `${hh}:${mm}:${ss}`;
-// };
-
-
-export const formatTime = (timeStr: string | Date | Number |null | undefined): string => {
+export const formatTime = (timeStr: string | number | null | undefined) : String => {
   if (!timeStr) return "ไม่มีข้อมูล";
 
-  const raw = String(timeStr).trim();
+  const str = String(timeStr).padStart(6, "0"); 
 
-  if (/^\d{2}:\d{2}$/.test(raw)) {
-    return raw; 
-  }
+  if (!/^\d{6}$/.test(str)) return "ไม่มีข้อมูล";
 
-  return "ไม่มีข้อมูล";
+  const hh = str.substring(0, 2);
+  const mm = str.substring(2, 4);
+  const ss = str.substring(4, 6);
+
+  return `${hh}:${mm}:${ss}`;
 };

@@ -33,7 +33,6 @@ import ActionPage from './Pages/workStation/ActionPage';
 import WorkStation from './Pages/workStation/WorkStation';
 import SparePart from './Pages/workStation/SparePart';
 import TestContextPage from './Pages/workStation/TestContextPage';
-import TableSparePart from './Pages/workStation/TableSparePart';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -65,7 +64,6 @@ function App() {
           <Route path="ActionPage" element={<ActionPage />}></Route>
           <Route path="SparePart" element={<SparePart />}></Route>
           <Route path="TestContextPage" element={<TestContextPage />}></Route>
-          <Route path="TableSparePart" element={<TableSparePart />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
       </div>

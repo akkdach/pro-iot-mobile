@@ -1,9 +1,9 @@
 import { useWork } from "../../Context/WorkStationContext";
-import { Button } from "@mui/material";
+import { Button, Box } from "@mui/material";
+import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import callApi from "../../Services/callApi";
-import TableSparePart from "./TableSparePart";
 
 const TestContextPage = () => {
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ const TestContextPage = () => {
   return (
     <div>
       <h1>TestContextPage</h1>
-      {/* <div
+      <div
         style={{
           display: "flex",
           gap: 4,
@@ -98,18 +98,15 @@ const TestContextPage = () => {
         >
           set Work
         </Button>
-      </div> */}
+      </div>
 
-      {/* <div>
+      <div>
         {items.map((item) => (
           <p key={item.orderid}>
             {item.equipment} - {item.shorT_TEXT}
           </p>
         ))}
-      </div> */}
-
-
-        <TableSparePart />
+      </div>
     </div>
   );
 };
