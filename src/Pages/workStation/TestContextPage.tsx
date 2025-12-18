@@ -35,7 +35,7 @@ const TestContextPage = () => {
 
   const handleClick = () => {
     addPart("Some part", 6);
-    deletePart("KT", 9, 2);
+    //deletePart("KT", 9, 2);
     setScannedCode("codecodecode");
     submitWork();
     startWork();

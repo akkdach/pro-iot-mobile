@@ -55,11 +55,13 @@ const DashboardRefurbish = () => {
   }, []);
 
   const onLoad = async () => {
-    if (step.station == null) {
+    if (step.station == null && step.type === "workOrderList") {
       let res = await callApi.get("/WorkOrderList/workOrderList");
       console.log("work order list", res.data.dataResult);
       setItems(res.data.dataResult);
       setWork(res.data.dataResult);
+    } else if (step.station == null && step.type === "stockReport") {
+      navigate("/StockReport");
     } else {
       console.log("step : ", step.station);
       console.log(work?.orderid);
@@ -69,7 +71,7 @@ const DashboardRefurbish = () => {
       console.log("Each order in fontend : ", res.data.dataResult);
       setItems(res.data.dataResult);
       setWork(res.data.dataResult);
-      console.log(work)
+      console.log(work);
       //setItemEach(data);
     }
   };

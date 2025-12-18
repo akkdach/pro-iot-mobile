@@ -4,7 +4,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, use } from "react";
 import {
   Box,
   Checkbox,
@@ -47,6 +47,7 @@ import { formatDate, formatTime } from "../../Utility/DatetimeService";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
+import { on } from "events";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -112,6 +113,7 @@ export default function WorkStation() {
   const [openQrScanner, setOpenQrScanner] = useState(false);
   const [countDel, setCountDel] = useState(0);
   const [itemEach, setItemEach] = useState();
+  const [deleteId, setDeleteId] = useState<any>(null);
 
   const navigate = useNavigate();
 
@@ -137,7 +139,6 @@ export default function WorkStation() {
           matL_DESC: item?.matL_DESC,
           actuaL_QUANTITY: item?.actuaL_QUANTITY,
           actuaL_QUANTITY_UNIT: item?.actuaL_QUANTITY_UNIT,
-          
         };
       });
       setItem_Component(newData);
@@ -174,7 +175,8 @@ export default function WorkStation() {
       worK_ORDER_OPERATION_ID:
         item.worK_ORDER_OPERATION_ID ?? item.WORK_ORDER_OPERATION_ID,
       mN_WK_CTR: item.mN_WK_CTR ?? item.MN_WK_CTR,
-      worK_ORDER_COMPONENT_ID: item.worK_ORDER_COMPONENT_ID ?? item.WORK_ORDER_COMPONENT_ID,
+      worK_ORDER_COMPONENT_ID:
+        item.worK_ORDER_COMPONENT_ID ?? item.WORK_ORDER_COMPONENT_ID,
     }));
   };
 
@@ -221,9 +223,10 @@ export default function WorkStation() {
   //   });
   // }, [row]);
 
-  useEffect(() => {
-    console.log("before useEffect : ", item_component);
-  }, [item_component]);
+  // useEffect(() => {
+  //   console.log("before useEffect : ", item_component);
+  //   onLoad();
+  // }, [item_component]);
 
   const columns: GridColDef[] = [
     {
@@ -240,14 +243,14 @@ export default function WorkStation() {
               gap: "8px",
             }}
           >
-            
             <Button
               sx={{ backgroundColor: "red" }}
               variant="contained"
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-                handleOpenDelete();
+                //setDeleteId(params.row.worK_ORDER_COMPONENT_ID);
+                handleConfirmDelete(params.row.worK_ORDER_COMPONENT_ID);
               }}
             >
               <DeleteForeverIcon />
@@ -278,15 +281,9 @@ export default function WorkStation() {
     setCount(0);
   };
 
-  const handleConfirmDelete = () => {
-    console.log("ลบอะไหล่แล้ว");
-    setOpenDelete(false);
-    deletePart("more part", 4, 1);
-    Swal.fire({
-      title: "Successfully",
-      text: `Part is Already ${count} Delete`,
-      icon: "success",
-    });
+  const handleConfirmDelete = async (itemId: any) => {
+    deletePart(itemId);
+    await onLoad();
   };
 
   function CustomTabPanel(props: TabPanelProps) {
@@ -631,7 +628,7 @@ export default function WorkStation() {
               <Button
                 variant="contained"
                 onClick={() => {
-                  navigate("/TableSparePart", {state: {item_component}});
+                  navigate("/TableSparePart", { state: { item_component } });
                 }}
                 sx={{
                   textTransform: "none",

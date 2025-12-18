@@ -34,8 +34,8 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 
 
 export const steps = [
-  { id: 0, title: "Work Order List", icon: workorder, station: null },
-  { id: 0.1, title: "Stock Report", icon: stock, station: null },
+  { id: 0, title: "Work Order List", icon: workorder, station: null, type: "workOrderList" },
+  { id: 0.1, title: "Stock Report", icon: stock, station: null, type: "stockReport" },
   { id: 1, title: "Inspector", icon: inspector, station: "0010" },
   { id: 2, title: "Remove Part", icon: remove, station: "0020" },
   { id: 3, title: "Clean", icon: clean, station: "0030" },

@@ -54,10 +54,10 @@ interface SparePartApi {
   znew?: number;
 }
 
-interface CartItem  {
+interface CartItem {
   item: SparePartApi;
   qty: number;
-};
+}
 
 interface WorkContextType {
   work: Work | null;
@@ -85,7 +85,7 @@ interface WorkContextType {
   returnWork: () => void;
 
   addPart: (name: String, qty: number) => void;
-  deletePart: (name: String, qty: number, id: number) => void;
+  deletePart: (itemId: any) => void;
   setScannedCode: (code: String) => void;
   setUploadImage: (file: File[]) => void;
   submitWork: () => void;
@@ -155,7 +155,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         timer: 2000,
         showConfirmButton: false,
       });
-
     } catch (err: any) {
       console.error("Start Work Error:", err);
 
@@ -448,28 +447,66 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const deletePart = async (name: String, qty: number, id: number) => {
-    console.log(`delete part is working delete`);
+  const deletePart = async (itemId: any) => {
     try {
-      if (!work?.orderid) return;
+      const result = await Swal.fire({
+        title: "ยืนยันการลบ?",
+        text: "คุณต้องการลบรายการอะไหล่นี้ใช่หรือไม่",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "ลบ",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#D32F2F",
+        cancelButtonColor: "#9E9E9E",
+        reverseButtons: true,
+      });
 
-      const res = await callApi.delete(`/WorkOrderList/SparePart/${id}`);
+      if (!result.isConfirmed) return;
 
+      console.log("Deleting item with ID: ", itemId);
+
+      Swal.fire({
+        title: "กำลังลบ...",
+        text: "กรุณารอสักครู่",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const res = await callApi.delete(`/WorkOrderList/SparePart/${itemId}`);
       const data = res.data;
-      console.log("Delete spare part : ", data);
 
-      if (!data.IsSuccess) {
-        alert("Delete spare part fail : ");
-        return;
+      Swal.close();
+
+      if (data.dataResult.isSuccess === false) {
+        await Swal.fire({
+          icon: "error",
+          title: "ลบไม่สำเร็จ",
+          text: data.dataResult.message || "ไม่สามารถลบรายการได้",
+          confirmButtonText: "ปิด",
+        });
+      } else {
+        await Swal.fire({
+          icon: "success",
+          title: "ลบสำเร็จ",
+          text: "รายการอะไหล่ถูกลบเรียบร้อยแล้ว",
+          timer: 1500,
+          showConfirmButton: false,
+        });
       }
 
-      setItem_Component((prev) =>
-        (prev ?? []).filter((item) => item.worK_ORDER_COMPONENT_ID !== id)
-      );
-
-      alert("Delete spare part already");
+      console.log("Delete Already : ", data);
     } catch (err) {
-      console.log(err);
+      console.error("Error deleting item:", err);
+
+      Swal.close();
+
+      await Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถลบรายการได้ กรุณาลองใหม่อีกครั้ง",
+      });
     }
   };
 

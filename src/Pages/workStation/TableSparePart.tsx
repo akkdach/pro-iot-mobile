@@ -27,6 +27,7 @@ import HideImageIcon from "@mui/icons-material/HideImage";
 import SafeImage from "./SafeImage";
 import Swal from "sweetalert2";
 import { useLocation } from "react-router-dom";
+import { on } from "events";
 
 const uid = () => Math.random().toString(36).slice(2, 8);
 
@@ -43,6 +44,7 @@ type SparePartApi = {
 type CartItem = {
   item: SparePartApi;
   qty: number;
+  //orderid: string | number | null;
 };
 
 // type EditItem = {
@@ -57,7 +59,7 @@ type CartItem = {
 // } | null;
 
 export default function TableSparePart() {
-  const { work, item_component } = useWork();
+  const { work, item_component, deletePart } = useWork();
 
   const location = useLocation();
   const row = location.state;
@@ -91,6 +93,7 @@ export default function TableSparePart() {
 
   useEffect(() => {
     onLoad();
+    onLoadOldPart();
   }, []);
 
   const onLoad = async () => {
@@ -100,6 +103,36 @@ export default function TableSparePart() {
     const dataSparePartList = res.data.dataResult.sparepartList;
     console.log("on load get spare part : ", dataSparePartList);
     setDataSparePart(dataSparePartList);
+  };
+
+  const onLoadOldPart = async () => {
+    const res = await callApi.get(
+      `/WorkOrderList/items_component/${work?.orderid}`
+    );
+    const dataOldPart = res.data.dataResult;
+    console.log("load old part : ", dataOldPart);
+
+    if (Array.isArray(dataOldPart)) {
+      const cartFromOldPart: Record<string, CartItem> = {};
+      dataOldPart.forEach((item: any) => {
+        if (item.material && item.actuaL_QUANTITY > 0) {
+          cartFromOldPart[item.material] = {
+            item: {
+              workOrderComponentId: item.worK_ORDER_COMPONENT_ID,
+              material: item.material,
+              materialDescription: item.matL_DESC ?? "",
+              // imageUrl: item.imageUrl ?? "",
+              // quotaStock: item.quotaStock ?? 0,
+              // onWithdraw: item.onWithdraw ?? 0,
+              // znew: item.znew ?? 0,
+            },
+            qty: item.actuaL_QUANTITY,
+            //orderid: work?.orderid ?? 0,
+          };
+        }
+      });
+      setCart(cartFromOldPart);
+    }
   };
 
   // const [form, setForm] = useState<Omit<Part, "worK_ORDER_COMPONENT_ID">>({
@@ -193,8 +226,8 @@ export default function TableSparePart() {
 
     if (!confirm.isConfirmed) return;
     const payload = Object.values(cart).map(({ item, qty }) => ({
-      workOrderComponentId: 0,
-      workOrder: row?.orderid,
+      workOrderComponentId: item.workOrderComponentId,
+      workOrder: work?.orderid,
       material: item.material,
       matlDesc: item.materialDescription,
       requirementQuantity: qty,
@@ -213,16 +246,28 @@ export default function TableSparePart() {
 
       console.log("payload : ", payload);
 
-      const res = await callApi.post("/Mobile/SetWorkOrderSparePart", payload);
+      const res = await callApi.post(
+        `/Mobile/SetWorkOrderSparePart?OrderId=${work?.orderid}`,
+        payload
+      );
 
       console.log("save result:", res.data);
 
-      await Swal.fire({
-        icon: "success",
-        title: "สำเร็จ",
-        text: "บันทึกข้อมูลเรียบร้อย",
-        confirmButtonText: "ตกลง",
-      });
+      if (res.data.dataResult.isSuccess === true) {
+        await Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: "บันทึกข้อมูลเรียบร้อย",
+          confirmButtonText: "ตกลง",
+        });
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "ผิดพลาด",
+          text: res.data.dataResult.message || "ไม่สามารถบันทึกข้อมูลได้",
+          confirmButtonText: "ปิด",
+        });
+      }
 
       setCart({});
     } catch (error) {
@@ -259,7 +304,6 @@ export default function TableSparePart() {
         return;
       }
 
-      // 🔥 ยืนยันการแก้ไข
       const confirm = await Swal.fire({
         title: "ยืนยันการแก้ไข?",
         html: `
@@ -317,51 +361,9 @@ export default function TableSparePart() {
     }
   };
 
-  const handleDeleteItem = async (itemId: string | number) => {
-    try {
-      const result = await Swal.fire({
-        title: "ยืนยันการลบ?",
-        text: "คุณต้องการลบรายการอะไหล่นี้ใช่หรือไม่",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "ลบ",
-        cancelButtonText: "ยกเลิก",
-        confirmButtonColor: "#D32F2F",
-        cancelButtonColor: "#9E9E9E",
-        reverseButtons: true,
-      });
-
-      if (!result.isConfirmed) return;
-
-      // 🔥 ลบจาก state / context
-      //   setItemComponent((prev) =>
-      //     prev.filter((it) => it.worK_ORDER_COMPONENT_ID !== itemId)
-      //   );
-
-      ////////////////////////////////////////
-      //   setDeleteItem({
-      //     id: p.worK_ORDER_COMPONENT_ID ?? null,
-      //     name: p.reS_ITEM ?? "",
-      //   });
-      //setOpenDelete(true);
-      console.log("Deleting item with ID: ", itemId);
-
-      await Swal.fire({
-        icon: "success",
-        title: "ลบสำเร็จ",
-        text: "รายการอะไหล่ถูกลบเรียบร้อยแล้ว",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    } catch (err) {
-      console.error("Error deleting item:", err);
-
-      await Swal.fire({
-        icon: "error",
-        title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถลบรายการได้ กรุณาลองใหม่อีกครั้ง",
-      });
-    }
+  const handleDeleteItem = async (itemId: any) => {
+    deletePart(itemId);
+    await onLoad();
   };
 
   const cartCount = Object.values(cart).reduce((sum, x) => sum + x.qty, 0);
@@ -527,11 +529,6 @@ export default function TableSparePart() {
                               "&:hover": { bgcolor: "#FFCDD2" },
                             }}
                             onClick={() => {
-                              //   setDeleteItem({
-                              //     id: p.worK_ORDER_COMPONENT_ID ?? null,
-                              //     name: p.reS_ITEM ?? "",
-                              //   });
-                              //setOpenDelete(true);
                               handleDeleteItem(p.worK_ORDER_COMPONENT_ID!);
                               console.log(
                                 "work order component ID in delete item function : ",
