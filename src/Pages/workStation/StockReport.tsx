@@ -22,7 +22,7 @@ import { MaterialReactTable } from "material-react-table";
 import type { MRT_ColumnDef } from "material-react-table";
 import callApi from "../../Services/callApi";
 import { useNavigate } from "react-router-dom";
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 type WorkCenterObj = {
   wK_CTR: string;
@@ -391,7 +391,7 @@ const StockReport: React.FC = () => {
                 boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
               }}
               onClick={() => {
-               console.log("Click in add : ")
+                navigate("/AddSpareFromStock");
               }}
             >
               เพิ่มรายการ

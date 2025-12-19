@@ -36,6 +36,7 @@ import TestContextPage from './Pages/workStation/TestContextPage';
 import TableSparePart from './Pages/workStation/TableSparePart';
 import StockReport from './Pages/workStation/StockReport';
 import StockReportItem from './Pages/workStation/StockReportItem';
+import AddSpareFromStock from './Pages/workStation/AddSpareFromStock';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -70,6 +71,7 @@ function App() {
           <Route path="TableSparePart" element={<TableSparePart />}></Route>
           <Route path="StockReport" element={<StockReport />}></Route>
           <Route path="StockReportItem/:resId" element={<StockReportItem />}></Route>
+          <Route path="AddSpareFromStock" element={<AddSpareFromStock />}></Route>
         </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
       
       </div>

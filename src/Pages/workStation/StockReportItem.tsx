@@ -303,7 +303,7 @@ const StockReportItem: React.FC = () => {
           borderRadius: 3,
           border: "1px solid rgba(0,0,0,0.06)",
           boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-          height: "100vh"
+          height: "100vh",
         }}
       >
         <Stack
@@ -323,13 +323,13 @@ const StockReportItem: React.FC = () => {
 
         <MaterialReactTable
           columns={itemColumns}
-          data={filtered} 
+          data={filtered}
           enableStickyHeader
           enableDensityToggle={false}
           initialState={{
             density: "compact",
             pagination: { pageSize: 10, pageIndex: 0 },
-            showGlobalFilter: true, 
+            showGlobalFilter: true,
           }}
           state={{
             isLoading: loading,
@@ -342,10 +342,24 @@ const StockReportItem: React.FC = () => {
             size: "small",
             sx: { minWidth: { xs: "100%", md: 380 } },
           }}
-          muiTableContainerProps={{ sx: { maxHeight: 520, borderRadius: 2 } }}
+          muiTableContainerProps={{
+            sx: {
+              flex: 1,
+              overflow: "auto",
+            },
+          }}
           localization={{
             noRecordsToDisplay: "ไม่พบข้อมูล",
           }}
+          muiTablePaperProps={{
+            sx: {
+              height: "calc(100vh - 180px)", 
+              display: "flex",
+              flexDirection: "column",
+            },
+          }}
+          muiTopToolbarProps={{ sx: { flex: "0 0 auto" } }}
+          muiBottomToolbarProps={{ sx: { flex: "0 0 auto" } }}
         />
       </Paper>
     </Box>
