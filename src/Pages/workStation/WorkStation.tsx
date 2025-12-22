@@ -35,8 +35,13 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useParams, useLocation, useFetcher } from "react-router-dom";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import SparePart from "./SparePart";
-
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import CameraCaptureFile from "../../Component/CameraCaptureToFile";
+import DriveFolderUploadIcon from "@mui/icons-material/DriveFolderUpload";
+import UploadPicture from "./UploadPicture";
 import QRScanner from "../../Component/QRScanner";
+
+
 import { useWork } from "../../Context/WorkStationContext";
 import callApi from "../../Services/callApi";
 import { formatDate, formatTime } from "../../Utility/DatetimeService";
@@ -51,6 +56,7 @@ interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
+  keepMounted?: boolean;
 }
 
 const paginationModel = { page: 0, pageSize: 5 };
@@ -106,6 +112,8 @@ export default function WorkStation() {
   const [count, setCount] = useState(0);
   const [partName, setPartName] = useState("");
   const [value, setValue] = useState(0);
+  const [openCamera, setOpenCamera] = useState(false);
+  const [openUpload, setOpenUpload] = useState(false);
 
   const [openQrScanner, setOpenQrScanner] = useState(false);
   const [countDel, setCountDel] = useState(0);
@@ -296,7 +304,7 @@ export default function WorkStation() {
   };
 
   function CustomTabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
+    const { children, value, index, keepMounted, ...other } = props;
 
     return (
       <div
@@ -306,7 +314,11 @@ export default function WorkStation() {
         aria-labelledby={`simple-tab-${index}`}
         {...other}
       >
-        {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+        {keepMounted ? (
+          <Box sx={{ p: 3, display: value === index ? 'block' : 'none' }}>{children}</Box>
+        ) : (
+          value === index && <Box sx={{ p: 3 }}>{children}</Box>
+        )}
       </div>
     );
   }
@@ -322,7 +334,17 @@ export default function WorkStation() {
     setValue(newValue);
   };
 
+  const handleCamera = () => {
+    setOpenCamera(true);
+  };
 
+  const onCapture = (files: File[]) => {
+    console.log("HHH ", files);
+  };
+
+  const handleUpload = () => {
+    setOpenUpload(true);
+  };
 
   const handleQrScanner = () => {
     setOpenQrScanner(true);
@@ -383,7 +405,16 @@ export default function WorkStation() {
 
         <CustomTabPanel value={value} index={0}>
           <div>
-
+            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+              <DriveFolderUploadIcon
+                sx={{ fontSize: 40 }}
+                onClick={handleUpload}
+              />
+              <CameraAltIcon sx={{ fontSize: 40 }} onClick={handleCamera} />
+              {openUpload && (
+                <UploadPicture open={openUpload} setOpen={setOpenUpload} />
+              )}
+            </Box>
             <Box
               sx={{
                 display: "flex",
@@ -651,7 +682,7 @@ export default function WorkStation() {
           </Paper>
         </CustomTabPanel>
 
-        <CustomTabPanel value={value} index={2}>
+        <CustomTabPanel value={value} index={2} keepMounted>
           <Box sx={{ p: 3, maxWidth: 800, margin: '0 auto' }}>
             <Typography variant="h5" sx={{ mb: 3, fontWeight: 900, color: '#2d3a4b' }}>
               Upload Work Order Images
@@ -745,6 +776,28 @@ export default function WorkStation() {
         </Dialog>
 
 
+
+        {/* Camera */}
+        <Dialog
+          open={openCamera}
+          onClose={() => setOpenCamera(false)}
+          fullWidth
+        >
+          <DialogTitle>ถ่ายภาพ</DialogTitle>
+          <DialogContent>
+            <CameraCaptureFile
+              // onCapture={(files) => {
+              //   console.log("Captured:", files);
+              //   setOpenCamera(false);
+              // }}
+              onCapture={onCapture}
+            />
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={() => setOpenCamera(false)}>ปิด</Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );

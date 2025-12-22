@@ -3,6 +3,7 @@ import { Box, Button, Typography } from '@mui/material';
 import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import Swal from 'sweetalert2';
 import callApi from '../../Services/callApi';
+import callUploadImage from '../../Services/callUploadImage';
 
 interface ImageUploadCardProps {
     title: string;
@@ -38,14 +39,16 @@ const ImageUploadCard: React.FC<ImageUploadCardProps> = ({ title, imageKey, orde
         try {
             const formData = new FormData();
             formData.append('file', uploadFile);
-            formData.append('key', imageKey);
-            formData.append('order_id', orderid);
-            formData.append('seq', seq.toString());
+            //formData.append('type_image', imageKey);
+            //formData.append('order_id', orderid);
+            //formData.append('seq', seq.toString());
 
             // Replace with your actual API endpoint
             // await callApi.post('/Mobile/UploadImageByKey', formData, {
             //   headers: { 'Content-Type': 'multipart/form-data' },
             // });
+
+            await callUploadImage([uploadFile], `/upload?order_id=${orderid}&type_image=${imageKey}`);
 
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1500));
@@ -60,7 +63,7 @@ const ImageUploadCard: React.FC<ImageUploadCardProps> = ({ title, imageKey, orde
                 confirmButtonColor: '#2563EB',
             });
 
-            handleClear();
+            // handleClear();
 
         } catch (error) {
             Swal.close();
