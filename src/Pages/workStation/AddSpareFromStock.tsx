@@ -3,6 +3,8 @@ import AppHearder from "../../Component/AppHeader";
 import SettingsIcon from "@mui/icons-material/Settings";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import Swal from "sweetalert2";
+
 
 import {
   Box,
@@ -88,15 +90,24 @@ const AddSpareFromStock: React.FC = () => {
   };
 
   const onLoad2 = async () => {
+    if (!selectedWC) return;
     setLoading(true);
     setError("");
     try {
-        const res = await callApi.get(`/Mobile/TranferRequestSparepartList?stge_loc=${selectedWC}&material_type=${""}`);
-      //   const arr: SparePart[] = res?.data?.dataResult ?? res?.data ?? [];
-      //   setDataSparePart(arr);
-      //   console.log("data get from TranferRequestTo_ddl : ", res.data.dataResult);
-      const data = res.data.dataResult;
+      const res = await callApi.get(`/Mobile/TranferRequestSparepartList`, {
+        params: {
+          stge_loc: selectedWC,
+          material_type: ""
+        }
+      });
+      const data = res.data.dataResult || [];
       console.log("data get from TranferRequestSparepartList : ", data);
+
+      const arr: SparePart[] = data.map((x: any) => ({
+        ...x,
+        znew: x.quantity // map quantity to znew
+      }));
+      setDataSparePart(arr);
     } catch (e) {
       setDataSparePart([]);
       setError("โหลดรายการอะไหล่ไม่สำเร็จ");
@@ -150,23 +161,73 @@ const AddSpareFromStock: React.FC = () => {
   // ===== save (POST) =====
   const handleSave = async () => {
     if (cartKinds === 0) return;
+    setOpen(false);
+
+    const confirm = await Swal.fire({
+      icon: "question",
+      title: "ยืนยันการบันทึก?",
+      html: `คุณเลือก <b>${cartKinds}</b> รายการ<br/>รวม <b>${cartCount}</b> ชิ้น`,
+      showCancelButton: true,
+      confirmButtonText: "ยืนยัน",
+      cancelButtonText: "ยกเลิก",
+      confirmButtonColor: "#2563EB",
+      cancelButtonColor: "#94A3B8",
+    });
+
+    if (!confirm.isConfirmed) return;
 
     setSaving(true);
     setError("");
+
+    Swal.fire({
+      title: "กำลังบันทึก...",
+      text: "กรุณารอสักครู่",
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
     try {
-      // TODO: เปลี่ยน endpoint + payload ให้ตรงของจริง
       const payload = {
+        stge_loc: selectedWC,
+        material_type: "",
         items: Object.values(cart).map(({ item, qty }) => ({
           material: item.material,
-          qty,
+          quantity: qty,
+          description: item.materialDescription,
+
         })),
       };
 
-      await callApi.post(`/SparePart/Cart`, payload);
+      console.log("payload : ", payload);
+
+      await callApi.post(`/Mobile/ReservationRequest`, payload);
+
+      Swal.close();
+
+      await Swal.fire({
+        icon: "success",
+        title: "บันทึกสำเร็จ",
+        text: "ทำรายการขอเบิกอะไหล่เรียบร้อยแล้ว",
+        confirmButtonText: "ตกลง",
+        confirmButtonColor: "#2563EB",
+      });
 
       clearAll();
       setOpen(false);
     } catch (e) {
+      Swal.close();
+
+      Swal.fire({
+        icon: "error",
+        title: "บันทึกไม่สำเร็จ",
+        text: "เกิดข้อผิดพลาดระหว่างบันทึกข้อมูล",
+        confirmButtonText: "ปิด",
+        confirmButtonColor: "#EF4444",
+      });
+
       setError("บันทึกไม่สำเร็จ (POST error)");
     } finally {
       setSaving(false);
@@ -418,9 +479,8 @@ const AddSpareFromStock: React.FC = () => {
                               />
                               <Chip
                                 size="small"
-                                label={`ค้างเบิก: ${
-                                  sp.onWithdraw ? "Yes" : "No"
-                                }`}
+                                label={`ค้างเบิก: ${sp.onWithdraw ? "Yes" : "No"
+                                  }`}
                                 sx={{
                                   bgcolor: sp.onWithdraw
                                     ? "#FEF9C3"
