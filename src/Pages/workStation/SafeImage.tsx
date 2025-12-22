@@ -8,7 +8,7 @@ interface SafeImageProps {
 }
 
 const FALLBACK_URL =
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTw_HeSzHfBorKS4muw4IIeVvvRgnhyO8Gn8w&s";
+  "/no-image.png";
 
 const SafeImage: React.FC<SafeImageProps> = ({
   src,

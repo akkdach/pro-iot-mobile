@@ -48,19 +48,67 @@ const UploadPicture = ({ open, setOpen }: any) => {
     };
   }, [file]);
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) {
-      alert("กรุณาเลือกรูปก่อน");
+      Swal.fire({
+        icon: 'warning',
+        title: 'ไม่พบไฟล์',
+        text: 'กรุณาเลือกรูปภาพก่อนอัพโหลด',
+      });
       return;
     }
-    Swal.fire({
-      title: "Good job!",
-      text: "You upload picture already",
-      icon: "success",
-    });
-    console.log("Upload file ", file, " Already");
 
-    handleClose();
+    // Show loading
+    Swal.fire({
+      title: 'กำลังอัพโหลด...',
+      text: 'กรุณารอสักครู่',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('fileName', file.name);
+
+      // TODO: Replace with your actual upload endpoint
+      // const response = await callApi.post('/Mobile/UploadImage', formData, {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
+
+      // Simulate upload for now
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      Swal.close();
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'อัพโหลดสำเร็จ!',
+        text: `ไฟล์ ${file.name} ถูกอัพโหลดเรียบร้อยแล้ว`,
+        confirmButtonText: 'ตกลง',
+        confirmButtonColor: '#2563EB',
+      });
+
+      console.log('Upload file:', file.name, 'successfully');
+      handleClose();
+    } catch (error) {
+      Swal.close();
+
+      Swal.fire({
+        icon: 'error',
+        title: 'อัพโหลดไม่สำเร็จ',
+        text: 'เกิดข้อผิดพลาดในการอัพโหลดไฟล์',
+        confirmButtonText: 'ปิด',
+        confirmButtonColor: '#EF4444',
+      });
+
+      console.error('Upload error:', error);
+    }
   };
 
   return (

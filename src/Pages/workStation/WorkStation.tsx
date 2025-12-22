@@ -35,14 +35,12 @@ import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useParams, useLocation, useFetcher } from "react-router-dom";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import SparePart from "./SparePart";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
-import CameraCaptureFile from "../../Component/CameraCaptureToFile";
-import DriveFolderUploadIcon from "@mui/icons-material/DriveFolderUpload";
-import UploadPicture from "./UploadPicture";
+
 import QRScanner from "../../Component/QRScanner";
 import { useWork } from "../../Context/WorkStationContext";
 import callApi from "../../Services/callApi";
 import { formatDate, formatTime } from "../../Utility/DatetimeService";
+import ImageUploadCard from "./ImageUploadCard";
 
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -108,18 +106,19 @@ export default function WorkStation() {
   const [count, setCount] = useState(0);
   const [partName, setPartName] = useState("");
   const [value, setValue] = useState(0);
-  const [openCamera, setOpenCamera] = useState(false);
-  const [openUpload, setOpenUpload] = useState(false);
+
   const [openQrScanner, setOpenQrScanner] = useState(false);
   const [countDel, setCountDel] = useState(0);
   const [itemEach, setItemEach] = useState();
   const [deleteId, setDeleteId] = useState<any>(null);
+  const [masterImages, setMasterImages] = useState<any[]>([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     onLoad();
     onLoad2();
+    onLoad3();
   }, []);
 
   const onLoad = async () => {
@@ -179,6 +178,16 @@ export default function WorkStation() {
         item.worK_ORDER_COMPONENT_ID ?? item.WORK_ORDER_COMPONENT_ID,
     }));
   };
+
+  const onLoad3 = async () => {
+    try {
+      let res = await callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${row.orderid}`);
+      console.log("Result onLoad3 : ", res.data.dataResult);
+      setMasterImages(res.data.dataResult || []);
+    } catch (e) {
+      console.error("Error loading master images", e);
+    }
+  }
 
   function CustomToolbar() {
     const navigate = useNavigate();
@@ -313,17 +322,7 @@ export default function WorkStation() {
     setValue(newValue);
   };
 
-  const handleCamera = () => {
-    setOpenCamera(true);
-  };
 
-  const onCapture = (files: File[]) => {
-    console.log("HHH ", files);
-  };
-
-  const handleUpload = () => {
-    setOpenUpload(true);
-  };
 
   const handleQrScanner = () => {
     setOpenQrScanner(true);
@@ -370,21 +369,21 @@ export default function WorkStation() {
                 minHeight: 60,
               }}
             />
+            <Tab
+              label="Upload Image"
+              {...a11yProps(2)}
+              sx={{
+                fontSize: "1.1rem",
+                padding: "12px 24px",
+                minHeight: 60,
+              }}
+            />
           </Tabs>
         </Box>
 
         <CustomTabPanel value={value} index={0}>
           <div>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <DriveFolderUploadIcon
-                sx={{ fontSize: 40 }}
-                onClick={handleUpload}
-              />
-              <CameraAltIcon sx={{ fontSize: 40 }} onClick={handleCamera} />
-              {openUpload && (
-                <UploadPicture open={openUpload} setOpen={setOpenUpload} />
-              )}
-            </Box>
+
             <Box
               sx={{
                 display: "flex",
@@ -540,7 +539,7 @@ export default function WorkStation() {
                   to: "#27ae60",
                   onClick: startWork,
                 },
-                // { label: "Pause", from: "#f1c40f", to: "#f39c12" },
+                { label: "Hold", from: "#f1c40f", to: "#f39c12" },
                 {
                   label: "Finish",
                   from: "#3498db",
@@ -651,6 +650,32 @@ export default function WorkStation() {
             />
           </Paper>
         </CustomTabPanel>
+
+        <CustomTabPanel value={value} index={2}>
+          <Box sx={{ p: 3, maxWidth: 800, margin: '0 auto' }}>
+            <Typography variant="h5" sx={{ mb: 3, fontWeight: 900, color: '#2d3a4b' }}>
+              Upload Work Order Images
+            </Typography>
+
+            {masterImages.length === 0 ? (
+              <Typography sx={{ textAlign: 'center', color: '#64748B', mt: 4 }}>
+                ไม่พบรายการรูปภาพที่ต้องอัพโหลด
+              </Typography>
+            ) : (
+              masterImages.map((img, index) => (
+                <ImageUploadCard
+                  key={`${img.key}-${index}`}
+                  title={img.title}
+                  imageKey={img.key}
+                  orderid={row.orderid}
+                  seq={img.seq}
+                />
+              ))
+            )}
+          </Box>
+        </CustomTabPanel>
+
+
       </Box>
 
       <AppHeader title="Work Order" icon={<BusinessCenterIcon />} />
@@ -719,27 +744,7 @@ export default function WorkStation() {
           </DialogActions>
         </Dialog>
 
-        {/* Camera */}
-        <Dialog
-          open={openCamera}
-          onClose={() => setOpenCamera(false)}
-          fullWidth
-        >
-          <DialogTitle>ถ่ายภาพ</DialogTitle>
-          <DialogContent>
-            <CameraCaptureFile
-              // onCapture={(files) => {
-              //   console.log("Captured:", files);
-              //   setOpenCamera(false);
-              // }}
-              onCapture={onCapture}
-            />
-          </DialogContent>
 
-          <DialogActions>
-            <Button onClick={() => setOpenCamera(false)}>ปิด</Button>
-          </DialogActions>
-        </Dialog>
       </div>
     </div>
   );
