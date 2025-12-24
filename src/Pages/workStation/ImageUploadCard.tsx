@@ -41,14 +41,14 @@ const ImageUploadCard: React.FC<ImageUploadCardProps> = ({ title, imageKey, seq,
                 <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
                     {seq}. {title}
                 </Typography>
-                {file && status === 'modified' && (
+                {/* {file && status === 'modified' && (
                     <Chip
                         label="แก้ไข"
                         color="warning"
                         size="small"
                         sx={{ ml: 2, fontWeight: 'bold' }}
                     />
-                )}
+                )} */}
             </Box>
 
             <Box
@@ -123,8 +123,8 @@ const ImageUploadCard: React.FC<ImageUploadCardProps> = ({ title, imageKey, seq,
                     hidden
                     onChange={(e) => {
                         const f = e.target.files?.[0];
+                        console.log("[Card onChange]", { imageKey, seq, fileName: f?.name, hasFile: !!f });
                         if (f && f.type.startsWith('image/')) {
-                            // setUploadPreview(URL.createObjectURL(f)); // Removed
                             onFileSelect(f);
                         }
                         e.target.value = '';

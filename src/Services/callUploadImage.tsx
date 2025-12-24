@@ -1,44 +1,72 @@
-import { splitDate } from '../Utility/DatetimeService';
-import callApi from './callApi';
+import axios from "axios";
+import { splitDate } from "../Utility/DatetimeService";
+import callApi from "./callApi";
 
 interface UploadImageParams {
     orderId: string;
+    image: File;
     tradCode?: string;
     orderType?: string;
     year?: string;
     month?: string;
-    image: File;
 }
 
 export default async function callUploadImage(params: UploadImageParams) {
+    if (!params.orderId) throw new Error("orderId is required");
+    if (!params.image) throw new Error("image is required");
 
+    // 1) ดึงข้อมูลจาก .NET (เหมือนเดิม)
     const res = await callApi.get(`/WorkOrderList/Img/${params.orderId}`);
-    const data = res.data.dataResult;
-    console.log("data Result Img info : ", data);
+    const data = res.data?.dataResult;
 
-    const { year, month } = splitDate(new Date(data[0].productioN_START_DATE));
+    if (!Array.isArray(data) || data.length === 0) {
+        throw new Error("No Img info found");
+    }
 
-    const now = new Date();
+    const startDate = data[0]?.productioN_START_DATE
+        ? new Date(data[0].productioN_START_DATE)
+        : new Date();
 
-    console.log("data Result productioN_START_DATE : ", data[0].productioN_START_DATE);
-    console.log("data Result Year : ", year);
-    console.log("data Result Month : ", month);
+    const { year, month } = splitDate(startDate);
 
-    const form = new FormData();
-    form.append("OrderId", params.orderId);
-    form.append("TradCode", "refurbish");
-    form.append("OrderType", data[0].ordeR_TYPE || "01");
-    form.append("Year", year || now.getFullYear().toString());
-    form.append("Month", month || (now.getMonth() + 1).toString().padStart(2, '0'));
-    form.append("Image", params.image);
+    // 2) build FormData
+    const formData = new FormData();
+    formData.append("tradCode", params.tradCode ?? "refurbish");
+    formData.append("orderType", params.orderType ?? data[0]?.ordeR_TYPE ?? "01");
+    formData.append("year", year);
+    formData.append("month", month);
+    formData.append("orderId", params.orderId);
+    formData.append("image", params.image, params.image.name);
 
+    // 3) ยิง axios ตรงไป external upload server
     try {
-        const response = await callApi.post("/WorkOrderList/UploadImage", form, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
+        const token = localStorage.getItem("token");
+        const response = await axios.post(
+            "http://10.10.199.16:8080/upload",
+            formData,
+            {
+                timeout: 5 * 60 * 1000,
+                headers: token
+                    ? { Authorization: `Bearer ${token}` }
+                    : undefined,
+            },
+
+        );
+
         return response.data;
     } catch (error: any) {
-        console.error('Upload failed:', error.message);
+        // axios error handling
+        if (axios.isAxiosError(error)) {
+            console.error("Upload error:", {
+                status: error.response?.status,
+                data: error.response?.data,
+            });
+            throw new Error(
+                `Upload failed (${error.response?.status}): ${error.response?.data ?? error.message
+                }`
+            );
+        }
+
         throw error;
     }
 }

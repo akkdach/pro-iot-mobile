@@ -60,6 +60,11 @@ interface TabPanelProps {
   keepMounted?: boolean;
 }
 
+type FileState = {
+  file: File | null;
+  isEditable: boolean;
+};
+
 const paginationModel = { page: 0, pageSize: 5 };
 
 const listCheck = [
@@ -121,16 +126,17 @@ export default function WorkStation() {
   const [itemEach, setItemEach] = useState();
   const [deleteId, setDeleteId] = useState<any>(null);
   const [masterImages, setMasterImages] = useState<any[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: { file: File | null; status: 'new' | 'modified' } }>({});
+  const [selectedFiles, setSelectedFiles] = useState<Record<string, FileState>>({});
 
   // useRef to persist state across renders (workaround for double invocation)
-  const selectedFilesRef = React.useRef<{ [key: string]: { file: File | null; status: 'new' | 'modified' } }>({});
+  const selectedFilesRef = React.useRef<Record<string, FileState>>({});
+
 
   // DEBUG: Track state changes
-  React.useEffect(() => {
-    console.log('[selectedFiles changed]', selectedFiles);
-    selectedFilesRef.current = selectedFiles; // Sync ref with state
-  }, [selectedFiles]);
+  // React.useEffect(() => {
+  //   console.log('[selectedFiles changed]', selectedFiles);
+  //   selectedFilesRef.current = selectedFiles; // Sync ref with state
+  // }, [selectedFiles]);
 
   const navigate = useNavigate();
 
@@ -373,41 +379,45 @@ export default function WorkStation() {
     console.log("สแกนได้ : ", value);
   };
 
-  const handleFileSelect = (key: string, seq: number, file: File | null, hasExistingImage: boolean) => {
+  const handleFileSelect = (key: string, seq: number, file: File | null) => {
     const uniqueKey = `${key}-${seq}`;
 
-    // If clearing (file is null), remove from state
+    // กดกากบาทล้างรูป
     if (!file) {
-      // Also clear from ref
-      const newRef = { ...selectedFilesRef.current };
-      delete newRef[uniqueKey];
-      selectedFilesRef.current = newRef;
-
       setSelectedFiles(prev => {
-        const newState = { ...prev };
-        delete newState[uniqueKey];
-        return newState;
+        const next = { ...prev };
+        delete next[uniqueKey];
+        return next;
       });
-    } else {
-      // Check if there's already a file selected for this card (from ref - persists across renders)
-      const alreadyHasFile = !!selectedFilesRef.current[uniqueKey]?.file;
-      // First selection = 'new', subsequent = 'modified'
-      const status = alreadyHasFile ? 'modified' : 'new';
-
-      console.log(`[handleFileSelect] ref check - alreadyHasFile: ${alreadyHasFile}, status: ${status}`);
-
-      // Update ref IMMEDIATELY (synchronously) so next call sees it
-      selectedFilesRef.current = {
-        ...selectedFilesRef.current,
-        [uniqueKey]: { file, status }
-      };
-
-      setSelectedFiles(prev => ({
-        ...prev,
-        [uniqueKey]: { file, status }
-      }));
+      // ลบเฉพาะ key นี้พอ (อย่าล้างทั้ง ref)
+      // const nextRef = { ...selectedFilesRef.current };
+      // delete nextRef[uniqueKey];
+      // selectedFilesRef.current = nextRef;
+      return;
     }
+
+    const prev = selectedFilesRef.current[uniqueKey];
+    const isEditable = !!prev; // ถ้ามีของเดิมอยู่แล้ว แปลว่ารอบนี้คือการแก้ไข (Modified)
+
+    const nextState: FileState = {
+      file,
+      isEditable,
+    };
+
+    // อัปเดต ref ก่อน เพื่อให้ครั้งถัดไปอ่านค่าถูก
+    selectedFilesRef.current = {
+      ...selectedFilesRef.current,
+      [uniqueKey]: nextState,
+    };
+
+    setSelectedFiles(prevState => ({
+      ...prevState,
+      [uniqueKey]: nextState,
+    }));
   };
+
+
+
 
   const handleUploadAll = async () => {
     const filesToUpload = masterImages.filter(img => selectedFiles[`${img.key}-${img.seq}`]?.file);
@@ -472,7 +482,7 @@ export default function WorkStation() {
   const hasStarted = !!work?.actuaL_START_DATE;
   const hasFinished = !!work?.actuaL_FINISH_DATE;
 
-  console.log("Item component : ", item_component);
+  //console.log("Item component : ", item_component);
 
   return (
     <div className="scrollable-div bigBox">
@@ -803,19 +813,26 @@ export default function WorkStation() {
                 ไม่พบรายการรูปภาพที่ต้องอัพโหลด
               </Typography>
             ) : (
-              masterImages.map((img: any, index: number) => (
-                <ImageUploadCard
-                  key={`${img.key}-${index}`}
-                  title={img.title}
-                  imageKey={img.key}
-                  orderid={row.orderid}
-                  seq={img.seq}
-                  imageUrl={img.imageUrl || img.url}
-                  file={selectedFiles[`${img.key}-${img.seq}`]?.file || null}
-                  status={selectedFiles[`${img.key}-${img.seq}`]?.status}
-                  onFileSelect={(file) => handleFileSelect(img.key, img.seq, file, !!(img.imageUrl || img.url))}
-                />
-              ))
+
+              masterImages.map((img: any, index: number) => {
+                const k = `${img.key}-${img.seq}`;
+                const state = selectedFiles[k];
+
+                // console.log("[render card]", k, "pickCount =", state?.pickCount);
+                return (
+                  <ImageUploadCard
+                    key={k}
+                    title={img.title}
+                    imageKey={img.key}
+                    orderid={row.orderid}
+                    seq={img.seq}
+                    imageUrl={img.imageUrl || img.url}
+                    file={state?.file || null}
+                    status={state?.isEditable ? "modified" : "new"}
+                    onFileSelect={(file) => handleFileSelect(img.key, img.seq, file)}
+                  />
+                );
+              })
             )}
 
             <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
