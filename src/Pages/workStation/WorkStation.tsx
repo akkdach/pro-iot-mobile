@@ -44,6 +44,7 @@ import QRScanner from "../../Component/QRScanner";
 
 import { useWork } from "../../Context/WorkStationContext";
 import callApi from "../../Services/callApi";
+import callUploadImage from "../../Services/callUploadImage";
 import { formatDate, formatTime } from "../../Utility/DatetimeService";
 import ImageUploadCard from "./ImageUploadCard";
 
@@ -120,6 +121,16 @@ export default function WorkStation() {
   const [itemEach, setItemEach] = useState();
   const [deleteId, setDeleteId] = useState<any>(null);
   const [masterImages, setMasterImages] = useState<any[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<{ [key: string]: { file: File | null; status: 'new' | 'modified' } }>({});
+
+  // useRef to persist state across renders (workaround for double invocation)
+  const selectedFilesRef = React.useRef<{ [key: string]: { file: File | null; status: 'new' | 'modified' } }>({});
+
+  // DEBUG: Track state changes
+  React.useEffect(() => {
+    console.log('[selectedFiles changed]', selectedFiles);
+    selectedFilesRef.current = selectedFiles; // Sync ref with state
+  }, [selectedFiles]);
 
   const navigate = useNavigate();
 
@@ -191,6 +202,10 @@ export default function WorkStation() {
     try {
       let res = await callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${row.orderid}`);
       console.log("Result onLoad3 : ", res.data.dataResult);
+      if (res.data.dataResult && res.data.dataResult.length > 0) {
+        console.log("First item keys:", Object.keys(res.data.dataResult[0]));
+        console.log("First item sample:", res.data.dataResult[0]);
+      }
       setMasterImages(res.data.dataResult || []);
     } catch (e) {
       console.error("Error loading master images", e);
@@ -356,6 +371,101 @@ export default function WorkStation() {
 
   const handleScanResult = (value: string) => {
     console.log("สแกนได้ : ", value);
+  };
+
+  const handleFileSelect = (key: string, seq: number, file: File | null, hasExistingImage: boolean) => {
+    const uniqueKey = `${key}-${seq}`;
+
+    // If clearing (file is null), remove from state
+    if (!file) {
+      // Also clear from ref
+      const newRef = { ...selectedFilesRef.current };
+      delete newRef[uniqueKey];
+      selectedFilesRef.current = newRef;
+
+      setSelectedFiles(prev => {
+        const newState = { ...prev };
+        delete newState[uniqueKey];
+        return newState;
+      });
+    } else {
+      // Check if there's already a file selected for this card (from ref - persists across renders)
+      const alreadyHasFile = !!selectedFilesRef.current[uniqueKey]?.file;
+      // First selection = 'new', subsequent = 'modified'
+      const status = alreadyHasFile ? 'modified' : 'new';
+
+      console.log(`[handleFileSelect] ref check - alreadyHasFile: ${alreadyHasFile}, status: ${status}`);
+
+      // Update ref IMMEDIATELY (synchronously) so next call sees it
+      selectedFilesRef.current = {
+        ...selectedFilesRef.current,
+        [uniqueKey]: { file, status }
+      };
+
+      setSelectedFiles(prev => ({
+        ...prev,
+        [uniqueKey]: { file, status }
+      }));
+    }
+  };
+
+  const handleUploadAll = async () => {
+    const filesToUpload = masterImages.filter(img => selectedFiles[`${img.key}-${img.seq}`]?.file);
+
+    if (filesToUpload.length === 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'ไม่พบรูปภาพ',
+        text: 'กรุณาเลือกรูปภาพอย่างน้อย 1 รูป',
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'กำลังอัพโหลด...',
+      html: `กรุณารอสักครู่... (0/${filesToUpload.length})`,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const img = filesToUpload[i];
+      const file = selectedFiles[`${img.key}-${img.seq}`]?.file;
+
+      if (file) {
+        try {
+          Swal.update({ html: `กำลังอัพโหลด... (${i + 1}/${filesToUpload.length})<br/>${img.title}` });
+
+          await callUploadImage({
+            orderId: row.orderid,
+            image: file,
+          });
+
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to upload ${img.title}:`, error);
+          failCount++;
+        }
+      }
+    }
+
+    Swal.fire({
+      icon: failCount === 0 ? 'success' : 'warning',
+      title: 'ดำเนินการเสร็จสิ้น',
+      text: `อัพโหลดสำเร็จ ${successCount} รูป${failCount > 0 ? `, ล้มเหลว ${failCount} รูป` : ''}`,
+      confirmButtonText: 'ตกลง',
+    });
+
+    // Optional: Clear selection after successful upload
+    // if (failCount === 0) {
+    //    setSelectedFiles({});
+    // }
   };
 
   const normalizedOp = work?.current_operation?.toString().padStart(4, "0");
@@ -693,16 +803,43 @@ export default function WorkStation() {
                 ไม่พบรายการรูปภาพที่ต้องอัพโหลด
               </Typography>
             ) : (
-              masterImages.map((img, index) => (
+              masterImages.map((img: any, index: number) => (
                 <ImageUploadCard
                   key={`${img.key}-${index}`}
                   title={img.title}
                   imageKey={img.key}
                   orderid={row.orderid}
                   seq={img.seq}
+                  imageUrl={img.imageUrl || img.url}
+                  file={selectedFiles[`${img.key}-${img.seq}`]?.file || null}
+                  status={selectedFiles[`${img.key}-${img.seq}`]?.status}
+                  onFileSelect={(file) => handleFileSelect(img.key, img.seq, file, !!(img.imageUrl || img.url))}
                 />
               ))
             )}
+
+            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+              <Button
+                variant="contained"
+                size="large"
+                onClick={handleUploadAll}
+                startIcon={<DriveFolderUploadIcon />}
+                disabled={Object.values(selectedFiles).filter(Boolean).length === 0}
+                sx={{
+                  bgcolor: '#2563EB',
+                  px: 4,
+                  py: 1.5,
+                  borderRadius: 2,
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)',
+                  '&:hover': { bgcolor: '#1D4ED8' },
+                  '&:disabled': { bgcolor: '#94A3B8' }
+                }}
+              >
+                อัปโหลดรูปภาพทั้งหมด ({Object.values(selectedFiles).filter(Boolean).length})
+              </Button>
+            </Box>
           </Box>
         </CustomTabPanel>
 
