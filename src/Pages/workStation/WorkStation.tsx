@@ -890,7 +890,18 @@ export default function WorkStation() {
               })
             )}
 
-            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+            <Box sx={{
+              mt: 5,
+              pt: 3,
+              pb: 2,
+              borderTop: '2px solid #E2E8F0',
+              display: 'flex',
+              justifyContent: 'center',
+              position: 'sticky',
+              bottom: 0,
+              bgcolor: 'white',
+              zIndex: 10
+            }}>
               <Button
                 variant="contained"
                 size="large"
@@ -899,17 +910,20 @@ export default function WorkStation() {
                 disabled={Object.values(selectedFiles).filter(Boolean).length === 0}
                 sx={{
                   bgcolor: '#2563EB',
-                  px: 4,
+                  px: 5,
                   py: 1.5,
                   borderRadius: 2,
                   fontSize: '1.1rem',
                   fontWeight: 600,
-                  boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)',
-                  '&:hover': { bgcolor: '#1D4ED8' },
+                  boxShadow: '0 4px 12px -2px rgba(37, 99, 235, 0.3)',
+                  '&:hover': {
+                    bgcolor: '#1D4ED8',
+                    boxShadow: '0 6px 16px -2px rgba(37, 99, 235, 0.4)'
+                  },
                   '&:disabled': { bgcolor: '#94A3B8' }
                 }}
               >
-                อัปโหลดรูปภาพทั้งหมด ({Object.values(selectedFiles).filter(Boolean).length})
+                บันทึกรูปภาพทั้งหมด ({Object.values(selectedFiles).filter(Boolean).length})
               </Button>
             </Box>
           </Box>
