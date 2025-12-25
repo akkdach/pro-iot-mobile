@@ -25,7 +25,7 @@ export default async function callUploadImage(params: UploadImageParams) {
 
     // Fetch current image values to preserve them
     const res3 = await callApi.get(`/WorkOrderList/ImgBox/${params.orderId}`);
-    const currentImages = res3.data?.dataResult?.[0] || {};
+    const currentImages = res3.data?.dataResult || {};
 
     // console.log("data2", data2);
 

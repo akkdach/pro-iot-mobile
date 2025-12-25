@@ -208,21 +208,44 @@ export default function WorkStation() {
   const onLoad3 = async () => {
     try {
       // Fetch both Master Templates and Current Image Data in parallel
+      console.log("row.orderid", row.orderid);
       const [resMaster, resBox] = await Promise.all([
         callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${row.orderid}`),
         callApi.get(`/WorkOrderList/ImgBox/${row.orderid}`)
       ]);
 
       const masterData = resMaster.data.dataResult || [];
-      const boxData = resBox.data.dataResult?.[0] || {};
+      const boxData = resBox.data.dataResult || {};
 
       console.log("Master Data:", masterData);
       console.log("Box Data (Current Images):", boxData);
 
+      // DEBUG: Print all keys to compare
       if (masterData.length > 0) {
+        console.log("--- KEY CHECK ---");
+        console.log("Master Keys:", masterData.map((m: any) => m.key));
+        console.log("Box Keys:", Object.keys(boxData));
+        console.log("-----------------");
+      }
+
+      if (masterData.length > 0) {
+
+        // Convert boxData keys to lowercase for case-insensitive matching
+        const boxDataLower: any = {};
+        Object.keys(boxData).forEach(k => {
+          if (k) boxDataLower[k.toLowerCase()] = boxData[k];
+        });
+
         const mergedImages = masterData.map((img: any) => {
-          // Check if there is a URL for this key in the fetched box data
-          const serverUrl = boxData[img.key];
+          // Check key with case-insensitive
+          let targetKey = img.key?.toLowerCase();
+
+          // Manual Mapping for known mismatches
+          if (targetKey === 'image_pull_condensor_evap') {
+            targetKey = 'image_speed_condensor_evap';
+          }
+
+          const serverUrl = boxDataLower[targetKey];
           const fixedUrl = replaceImageBaseUrl(serverUrl);
 
           if (serverUrl) {

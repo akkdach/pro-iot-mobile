@@ -9,7 +9,6 @@ const DEFAULT_TO = "http://10.10.199.16:8080";
 type ReplaceImageUrlOptions = {
     from?: string | string[]; // base เดิม เช่น http://localhost:7887 หรือ array
     to?: string;   // base ใหม่ เช่น http://10.10.199.16:8080
-    // ถ้าอยากให้รองรับ https/พอร์ตอื่น ๆ ในอนาคต ค่อยเพิ่ม logic ได้
 };
 
 /**
