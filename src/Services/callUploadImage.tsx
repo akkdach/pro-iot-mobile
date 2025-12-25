@@ -23,6 +23,10 @@ export default async function callUploadImage(params: UploadImageParams) {
     const res2 = await callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${params.orderId}`);
     const data2 = res2.data?.dataResult; // List of image metadata objects
 
+    // Fetch current image values to preserve them
+    const res3 = await callApi.get(`/WorkOrderList/ImgBox/${params.orderId}`);
+    const currentImages = res3.data?.dataResult?.[0] || {};
+
     // console.log("data2", data2);
 
     if (!Array.isArray(data) || data.length === 0) {
@@ -63,7 +67,7 @@ export default async function callUploadImage(params: UploadImageParams) {
 
         // 4) Update database with new URL
         if (Array.isArray(data2) && params.imageKey) {
-            // Construct payload from existing data2
+            // Construct payload from existing data2 AND currentImages
             const payload: any = {
                 orderId: params.orderId,
                 ordeR_TYPE: params.orderType ?? data[0]?.ordeR_TYPE ?? "01",
@@ -71,18 +75,17 @@ export default async function callUploadImage(params: UploadImageParams) {
                 tradename: params.tradCode ?? "refurbish",
             };
 
-            // Map existing URLs from data2
+            // Map existing URLs from currentImages based on keys in data2
             data2.forEach((item: any) => {
                 if (item.key) {
-                    payload[item.key] = item.url || "";
+                    // Use current value from DB if available, otherwise empty
+                    // IMPORTANT: Use the raw value from DB, do NOT replace/fix base URL here as we are saving back to DB
+                    payload[item.key] = currentImages[item.key] || "";
                 }
             });
 
             // Override with new URL
-            // response.data usually is the URL string or object containing it. 
-            // Assuming response.data is the URL string based on similar systems, 
-            // OR if it's an object { url: ... }, adjust accordingly. 
-            // If strictly following user request "response.data" logged earlier:
+            // payload[params.imageKey] = typeof response.data === 'string' ? response.data : response.data?.url ?? response.data;
             payload[params.imageKey] = response.data?.path || response.data;
 
             console.log("Updating Image Payload:", payload);

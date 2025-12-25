@@ -47,6 +47,7 @@ import callApi from "../../Services/callApi";
 import callUploadImage from "../../Services/callUploadImage";
 import { formatDate, formatTime } from "../../Utility/DatetimeService";
 import ImageUploadCard from "./ImageUploadCard";
+import { replaceImageBaseUrl } from "../../Services/imageUrl";
 
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -144,7 +145,6 @@ export default function WorkStation() {
     onLoad();
     onLoad2();
     onLoad3();
-    onLoad4();
   }, []);
 
   const onLoad = async () => {
@@ -207,21 +207,41 @@ export default function WorkStation() {
 
   const onLoad3 = async () => {
     try {
-      let res = await callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${row.orderid}`);
-      console.log("Result onLoad3 : ", res.data.dataResult);
-      if (res.data.dataResult && res.data.dataResult.length > 0) {
-        console.log("First item keys:", Object.keys(res.data.dataResult[0]));
-        console.log("First item sample:", res.data.dataResult[0]);
-      }
-      setMasterImages(res.data.dataResult || []);
-    } catch (e) {
-      console.error("Error loading master images", e);
-    }
-  }
+      // Fetch both Master Templates and Current Image Data in parallel
+      const [resMaster, resBox] = await Promise.all([
+        callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${row.orderid}`),
+        callApi.get(`/WorkOrderList/ImgBox/${row.orderid}`)
+      ]);
 
-  const onLoad4 = async () => {
-    let res = await callApi.get(`/WorkOrderList/ImgBox/${row.orderid}`)
-    console.log("Result onLoad4 : ", res.data.dataResult[0]);
+      const masterData = resMaster.data.dataResult || [];
+      const boxData = resBox.data.dataResult?.[0] || {};
+
+      console.log("Master Data:", masterData);
+      console.log("Box Data (Current Images):", boxData);
+
+      if (masterData.length > 0) {
+        const mergedImages = masterData.map((img: any) => {
+          // Check if there is a URL for this key in the fetched box data
+          const serverUrl = boxData[img.key];
+          const fixedUrl = replaceImageBaseUrl(serverUrl);
+
+          if (serverUrl) {
+            // Found existing image, use it
+            return { ...img, imageUrl: fixedUrl };
+          }
+          // No image yet, keep original
+          return img;
+        });
+
+        console.log("Merged Images:", mergedImages);
+        setMasterImages(mergedImages);
+      } else {
+        setMasterImages([]);
+      }
+
+    } catch (e) {
+      console.error("Error loading images (Master + Box):", e);
+    }
   }
 
   function CustomToolbar() {
@@ -403,7 +423,12 @@ export default function WorkStation() {
     }
 
     const prev = selectedFilesRef.current[uniqueKey];
-    const isEditable = !!prev; // ถ้ามีของเดิมอยู่แล้ว แปลว่ารอบนี้คือการแก้ไข (Modified)
+
+    // Find master image to check if DB has image
+    const masterImg = masterImages.find(img => img.key === key && img.seq === seq);
+    const hasDbImage = !!masterImg?.imageUrl;
+
+    const isEditable = !!prev || hasDbImage; // ถ้ามีของเดิมอยู่แล้ว หรือ มีใน DB แล้วเลือกใหม่ แปลว่าแก้ไข
 
     const nextState: FileState = {
       file,

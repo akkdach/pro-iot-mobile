@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Typography, IconButton, Chip } from '@mui/material';
 import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import CloseIcon from '@mui/icons-material/Close';
+import { FixedImage } from './FixedImage';
 
 interface ImageUploadCardProps {
     title: string;
@@ -109,11 +110,10 @@ const ImageUploadCard: React.FC<ImageUploadCardProps> = ({ title, imageKey, seq,
                         </Typography>
                     </>
                 ) : (
-                    <Box
-                        component="img"
+                    <FixedImage
                         src={displayImage}
                         alt="Preview"
-                        sx={{ maxWidth: '100%', maxHeight: 200, borderRadius: 1, objectFit: 'contain' }}
+                        style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 4, objectFit: 'contain' }}
                     />
                 )}
 
