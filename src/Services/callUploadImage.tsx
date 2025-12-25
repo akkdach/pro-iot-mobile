@@ -9,6 +9,7 @@ interface UploadImageParams {
     orderType?: string;
     year?: string;
     month?: string;
+    imageKey?: string;
 }
 
 export default async function callUploadImage(params: UploadImageParams) {
@@ -18,6 +19,11 @@ export default async function callUploadImage(params: UploadImageParams) {
     // 1) ดึงข้อมูลจาก .NET (เหมือนเดิม)
     const res = await callApi.get(`/WorkOrderList/Img/${params.orderId}`);
     const data = res.data?.dataResult;
+
+    const res2 = await callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${params.orderId}`);
+    const data2 = res2.data?.dataResult; // List of image metadata objects
+
+    // console.log("data2", data2);
 
     if (!Array.isArray(data) || data.length === 0) {
         throw new Error("No Img info found");
@@ -52,6 +58,38 @@ export default async function callUploadImage(params: UploadImageParams) {
             },
 
         );
+
+        console.log("Upload Success response:", response.data);
+
+        // 4) Update database with new URL
+        if (Array.isArray(data2) && params.imageKey) {
+            // Construct payload from existing data2
+            const payload: any = {
+                orderId: params.orderId,
+                ordeR_TYPE: params.orderType ?? data[0]?.ordeR_TYPE ?? "01",
+                isConnect: true,
+                tradename: params.tradCode ?? "refurbish",
+            };
+
+            // Map existing URLs from data2
+            data2.forEach((item: any) => {
+                if (item.key) {
+                    payload[item.key] = item.url || "";
+                }
+            });
+
+            // Override with new URL
+            // response.data usually is the URL string or object containing it. 
+            // Assuming response.data is the URL string based on similar systems, 
+            // OR if it's an object { url: ... }, adjust accordingly. 
+            // If strictly following user request "response.data" logged earlier:
+            payload[params.imageKey] = response.data?.path || response.data;
+
+            console.log("Updating Image Payload:", payload);
+
+            await callApi.put("/Mobile/update_workorderImage", payload);
+        }
+
 
         return response.data;
     } catch (error: any) {

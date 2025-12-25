@@ -144,6 +144,7 @@ export default function WorkStation() {
     onLoad();
     onLoad2();
     onLoad3();
+    onLoad4();
   }, []);
 
   const onLoad = async () => {
@@ -216,6 +217,11 @@ export default function WorkStation() {
     } catch (e) {
       console.error("Error loading master images", e);
     }
+  }
+
+  const onLoad4 = async () => {
+    let res = await callApi.get(`/WorkOrderList/ImgBox/${row.orderid}`)
+    console.log("Result onLoad4 : ", res.data.dataResult[0]);
   }
 
   function CustomToolbar() {
@@ -455,6 +461,7 @@ export default function WorkStation() {
           await callUploadImage({
             orderId: row.orderid,
             image: file,
+            imageKey: img.key,
           });
 
           successCount++;
