@@ -49,6 +49,7 @@ import { formatDate, formatTime } from "../../Utility/DatetimeService";
 import ImageUploadCard from "./ImageUploadCard";
 import { replaceImageBaseUrl } from "../../Services/imageUrl";
 
+import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
@@ -141,6 +142,96 @@ export default function WorkStation() {
 
   const navigate = useNavigate();
 
+  // Edit QTY State
+  const [openEditQty, setOpenEditQty] = useState(false);
+  const [editItem, setEditItem] = useState<{
+    material: string;
+    materialDescription: string;
+    qty: string;
+    max?: number;
+    workOrderComponentId?: number;
+  } | null>(null);
+  const [editQty, setEditQty] = useState<string>("1");
+
+  const handleEditQty = async () => {
+    try {
+      if (!editItem) return;
+
+      const newQty = Math.max(1, Number(editQty || 1));
+
+      // 1. Create a bulk payload from all existing items
+      // We map over item_component to include everyone
+      const payload = (item_component || []).map((item: any) => {
+        // If this is the item we are editing, use the new quantity
+        if (item.worK_ORDER_COMPONENT_ID === editItem.workOrderComponentId) {
+          return {
+            workOrderComponentId: item.worK_ORDER_COMPONENT_ID,
+            workOrder: work?.orderid,
+            material: item.reS_ITEM || item.material,
+            matL_DESC: item.matL_DESC,
+            requirementQuantity: newQty,
+            requirementQuantityUnit: item.actuaL_QUANTITY_UNIT,
+            moveType: true,
+          };
+        }
+        // Otherwise use existing quantity
+        return {
+          workOrderComponentId: item.worK_ORDER_COMPONENT_ID,
+          workOrder: work?.orderid,
+          material: item.reS_ITEM || item.material,
+          matL_DESC: item.matL_DESC,
+          requirementQuantity: item.actuaL_QUANTITY,
+          requirementQuantityUnit: item.actuaL_QUANTITY_UNIT,
+          moveType: true,
+        };
+      });
+
+      // Special check: If for some reason the editItem wasn't found in item_component (rare but possible if fresh add),
+      // we might need to append it. But typically in this View, we only edit existing.
+      // So we assume it's covered by the map.
+
+      Swal.fire({
+        title: "กำลังบันทึก...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
+      });
+
+      const res = await callApi.post(
+        `/Mobile/SetWorkOrderSparePart?OrderId=${work?.orderid}`,
+        payload
+      );
+
+      if (res.data.dataResult.isSuccess === true) {
+        await Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: "บันทึกข้อมูลเรียบร้อย",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        setOpenEditQty(false);
+        // Reload data
+        await onLoad();
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "ผิดพลาด",
+          text: res.data.dataResult.message || "ไม่สามารถบันทึกข้อมูลได้",
+          confirmButtonText: "ปิด",
+        });
+      }
+    } catch (error) {
+      console.error("Edit Qty Error: ", error);
+      Swal.fire({
+        icon: "error",
+        title: "ผิดพลาด",
+        text: "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+        confirmButtonText: "ปิด",
+      });
+    }
+  };
+
   useEffect(() => {
     onLoad();
     onLoad2();
@@ -160,7 +251,7 @@ export default function WorkStation() {
           worK_ORDER_COMPONENT_ID: item?.worK_ORDER_COMPONENT_ID,
           orderid: item?.orderid,
           reserV_NO: item?.reserV_NO,
-          reS_ITEM: item?.reS_ITEM,
+          reS_ITEM: item?.reS_ITEM || item?.material,
           matL_DESC: item?.matL_DESC,
           actuaL_QUANTITY: item?.actuaL_QUANTITY,
           actuaL_QUANTITY_UNIT: item?.actuaL_QUANTITY_UNIT,
@@ -330,6 +421,25 @@ export default function WorkStation() {
               gap: "8px",
             }}
           >
+            <Button
+              sx={{ backgroundColor: "#1976D2" }} // Blue for edit
+              variant="contained"
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                // Prepare edit item
+                setEditItem({
+                  material: params.row.reS_ITEM ?? "", // Use displayed item no or material
+                  materialDescription: params.row.matL_DESC ?? "",
+                  qty: String(params.row.actuaL_QUANTITY ?? 0),
+                  workOrderComponentId: params.row.worK_ORDER_COMPONENT_ID
+                });
+                setEditQty(String(params.row.actuaL_QUANTITY ?? 0));
+                setOpenEditQty(true);
+              }}
+            >
+              <EditIcon />
+            </Button>
             <Button
               sx={{ backgroundColor: "red" }}
               variant="contained"
@@ -1019,6 +1129,99 @@ export default function WorkStation() {
 
           <DialogActions>
             <Button onClick={() => setOpenCamera(false)}>ปิด</Button>
+          </DialogActions>
+        </Dialog>
+
+
+        {/* Edit Qty Dialog */}
+        <Dialog
+          open={openEditQty}
+          onClose={() => setOpenEditQty(false)}
+          fullWidth
+          maxWidth="xs"
+        >
+          <DialogTitle sx={{ fontWeight: 900 }}>แก้ไขจำนวน</DialogTitle>
+
+          <DialogContent>
+            {editItem && (
+              <Stack spacing={2} mt={1}>
+                <Typography fontWeight={700} color="#1976D2">
+                  {editItem.material}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {editItem.materialDescription}
+                </Typography>
+
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      minWidth: 40,
+                      height: 40,
+                      borderRadius: 2,
+                      borderColor: "#E0E0E0",
+                      color: "#1976D2",
+                    }}
+                    onClick={() => {
+                      const current = Number(editQty);
+                      if (current > 1) setEditQty(String(current - 1));
+                    }}
+                  >
+                    -
+                  </Button>
+
+                  <TextField
+                    fullWidth
+                    label="จำนวนที่ต้องการ"
+                    type="number"
+                    size="small"
+                    value={editQty}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") { setEditQty(""); return; }
+                      const n = Number(v);
+                      if (!Number.isNaN(n) && n >= 0) setEditQty(v);
+                    }}
+                    sx={{ width: 160 }}
+                  />
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      minWidth: 40,
+                      height: 40,
+                      borderRadius: 2,
+                      borderColor: "#E0E0E0",
+                      color: "#1976D2",
+                    }}
+                    onClick={() => {
+                      const current = Number(editQty) || 0;
+                      setEditQty(String(current + 1));
+                    }}
+                  >
+                    +
+                  </Button>
+                </Stack>
+              </Stack>
+            )}
+          </DialogContent>
+
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setOpenEditQty(false)}>Cancel</Button>
+
+            <Button
+              variant="contained"
+              sx={{
+                fontWeight: 800,
+                bgcolor: "#1976D2",
+                "&:hover": { bgcolor: "#1565C0" },
+              }}
+              onClick={() => {
+                handleEditQty();
+                setOpenEditQty(false);
+              }}
+            >
+              Save นะ
+            </Button>
           </DialogActions>
         </Dialog>
       </div>

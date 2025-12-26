@@ -44,6 +44,7 @@ type SparePartApi = {
 type CartItem = {
   item: SparePartApi;
   qty: number;
+  unit?: string;
   //orderid: string | number | null;
 };
 
@@ -127,6 +128,7 @@ export default function TableSparePart() {
               // znew: item.znew ?? 0,
             },
             qty: item.actuaL_QUANTITY,
+            unit: item.actuaL_QUANTITY_UNIT,
             //orderid: work?.orderid ?? 0,
           };
         }
@@ -274,7 +276,7 @@ export default function TableSparePart() {
       Swal.fire({
         icon: "error",
         title: "ผิดพลาด",
-        text: "ไม่สามารถบันทึกข้อมูลได้",
+        text: "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
         confirmButtonText: "ปิด",
       });
     }
@@ -284,79 +286,86 @@ export default function TableSparePart() {
     try {
       if (!editItem) return;
 
-      const raw = Number(editQty);
-      if (!Number.isFinite(raw) || raw < 1) {
-        await Swal.fire({
-          icon: "warning",
-          title: "จำนวนไม่ถูกต้อง",
-          text: "กรุณากรอกจำนวนที่มากกว่า 0",
-        });
-        return;
-      }
+      const newQty = Math.max(1, Number(editQty || 1));
 
-      // ✅ เช็คคงเหลือ
-      if (editItem.max !== undefined && raw > editItem.max) {
-        await Swal.fire({
-          icon: "warning",
-          title: "จำนวนเกินคงเหลือ",
-          text: `คงเหลือในคลัง ${editItem.max} เท่านั้น`,
-        });
-        return;
-      }
+      // 1. Update logic: Clone cart and update the specific item
+      const currentCart = { ...cart };
 
-      const confirm = await Swal.fire({
-        title: "ยืนยันการแก้ไข?",
-        html: `
-        <div style="text-align:left">
-          <p><b>อะไหล่:</b> ${editItem.material}</p>
-          <p><b>จำนวนใหม่:</b> ${raw}</p>
-        </div>
-      `,
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonText: "บันทึก",
-        cancelButtonText: "ยกเลิก",
-        confirmButtonColor: "#1976D2",
-        reverseButtons: true,
-      });
+      // Try to find existing cart item
+      let targetCartItem = currentCart[editItem.material];
 
-      if (!confirm.isConfirmed) return;
-
-      //   setEditItem({
-      //     qty: selectedQty ?? "0",
-      //     max,
-      //   });
-
-      // update cart (หรือ state ของคุณ)
-      setCart((prev) => {
-        const current = prev[editItem.material];
-        if (!current) return prev;
-
-        return {
-          ...prev,
-          [editItem.material]: {
-            ...current,
-            qty: raw,
-          },
+      if (!targetCartItem) {
+        // If not in cart, we need to create a new entry from dataSparePart or editItem
+        const spareInfo = dataSparePart.find(s => s.material === editItem.material);
+        if (!spareInfo) {
+          Swal.fire({ icon: 'error', title: 'Error', text: 'Material info not found' });
+          return;
+        }
+        targetCartItem = {
+          item: spareInfo,
+          qty: newQty
         };
+        currentCart[editItem.material] = targetCartItem;
+      } else {
+        // Update existing
+        targetCartItem.qty = newQty;
+        currentCart[editItem.material] = targetCartItem;
+      }
+
+      // 2. Construct Payload from the UPDATED cart (ALL items)
+      // Note: We need to define `unit` on CartItem type or allow any
+      const payload = Object.values(currentCart).map((c: any) => ({
+        workOrderComponentId: c.item.workOrderComponentId,
+        workOrder: work?.orderid,
+        material: c.item.material,
+        matlDesc: c.item.materialDescription,
+        requirementQuantity: c.qty,
+        requirementQuantityUnit: c.unit || row?.actuaL_QUANTITY_UNIT, // Prefer item unit, fallback if needed
+        moveType: true,
+      }));
+
+      Swal.fire({
+        title: "กำลังบันทึก...",
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading(),
       });
 
-      await Swal.fire({
-        icon: "success",
-        title: "บันทึกสำเร็จ",
-        text: "อัปเดตจำนวนเรียบร้อยแล้ว",
-        timer: 1400,
-        showConfirmButton: false,
-      });
+      // 3. Send the entire cart payload
+      const res = await callApi.post(
+        `/Mobile/SetWorkOrderSparePart?OrderId=${work?.orderid}`,
+        payload
+      );
 
-      setOpenEditQty(false);
-    } catch (err) {
-      console.error("Error editing quantity:", err);
+      if (res.data.dataResult.isSuccess === true) {
+        await Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: "บันทึกข้อมูลเรียบร้อย",
+          timer: 1500,
+          showConfirmButton: false,
+        });
 
-      await Swal.fire({
+        // 4. Update local state and close
+        setCart(currentCart);
+        setOpenEditQty(false);
+        // Reload data from server to be sure
+        await onLoadOldPart();
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "ผิดพลาด",
+          text: res.data.dataResult.message || "ไม่สามารถบันทึกข้อมูลได้",
+          confirmButtonText: "ปิด",
+        });
+      }
+
+    } catch (error) {
+      console.error("Edit Qty Error: ", error);
+      Swal.fire({
         icon: "error",
-        title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถแก้ไขจำนวนได้ กรุณาลองใหม่อีกครั้ง",
+        title: "ผิดพลาด",
+        text: "เกิดข้อผิดพลาดในการบันทึกข้อมูล",
+        confirmButtonText: "ปิด",
       });
     }
   };
@@ -496,25 +505,27 @@ export default function TableSparePart() {
                               "&:hover": { bgcolor: "#BBDEFB" },
                             }}
                             onClick={() => {
-                              const spare = (dataSparePart ?? []).find(
-                                (s: any) => s.material === s.material
-                              );
+                              const matCode = p.reS_ITEM || (p as any).material || "";
 
-                              console.log(
-                                "materialDescription : ",
-                                p.matL_DESC
+                              const spare = (dataSparePart ?? []).find(
+                                (s: any) => s.material === matCode
                               );
-                              console.log("spare found : ", spare);
 
                               const max =
                                 typeof spare?.znew === "number"
                                   ? spare.znew
                                   : typeof spare?.znew === "string"
-                                  ? Number(spare.znew)
-                                  : undefined;
+                                    ? Number(spare.znew)
+                                    : undefined;
 
+                              setEditItem({
+                                material: matCode,
+                                materialDescription: p.matL_DESC ?? "",
+                                qty: String(p.actuaL_QUANTITY ?? 0),
+                                max: max,
+                              });
+                              setEditQty(String(p.actuaL_QUANTITY ?? 0));
                               setOpenEditQty(true);
-                              handleEditQty();
                             }}
                           >
                             <EditIcon fontSize="small" />
@@ -546,7 +557,7 @@ export default function TableSparePart() {
                         alignItems="center"
                       >
                         <Chip
-                          label={`Qty: ${selectedQty} `} //${p.actuaL_QUANTITY_UNIT}
+                          label={`Qty: ${cart[p.reS_ITEM || (p as any).material || ""]?.qty ?? p.actuaL_QUANTITY ?? 0}`}
                           size="small"
                           sx={{
                             bgcolor: "#E3F2FD",
@@ -585,8 +596,8 @@ export default function TableSparePart() {
                 placeholder="ค้นหา Material / Description..."
                 size="small"
                 fullWidth
-                // value={search}
-                // onChange={(e) => setSearch(e.target.value)}
+              // value={search}
+              // onChange={(e) => setSearch(e.target.value)}
               />
 
               {/* Cart */}
@@ -991,31 +1002,67 @@ export default function TableSparePart() {
                 {editItem.material}
               </Typography>
 
-              <TextField
-                label="จำนวน"
-                type="number"
-                value={editQty}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  const v = e.target.value;
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    const n = Number(editQty);
+                    if (n > 1) setEditQty(String(n - 1));
+                  }}
+                  sx={{
+                    minWidth: 45,
+                    height: 45,
+                    borderRadius: 2,
+                    fontSize: 20,
+                    fontWeight: 700,
+                  }}
+                >
+                  -
+                </Button>
+                <TextField
+                  label="จำนวน"
+                  type="number"
+                  value={editQty}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    const v = e.target.value;
 
-                  if (v === "") {
-                    setEditQty("");
-                    return;
-                  }
+                    if (v === "") {
+                      setEditQty("");
+                      return;
+                    }
 
-                  const n = Number(v);
-                  if (Number.isNaN(n)) return;
-                  if (n < 0) return;
+                    const n = Number(v);
+                    if (Number.isNaN(n)) return;
+                    if (n < 0) return;
 
-                  setEditQty(v);
-                }}
-                onBlur={() => {
-                  if (editQty === "" || Number(editQty) < 1) {
-                    setEditQty("1");
-                  }
-                }}
-                fullWidth
-              />
+                    setEditQty(v);
+                  }}
+                  onBlur={() => {
+                    if (editQty === "" || Number(editQty) < 1) {
+                      setEditQty("1");
+                    }
+                  }}
+                  fullWidth
+                  sx={{ "& input": { textAlign: "center" } }}
+                />
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    const n = Number(editQty);
+                    const max = editItem.max ?? Infinity;
+                    if (n < max) setEditQty(String(n + 1));
+                  }}
+                  sx={{
+                    minWidth: 45,
+                    height: 45,
+                    borderRadius: 2,
+                    fontSize: 20,
+                    fontWeight: 700,
+                  }}
+                >
+                  +
+                </Button>
+              </Stack>
             </Stack>
           )}
         </DialogContent>
@@ -1031,22 +1078,8 @@ export default function TableSparePart() {
               "&:hover": { bgcolor: "#1565C0" },
             }}
             onClick={() => {
-              if (!editItem) return;
-
-              const newQty = Math.max(1, Number(editQty || 1));
-
-              // 🔥 update item_component
-              //   setItemComponent((prev) =>
-              //     prev.map((it) =>
-              //       it.worK_ORDER_COMPONENT_ID === editItem.id
-              //         ? { ...it, actuaL_QUANTITY: newQty }
-              //         : it
-              //     )
-              //   );
-
+              handleEditQty();
               setOpenEditQty(false);
-
-              handleSave();
             }}
           >
             Save นะ
