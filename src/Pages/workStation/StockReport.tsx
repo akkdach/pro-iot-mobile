@@ -153,8 +153,8 @@ const StockReport: React.FC = () => {
       dates.length === 0
         ? "-"
         : `${dates[0].toLocaleDateString("th-TH")} → ${dates[
-            dates.length - 1
-          ].toLocaleDateString("th-TH")}`;
+          dates.length - 1
+        ].toLocaleDateString("th-TH")}`;
     return { total, wc, range };
   }, [filtered]);
 
@@ -199,44 +199,44 @@ const StockReport: React.FC = () => {
         size: 80,
         Cell: ({ row }) => row.original.worK_CENTER_OBJ?.plant || "-",
       },
-      {
-        accessorKey: "materialType",
-        header: "Material",
-        size: 90,
-        Cell: ({ cell }) => (
-          <Chip
-            size="small"
-            label={cell.getValue<string>() || "-"}
-            variant="outlined"
-          />
-        ),
-      },
+      // {
+      //   accessorKey: "materialType",
+      //   header: "Material",
+      //   size: 90,
+      //   Cell: ({ cell }) => (
+      //     <Chip
+      //       size="small"
+      //       label={cell.getValue<string>() || "-"}
+      //       variant="outlined"
+      //     />
+      //   ),
+      // },
       {
         accessorKey: "orderid",
         header: "Order",
         size: 120,
         Cell: ({ cell }) => cell.getValue<string | null>() ?? "-",
       },
-      {
-        id: "shift",
-        header: "กะเวลา",
-        size: 130,
-        Cell: ({ row }) => {
-          const wc = row.original.worK_CENTER_OBJ;
-          return (
-            <Stack direction="row" spacing={1}>
-              <Chip
-                size="small"
-                label={`เริ่ม ${hhmmssToHHMM(wc?.starT_TIME)}`}
-              />
-              <Chip
-                size="small"
-                label={`จบ ${hhmmssToHHMM(wc?.finisH_TIME)}`}
-              />
-            </Stack>
-          );
-        },
-      },
+      // {
+      //   id: "shift",
+      //   header: "กะเวลา",
+      //   size: 130,
+      //   Cell: ({ row }) => {
+      //     const wc = row.original.worK_CENTER_OBJ;
+      //     return (
+      //       <Stack direction="row" spacing={1}>
+      //         <Chip
+      //           size="small"
+      //           label={`เริ่ม ${hhmmssToHHMM(wc?.starT_TIME)}`}
+      //         />
+      //         <Chip
+      //           size="small"
+      //           label={`จบ ${hhmmssToHHMM(wc?.finisH_TIME)}`}
+      //         />
+      //       </Stack>
+      //     );
+      //   },
+      // },
     ],
     []
   );
@@ -342,7 +342,7 @@ const StockReport: React.FC = () => {
               ))}
             </TextField>
 
-            <TextField
+            {/* <TextField
               select
               size="small"
               label="Material Type"
@@ -356,7 +356,7 @@ const StockReport: React.FC = () => {
                   {v}
                 </MenuItem>
               ))}
-            </TextField>
+            </TextField> */}
           </Stack>
         </Paper>
 

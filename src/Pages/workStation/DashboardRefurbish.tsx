@@ -61,7 +61,7 @@ const DashboardRefurbish = () => {
       setItems(res.data.dataResult);
       setWork(res.data.dataResult);
     } else if (step.station == null && step.type === "stockReport") {
-      navigate("/StockReport");
+      navigate("/StockReport", { replace: true });
     } else {
       console.log("step : ", step.station);
       console.log(work?.orderid);
