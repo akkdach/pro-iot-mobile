@@ -201,7 +201,7 @@ export default function WorkStation() {
         payload
       );
 
-      if (res.data.dataResult.isSuccess === true) {
+      if (res.data.isSuccess === true) {
         await Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -252,9 +252,10 @@ export default function WorkStation() {
           orderid: item?.orderid,
           reserV_NO: item?.reserV_NO,
           reS_ITEM: item?.reS_ITEM || item?.material,
-          matL_DESC: item?.matL_DESC,
+          matL_DESC: item?.matL_DESC || item?.MATL_DESC || item?.MatlDesc || item?.materialDescription,
           actuaL_QUANTITY: item?.actuaL_QUANTITY,
           actuaL_QUANTITY_UNIT: item?.actuaL_QUANTITY_UNIT,
+          material: item?.material,
         };
       });
       setItem_Component(newData);
@@ -262,6 +263,7 @@ export default function WorkStation() {
   };
 
   const onLoad2 = async () => {
+    console.log(`/WorkOrderList/workOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`);
     let res = await callApi.get(
       `/WorkOrderList/workOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`
     );
@@ -932,7 +934,7 @@ export default function WorkStation() {
         </CustomTabPanel>
 
         <CustomTabPanel value={value} index={1}>
-          <Paper sx={{ height: 740, width: "100%" }}>
+          <Paper sx={{ height: 740, width: "100%", marginBottom: 9 }}>
             <Box
               sx={{
                 display: "flex",
@@ -958,8 +960,10 @@ export default function WorkStation() {
             <DataGrid
               rows={item_component ?? []}
               columns={columns}
-              initialState={{ pagination: { paginationModel } }}
-              pageSizeOptions={[5, 10]}
+              initialState={{
+                pagination: { paginationModel: { page: 0, pageSize: 30 } },
+              }}
+              pageSizeOptions={[30]}
               checkboxSelection={false}
               sx={{ border: 0 }}
               getRowId={(row) => row.worK_ORDER_COMPONENT_ID}

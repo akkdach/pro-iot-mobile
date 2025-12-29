@@ -43,6 +43,7 @@ interface Item_Component {
   matL_DESC?: string;
   actuaL_QUANTITY?: number;
   actuaL_QUANTITY_UNIT?: string;
+  material?: string;
 }
 
 interface SparePartApi {

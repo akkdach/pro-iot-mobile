@@ -60,7 +60,7 @@ type CartItem = {
 // } | null;
 
 export default function TableSparePart() {
-  const { work, item_component, deletePart } = useWork();
+  const { work, item_component, setItem_Component, deletePart } = useWork();
 
   const location = useLocation();
   const row = location.state;
@@ -93,9 +93,16 @@ export default function TableSparePart() {
   useEffect(() => console.log("cart:", cart), [cart]);
 
   useEffect(() => {
-    onLoad();
-    onLoadOldPart();
-  }, []);
+    const init = async () => {
+      const spareList = await onLoad();
+      if (spareList) {
+        await onLoadOldPart(spareList);
+      }
+    };
+    if (work?.orderid) {
+      init();
+    }
+  }, [work?.orderid]);
 
   const onLoad = async () => {
     console.log("mn_wk_ctr : ", work?.mN_WK_CTR);
@@ -104,9 +111,12 @@ export default function TableSparePart() {
     const dataSparePartList = res.data.dataResult.sparepartList;
     console.log("on load get spare part : ", dataSparePartList);
     setDataSparePart(dataSparePartList);
+    return dataSparePartList;
   };
 
-  const onLoadOldPart = async () => {
+  const onLoadOldPart = async (spareList: SparePartApi[] = []) => {
+    if (!work?.orderid) return; // Prevent 401 loop
+
     const res = await callApi.get(
       `/WorkOrderList/items_component/${work?.orderid}`
     );
@@ -115,25 +125,89 @@ export default function TableSparePart() {
 
     if (Array.isArray(dataOldPart)) {
       const cartFromOldPart: Record<string, CartItem> = {};
-      dataOldPart.forEach((item: any) => {
-        if (item.material && item.actuaL_QUANTITY > 0) {
-          cartFromOldPart[item.material] = {
+      console.log("spareList length:", spareList.length);
+
+      dataOldPart.forEach((item: any, idx: number) => {
+        console.log(`[${idx}] Processing item:`, {
+          material: item.material,
+          reS_ITEM: item.reS_ITEM,
+          actuaL_QUANTITY: item.actuaL_QUANTITY,
+          matL_DESC: item.matL_DESC
+        });
+
+        let matKey = item.material;
+
+        // Fallback: If material is missing, try to recover it from master list using identifiers or description
+        if (!matKey && spareList.length > 0) {
+          // Try matching by Description
+          const descToMatch = item.matL_DESC || item.MATL_DESC || item.MatlDesc || item.materialDescription;
+          console.log(`[${idx}] No material, trying desc match:`, descToMatch);
+          if (descToMatch) {
+            const found = spareList.find(s =>
+              s.materialDescription === descToMatch ||
+              s.materialDescription?.toLowerCase() === descToMatch.toLowerCase()
+            );
+            if (found) {
+              matKey = found.material;
+              console.log(`[${idx}] Found via desc:`, matKey);
+            }
+          }
+        }
+
+        // Final fallback
+        if (!matKey) {
+          matKey = item.reS_ITEM || item.RES_ITEM;
+          console.log(`[${idx}] Using reS_ITEM fallback:`, matKey);
+        }
+
+        console.log(`[${idx}] Final matKey:`, matKey, "qty:", item.actuaL_QUANTITY);
+
+        if (matKey && item.actuaL_QUANTITY > 0) {
+
+          // Lookup description if missing
+          let desc = item.matL_DESC ?? item.MATL_DESC ?? item.MatlDesc ?? item.materialDescription;
+          if (!desc) {
+            const master = spareList.find((s: any) => s.material === matKey);
+            desc = master?.materialDescription;
+          }
+
+          cartFromOldPart[matKey] = {
             item: {
               workOrderComponentId: item.worK_ORDER_COMPONENT_ID,
-              material: item.material,
-              materialDescription: item.matL_DESC ?? "",
-              // imageUrl: item.imageUrl ?? "",
-              // quotaStock: item.quotaStock ?? 0,
-              // onWithdraw: item.onWithdraw ?? 0,
-              // znew: item.znew ?? 0,
+              material: matKey,
+              materialDescription: desc || "",
             },
             qty: item.actuaL_QUANTITY,
             unit: item.actuaL_QUANTITY_UNIT,
-            //orderid: work?.orderid ?? 0,
           };
+          console.log(`[${idx}] Added to cart:`, matKey);
+        } else {
+          console.log(`[${idx}] SKIPPED - matKey:`, matKey, "qty:", item.actuaL_QUANTITY);
         }
       });
+
+      console.log("Final cartFromOldPart:", cartFromOldPart);
       setCart(cartFromOldPart);
+      // Update item_component for the card list display
+      const mappedComponents = dataOldPart.map((item: any) => {
+        let desc = item.matL_DESC || item.MATL_DESC || item.MatlDesc || item.materialDescription;
+        if (!desc) {
+          const master = spareList.find((s: any) => s.material === item.material);
+          desc = master?.materialDescription;
+        }
+
+        return {
+          worK_ORDER_COMPONENT_ID: item?.worK_ORDER_COMPONENT_ID,
+          orderid: item?.orderid,
+          reserV_NO: item?.reserV_NO,
+          reS_ITEM: item?.reS_ITEM || item?.material,
+          matL_DESC: desc,
+          actuaL_QUANTITY: item?.actuaL_QUANTITY,
+          actuaL_QUANTITY_UNIT: item?.actuaL_QUANTITY_UNIT,
+          material: item?.material,
+        };
+      });
+      setItem_Component(mappedComponents);
     }
   };
 
@@ -255,13 +329,19 @@ export default function TableSparePart() {
 
       console.log("save result:", res.data);
 
-      if (res.data.dataResult.isSuccess === true) {
+      if (res.data.isSuccess === true) {
         await Swal.fire({
           icon: "success",
           title: "สำเร็จ",
           text: "บันทึกข้อมูลเรียบร้อย",
           confirmButtonText: "ตกลง",
         });
+
+        // Reload data to update cards
+        const spareList = await onLoad();
+        if (spareList) {
+          await onLoadOldPart(spareList);
+        }
       } else {
         await Swal.fire({
           icon: "error",
@@ -371,8 +451,11 @@ export default function TableSparePart() {
   };
 
   const handleDeleteItem = async (itemId: any) => {
-    deletePart(itemId);
-    await onLoad();
+    await deletePart(itemId);
+    const spareList = await onLoad();
+    if (spareList) {
+      await onLoadOldPart(spareList);
+    }
   };
 
   const cartCount = Object.values(cart).reduce((sum, x) => sum + x.qty, 0);
@@ -505,7 +588,7 @@ export default function TableSparePart() {
                               "&:hover": { bgcolor: "#BBDEFB" },
                             }}
                             onClick={() => {
-                              const matCode = p.reS_ITEM || (p as any).material || "";
+                              const matCode = p.material || p.reS_ITEM || "";
 
                               const spare = (dataSparePart ?? []).find(
                                 (s: any) => s.material === matCode
@@ -557,7 +640,7 @@ export default function TableSparePart() {
                         alignItems="center"
                       >
                         <Chip
-                          label={`Qty: ${cart[p.reS_ITEM || (p as any).material || ""]?.qty ?? p.actuaL_QUANTITY ?? 0}`}
+                          label={`Qty: ${cart[p.material || p.reS_ITEM || ""]?.qty ?? p.actuaL_QUANTITY ?? 0}`}
                           size="small"
                           sx={{
                             bgcolor: "#E3F2FD",
@@ -571,7 +654,7 @@ export default function TableSparePart() {
                         </Typography>
                       </Stack>
                       <Typography variant="caption" sx={{ color: "#B0BEC5" }}>
-                        ID: {p.reserV_NO}
+                        ID: {p.material}
                       </Typography>
                     </Stack>
                   </CardContent>
