@@ -93,18 +93,25 @@ export default function TableSparePart() {
   useEffect(() => console.log("cart:", cart), [cart]);
 
   useEffect(() => {
-    const init = async () => {
-      const spareList = await onLoad();
-      if (spareList) {
-        await onLoadOldPart(spareList);
-      }
-    };
-    if (work?.orderid) {
-      init();
-    }
+    // const spareList = onLoad();
+    // const init = async () => {
+
+    // };
+    // if (work?.orderid) {
+    //   init();
+    // }
+    onInit();
   }, [work?.orderid]);
 
+  const onInit = async () => {
+    const spareList = await onLoad();
+    if (spareList) {
+      await onLoadOldPart(spareList);
+    }
+  };
+
   const onLoad = async () => {
+    alert();
     console.log("mn_wk_ctr : ", work?.mN_WK_CTR);
     console.log("orderid : ", work?.orderid);
     let res = await callApi.get("/Mobile/RemainingSparepart");

@@ -48,6 +48,11 @@ type StockReportItem = {
   wK_CTR: string;
   worK_CENTER_OBJ: WorkCenterObj;
   materialType: string;
+  isApprove?: string;
+  approvE_USER?: string;
+  approvE_DATE?: string;
+  approvE_TIME?: string;
+  reservatioN_NO?: string;
 };
 
 const fmtDateTimeTH = (iso?: string) => {
@@ -63,8 +68,24 @@ const fmtDateTimeTH = (iso?: string) => {
   });
 };
 
+const fmtDateOnlyTH = (iso?: string) => {
+  if (!iso) return "-";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "-";
+  return d.toLocaleString("th-TH", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+};
+
 const hhmmssToHHMM = (v?: string) => {
   if (!v || v.length < 4) return "-";
+  // Handle "HH:MM:SS" format
+  if (v.includes(":")) {
+    return v.slice(0, 5);
+  }
+  // Handle "HHMMSS" format
   const hh = v.slice(0, 2);
   const mm = v.slice(2, 4);
   return `${hh}:${mm}`;
@@ -79,7 +100,11 @@ const StockReport: React.FC = () => {
   const [q, setQ] = useState("");
   const [workCenter, setWorkCenter] = useState("");
   const [plant, setPlant] = useState("");
-  const [materialType, setMaterialType] = useState("");
+  const [isApprove, setIsApprove] = useState("");
+  const [approveUser, setApproveUser] = useState("");
+  const [approveDate, setApproveDate] = useState("");
+  const [approveTime, setApproveTime] = useState("");
+  const [reservationNo, setReservationNo] = useState("");
 
   // Detail dialog
   const [open, setOpen] = useState(false);
@@ -114,7 +139,7 @@ const StockReport: React.FC = () => {
   }, [data]);
 
   const mtOptions = useMemo(() => {
-    const s = new Set(data.map((x) => x.materialType).filter(Boolean));
+    const s = new Set(data.map((x) => x.isApprove).filter(Boolean));
     return Array.from(s).sort();
   }, [data]);
 
@@ -135,11 +160,11 @@ const StockReport: React.FC = () => {
 
       const hitWC = !workCenter || x.wK_CTR === workCenter;
       const hitPlant = !plant || x.worK_CENTER_OBJ?.plant === plant;
-      const hitMT = !materialType || x.materialType === materialType;
+      const hitMT = !isApprove || x.isApprove === isApprove;
 
       return hitKeyword && hitWC && hitPlant && hitMT;
     });
-  }, [data, q, workCenter, plant, materialType]);
+  }, [data, q, workCenter, plant, isApprove]);
 
   // KPI
   const kpi = useMemo(() => {
@@ -199,44 +224,72 @@ const StockReport: React.FC = () => {
         size: 80,
         Cell: ({ row }) => row.original.worK_CENTER_OBJ?.plant || "-",
       },
-      // {
-      //   accessorKey: "materialType",
-      //   header: "Material",
-      //   size: 90,
-      //   Cell: ({ cell }) => (
-      //     <Chip
-      //       size="small"
-      //       label={cell.getValue<string>() || "-"}
-      //       variant="outlined"
-      //     />
-      //   ),
-      // },
       {
-        accessorKey: "orderid",
-        header: "Order",
+        accessorKey: "reservatioN_NO",
+        header: "Reservation No",
+        size: 120,
+        Cell: ({ row }) => row.original.reservatioN_NO || "-",
+      },
+      {
+        accessorKey: "isApprove",
+        header: "การอนุมัติ",
+        size: 100,
+        Cell: ({ cell }) => {
+          const val = cell.getValue<string>();
+          let label = val || "-";
+          let color: "default" | "success" | "warning" | "error" = "default";
+
+          if (val === "N") {
+            label = "รออนุมัติ";
+            color = "warning";
+          } else if (val === "C") {
+            label = "ยกเลิก";
+            color = "error";
+          } else if (val === "Y") {
+            label = "อนุมัติ";
+            color = "success";
+          }
+
+          return (
+            <Chip
+              size="small"
+              label={label}
+              color={color}
+              variant="outlined"
+              sx={{ fontWeight: 700 }}
+            />
+          );
+        },
+      },
+
+      {
+        accessorKey: "approvE_USER",
+        header: "ผู้อนุมัติ",
         size: 120,
         Cell: ({ cell }) => cell.getValue<string | null>() ?? "-",
       },
-      // {
-      //   id: "shift",
-      //   header: "กะเวลา",
-      //   size: 130,
-      //   Cell: ({ row }) => {
-      //     const wc = row.original.worK_CENTER_OBJ;
-      //     return (
-      //       <Stack direction="row" spacing={1}>
-      //         <Chip
-      //           size="small"
-      //           label={`เริ่ม ${hhmmssToHHMM(wc?.starT_TIME)}`}
-      //         />
-      //         <Chip
-      //           size="small"
-      //           label={`จบ ${hhmmssToHHMM(wc?.finisH_TIME)}`}
-      //         />
-      //       </Stack>
-      //     );
-      //   },
-      // },
+
+      {
+        id: "approvE_DATE",
+        header: "วันที่อนุมัติ",
+        size: 180,
+        Cell: ({ row }) => {
+          const wc = row.original;
+          return (
+            <Stack direction="row" spacing={1}>
+              <Chip
+                size="small"
+                label={`${fmtDateOnlyTH(wc?.approvE_DATE)}`}
+              />
+              <Chip
+                size="small"
+                label={`${hhmmssToHHMM(wc?.approvE_TIME)}`}
+              />
+
+            </Stack>
+          );
+        },
+      },
     ],
     []
   );
@@ -342,21 +395,7 @@ const StockReport: React.FC = () => {
               ))}
             </TextField>
 
-            {/* <TextField
-              select
-              size="small"
-              label="Material Type"
-              value={materialType}
-              onChange={(e) => setMaterialType(e.target.value)}
-              sx={{ minWidth: 160 }}
-            >
-              <MenuItem value="">ทั้งหมด</MenuItem>
-              {mtOptions.map((v) => (
-                <MenuItem key={v} value={v}>
-                  {v}
-                </MenuItem>
-              ))}
-            </TextField> */}
+
           </Stack>
         </Paper>
 
@@ -441,7 +480,7 @@ const StockReport: React.FC = () => {
               },
             })}
             enableRowActions
-            positionActionsColumn="last"
+
             renderRowActions={({ row }) => (
               <Tooltip title="ดูรายละเอียด">
                 <Button

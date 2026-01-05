@@ -203,7 +203,7 @@ const AddSpareFromStock: React.FC = () => {
 
       console.log("payload : ", payload);
 
-      await callApi.post(`/Mobile/ReservationRequest`, payload);
+      await callApi.post(`/Mobile/ReservationRequest_create`, payload);
 
       Swal.close();
 

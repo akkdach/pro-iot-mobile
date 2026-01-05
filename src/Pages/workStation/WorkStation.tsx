@@ -106,6 +106,7 @@ export default function WorkStation() {
   } = useWork();
   const location = useLocation();
   const row = location.state;
+  console.log("row naaaaaa : ", row);
   const [part, setPart] = useState("");
   const [openAdd, setOpenAdd] = React.useState(false);
   const [openDelete, setOpenDelete] = useState(false);
