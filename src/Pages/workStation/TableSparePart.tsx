@@ -111,7 +111,6 @@ export default function TableSparePart() {
   };
 
   const onLoad = async () => {
-    alert();
     console.log("mn_wk_ctr : ", work?.mN_WK_CTR);
     console.log("orderid : ", work?.orderid);
     let res = await callApi.get("/Mobile/RemainingSparepart");

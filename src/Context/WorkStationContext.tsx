@@ -4,6 +4,8 @@ import callApi from "../Services/callApi";
 import Header from "../Layout/Header";
 import Swal from "sweetalert2";
 import { steps } from "../Pages/workStation/SetupAndRefurbish";
+import CountTime from "../Utility/countTime";
+import { useTimer } from "../Context/TimerContext";
 
 
 interface Work {
@@ -106,6 +108,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
   const [sparePart, setSparePart] = useState<SparePartApi[] | null>(null);
   const [cartItem, setCartItem] = useState<CartItem[] | null>(null);
 
+  const timer = useTimer();
 
   const startWork = async () => {
     console.log("Work is start", work);
@@ -128,6 +131,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!confirm.isConfirmed) return;
 
+
       const res = await callApi.post("/WorkOrderList/Start", {
         ORDERID: work?.orderid,
         current_operation: work?.current_operation ?? "",
@@ -135,7 +139,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       const data = res.data;
       // console.log("Start Work : ", res);
-      alert(data.isSuccess);
       if (!data.isSuccess) {
         await Swal.fire({
           title: "Failed",
@@ -144,6 +147,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         });
         return;
       }
+
+      timer.start();
 
       setWork((prev) => ({
         ...prev!,
@@ -224,6 +229,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         worK_ACTUAL: data.dataResult?.worK_ACTUAL,
       }));
 
+      timer.stop();
+
       await Swal.fire({
         title: "Finished!",
         text: "Work order has been finished successfully.",
@@ -231,7 +238,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         timer: 2000,
         showConfirmButton: false,
       });
-      alert(data.message);
     } catch (err: any) {
       console.error("FinishWork Error:", err);
       await Swal.fire({

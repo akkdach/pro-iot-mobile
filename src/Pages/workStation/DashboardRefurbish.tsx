@@ -68,7 +68,7 @@ const DashboardRefurbish = () => {
       let res = await callApi.get(
         `/WorkOrderList/workOrderList/${step.station}`
       );
-      console.log("Each order in fontend : ", res.data.dataResult);
+      console.log("Each order in fontend in dashboard : ", res.data.dataResult);
       setItems(res.data.dataResult);
       setWork(res.data.dataResult);
       console.log(work);

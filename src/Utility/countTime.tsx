@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+"use client";
+import { useEffect, useState } from "react";
+import Typography from "@mui/material/Typography";
+import { useTimer } from "../Context/TimerContext";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
@@ -10,32 +13,33 @@ const formatElapsed = (ms: number) => {
     return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
 };
 
-export function CountTime({ running, intervalMs = 250 }: { running: boolean; intervalMs?: number }) {
-    const startAtRef = useRef<number | null>(null);
-    const accumulatedRef = useRef<number>(0);
-    const [, setTick] = useState(0);
+export default function CountTime({ intervalMs = 250 }: { intervalMs?: number }) {
+    const { startAtMs, accumulatedMs, running } = useTimer();
+    const [now, setNow] = useState(Date.now());
 
     useEffect(() => {
-        let id: number | null = null;
+        if (!running) return;
 
-        if (running) {
-            if (startAtRef.current == null) startAtRef.current = Date.now();
-            id = window.setInterval(() => setTick(Date.now()), intervalMs);
-        } else {
-            if (startAtRef.current != null) {
-                accumulatedRef.current += Date.now() - startAtRef.current;
-                startAtRef.current = null;
-            }
-        }
+        // Update 'now' immediately to prevent stale display
+        setNow(Date.now());
 
-        return () => {
-            if (id != null) window.clearInterval(id);
-        };
+        const id = window.setInterval(() => setNow(Date.now()), intervalMs);
+        return () => window.clearInterval(id);
     }, [running, intervalMs]);
 
-    const elapsedMs =
-        accumulatedRef.current +
-        (startAtRef.current != null ? Date.now() - startAtRef.current : 0);
+    // คำนวณเวลาสดๆ ที่หน้า Component นี้
+    const elapsedMs = accumulatedMs + (running && startAtMs != null ? now - startAtMs : 0);
 
-    return <>{formatElapsed(elapsedMs)}</>;
+    return (
+        <Typography
+            sx={{
+                fontFamily: "monospace",
+                fontWeight: 700,
+                fontSize: { xs: "24px", sm: "32px", md: "40px" },
+                lineHeight: 1.1,
+            }}
+        >
+            {formatElapsed(elapsedMs)}
+        </Typography>
+    );
 }

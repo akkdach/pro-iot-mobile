@@ -54,7 +54,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
-import { CountTime } from "../../Utility/countTime";
+import CountTime from "../../Utility/countTime";
+import SimpleElapsedTimer from "../../Utility/SimpleElapsedTimer";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -262,12 +263,13 @@ export default function WorkStation() {
 
   const onLoad2 = async () => {
     console.log(`/WorkOrderList/workOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`);
+    console.log("row operation id : ", row.worK_ORDER_OPERATION_ID);
     let res = await callApi.get(
       `/WorkOrderList/workOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`
     );
     const data = res.data.dataResult;
+    console.log("Each order in frontend in workStation : ", data);
     if (!data) return;
-    console.log("Each order in frontend : ", data);
     const item = Array.isArray(data) ? data[0] : data;
 
     setWork(() => ({
@@ -814,7 +816,7 @@ export default function WorkStation() {
                       filter: "drop-shadow(0px 2px 4px rgba(37, 99, 235, 0.2))"
                     }}
                   >
-                    <CountTime running={isWorking} />
+                    <SimpleElapsedTimer startAt={work?.acT_START_DATE ?? "00:00:00"} running={isWorking} />
                   </Typography>
                 </Stack>
               </Paper>

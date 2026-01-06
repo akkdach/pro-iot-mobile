@@ -5,15 +5,18 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import { WorkProvider } from "./Context/WorkStationContext";
+import { TimerProvider } from "./Context/TimerContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <BrowserRouter>
-    <WorkProvider>
-      <App />
-    </WorkProvider>
+    <TimerProvider>
+      <WorkProvider>
+        <App />
+      </WorkProvider>
+    </TimerProvider>
   </BrowserRouter>
 );
 
