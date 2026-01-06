@@ -19,6 +19,7 @@ import {
   Tab,
   Tabs,
 } from "@mui/material";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -53,7 +54,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
-import { on } from "events";
+import { CountTime } from "../../Utility/countTime";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -130,16 +131,12 @@ export default function WorkStation() {
   const [deleteId, setDeleteId] = useState<any>(null);
   const [masterImages, setMasterImages] = useState<any[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<Record<string, FileState>>({});
+  const [isWorking, setIsWorking] = useState<boolean>(false);
+
 
   // useRef to persist state across renders (workaround for double invocation)
   const selectedFilesRef = React.useRef<Record<string, FileState>>({});
 
-
-  // DEBUG: Track state changes
-  // React.useEffect(() => {
-  //   console.log('[selectedFiles changed]', selectedFiles);
-  //   selectedFilesRef.current = selectedFiles; // Sync ref with state
-  // }, [selectedFiles]);
 
   const navigate = useNavigate();
 
@@ -296,6 +293,7 @@ export default function WorkStation() {
       mN_WK_CTR: item.mN_WK_CTR ?? item.MN_WK_CTR,
       worK_ORDER_COMPONENT_ID:
         item.worK_ORDER_COMPONENT_ID ?? item.WORK_ORDER_COMPONENT_ID,
+      slA_FINISH_DATE: item.slA_FINISH_DATE ?? item.SLA_FINISH_DATE,
     }));
   };
 
@@ -389,25 +387,6 @@ export default function WorkStation() {
     );
   }
 
-  // useEffect(() => {
-  //   setWork({
-  //     orderid: row.orderid,
-  //     ordeR_TYPE: row.ordeR_TYPE,
-  //     shorT_TEXT: row.shorT_TEXT,
-  //     equipment: row.equipment,
-  //     weB_STATUS: row.weB_STATUS,
-  //     slA_FINISH_TIME: row.slA_FINISH_TIME,
-  //     actuaL_FINISH_DATE: row.actuaL_FINISH_DATE,
-  //     servicE_TIME: row.servicE_TIME,
-  //     actuaL_START_TIME: row.actuaL_START_TIME,
-  //     actuaL_FINISH_TIME: row.actuaL_FINISH_TIME,
-  //   });
-  // }, [row]);
-
-  // useEffect(() => {
-  //   console.log("before useEffect : ", item_component);
-  //   onLoad();
-  // }, [item_component]);
 
   const columns: GridColDef[] = [
     {
@@ -780,63 +759,114 @@ export default function WorkStation() {
                 display: "flex",
                 gap: 2,
                 width: "100%",
+                flexDirection: "column",
               }}
             >
-              {/* LEFT LIST */}
-              <List sx={{ flex: 1 }}>
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="SLA Time" />
-                  <Typography>
-                    {formatTime(Number(work?.slA_FINISH_TIME))}
+              {/* NEW TIMER DISPLAY */}
+              <Paper
+                elevation={6}
+                sx={{
+                  mb: 2,
+                  p: 3,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)",
+                  borderRadius: 4,
+                  boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)",
+                  border: "1px solid rgba(226, 232, 240, 0.8)",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                {/* Decorative background circle */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    right: -20,
+                    top: -20,
+                    width: 100,
+                    height: 100,
+                    borderRadius: "50%",
+                    background: "rgba(37, 99, 235, 0.05)",
+                  }}
+                />
+
+                <Stack direction="column" alignItems="center" spacing={0}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "#64748B", mb: 0.5 }}>
+                    <AccessTimeIcon fontSize="small" />
+                    <Typography variant="overline" sx={{ fontWeight: 600, letterSpacing: 1.2 }}>
+                      TIME ELAPSED
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      fontWeight: 800,
+                      background: isWorking
+                        ? "linear-gradient(to right, #2563EB, #4F46E5)"
+                        : "linear-gradient(to right, #64748B, #94A3B8)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      fontFamily: "'Roboto Mono', monospace",
+                      fontSize: { xs: "2.5rem", md: "3.5rem" },
+                      letterSpacing: -1,
+                      filter: "drop-shadow(0px 2px 4px rgba(37, 99, 235, 0.2))"
+                    }}
+                  >
+                    <CountTime running={isWorking} />
                   </Typography>
-                </ListItem>
-                <Divider component="li" />
+                </Stack>
+              </Paper>
 
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Start Date" />
-                  <Typography>{formatDate(work?.acT_START_DATE)}</Typography>
-                </ListItem>
-                <Divider component="li" />
+              <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
+                <List sx={{ flex: 1 }}>
+                  <ListItem
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <ListItemText primary="SLA Time" />
+                    <Typography>
+                      {formatTime(Number(work?.slA_FINISH_DATE))}
+                    </Typography>
+                  </ListItem>
+                  <Divider component="li" />
 
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Finish Date" />
-                  <Typography>{formatDate(work?.acT_END_DATE)}</Typography>
-                </ListItem>
-              </List>
+                  <ListItem
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <ListItemText primary="Start Date" />
+                    <Typography>{formatDate(work?.acT_START_DATE)}</Typography>
+                  </ListItem>
+                  <Divider component="li" />
 
-              {/* RIGHT LIST */}
-              <List sx={{ flex: 1 }}>
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Use Time" />
-                  <Typography>
-                    {formatTime(Number(work?.worK_ACTUAL))}
-                  </Typography>
-                </ListItem>
-                <Divider component="li" />
+                  <ListItem
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <ListItemText primary="Finish Date" />
+                    <Typography>{formatDate(work?.acT_END_DATE)}</Typography>
+                  </ListItem>
+                </List>
 
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Start Time" />
-                  <Typography>{formatTime(work?.acT_START_TIME)}</Typography>
-                </ListItem>
-                <Divider component="li" />
+                {/* RIGHT LIST */}
+                <List sx={{ flex: 1 }}>
 
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Finish Time" />
-                  <Typography>{formatTime(work?.acT_END_TIME)}</Typography>
-                </ListItem>
-              </List>
+
+                  <ListItem
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <ListItemText primary="Start Time" />
+                    <Typography>{formatTime(work?.acT_START_TIME)}</Typography>
+                  </ListItem>
+                  <Divider component="li" />
+
+                  <ListItem
+                    sx={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <ListItemText primary="Finish Time" />
+                    <Typography>{formatTime(work?.acT_END_TIME)}</Typography>
+                  </ListItem>
+                </List>
+              </Box>
             </Box>
           </div>
 
@@ -856,14 +886,20 @@ export default function WorkStation() {
                   label: "Start",
                   from: "#2ecc71",
                   to: "#27ae60",
-                  onClick: startWork,
+                  onClick: () => {
+                    setIsWorking(true);
+                    startWork();
+                  },
                 },
                 { label: "Hold", from: "#f1c40f", to: "#f39c12" },
                 {
                   label: "Finish",
                   from: "#3498db",
                   to: "#2980b9",
-                  onClick: finishWork,
+                  onClick: () => {
+                    setIsWorking(false);
+                    finishWork();
+                  },
                 },
                 {
                   label: "Check List",
@@ -1044,48 +1080,12 @@ export default function WorkStation() {
           </Box>
         </CustomTabPanel>
 
-
       </Box>
 
       <AppHeader title="Work Order" icon={<BusinessCenterIcon />} />
 
       <div>
-        {/* <Dialog open={openAdd} onClose={handleCloseAdd} fullWidth maxWidth="xs">
-          <DialogTitle>เพิ่มรายการอะไหล่</DialogTitle>
 
-          <DialogContent>
-            <Typography sx={{ mb: 2 }}>Enter Spare Part</Typography>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 7,
-              }}
-            >
-              <TextField
-                sx={{ mb: 2 }}
-                type="text"
-                fullWidth
-                variant="outlined"
-                value={partName}
-                onChange={(e) => setPartName(e.target.value)}
-              />
-            </div>
-
-            <SparePart setCount={setCount} count={count} />
-          </DialogContent>
-
-          <DialogActions>
-            <Button onClick={handleCloseAdd} color="inherit">
-              ยกเลิก
-            </Button>
-            <Button variant="contained" onClick={handleAddSubmit}>
-              ยืนยันการเพิ่มอะไหล่
-            </Button>
-          </DialogActions>
-        </Dialog> */}
 
         <Dialog
           open={openDelete}

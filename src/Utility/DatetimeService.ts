@@ -49,3 +49,5 @@ export const splitDate = (date: Date) => {
 
   return { year, month, day };
 };
+
+

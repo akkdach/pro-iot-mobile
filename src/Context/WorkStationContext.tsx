@@ -5,6 +5,7 @@ import Header from "../Layout/Header";
 import Swal from "sweetalert2";
 import { steps } from "../Pages/workStation/SetupAndRefurbish";
 
+
 interface Work {
   orderid?: string;
   ordeR_TYPE?: string;
@@ -13,7 +14,6 @@ interface Work {
   weB_STATUS?: string;
   state?: string;
 
-  slA_FINISH_TIME?: string;
   actuaL_START_DATE?: Date;
   actuaL_FINISH_DATE?: Date;
   servicE_TIME?: Number;
@@ -33,6 +33,9 @@ interface Work {
   worK_ORDER_COMPONENT_ID?: number;
 
   mN_WK_CTR?: string;
+
+  slA_FINISH_DATE?: Date;
+  slA_FINISH_TIME?: string;
 }
 
 interface Item_Component {
@@ -103,10 +106,14 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
   const [sparePart, setSparePart] = useState<SparePartApi[] | null>(null);
   const [cartItem, setCartItem] = useState<CartItem[] | null>(null);
 
+
   const startWork = async () => {
     console.log("Work is start", work);
     try {
       if (!work?.orderid) return;
+
+      console.log("Work is start", work.orderid);
+
 
       const confirm = await Swal.fire({
         title: "Start Work?",
@@ -302,7 +309,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const returnWork = async () => {
-    console.log("work is return");
+    console.log("work is return", work);
     try {
       if (!work?.orderid) return;
 
