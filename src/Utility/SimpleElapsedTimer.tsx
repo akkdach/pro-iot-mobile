@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import Typography from "@mui/material/Typography";
 
 type StartAt = Date | string | number | null | undefined;
@@ -64,27 +64,32 @@ export default function SimpleElapsedTimer({ startAt, running, intervalMs = 250 
 
     const [frozenMs, setFrozenMs] = useState(0);
     const [, setTick] = useState(0);
+    const wasRunningRef = useRef(false);
 
-    // เมื่อ startAt เปลี่ยน (เริ่มงานใหม่) ให้รีเซ็ตค่าค้าง
     useEffect(() => {
         setFrozenMs(0);
+        wasRunningRef.current = false;
     }, [startMs]);
 
-    // ถ้า running=true ให้ tick เพื่อให้เวลา “วิ่ง”
+    // วิ่งเวลา
     useEffect(() => {
         if (!running || startMs == null) return;
         const id = window.setInterval(() => setTick(Date.now()), intervalMs);
         return () => window.clearInterval(id);
     }, [running, startMs, intervalMs]);
 
-    // ตอนเปลี่ยนจาก running=true -> false ให้ “จับค่า” แล้วค้างไว้
+    // จับเวลาตอนกด stop (เฉพาะ transition true -> false)
     useEffect(() => {
-        if (running) return;
-        if (startMs == null) {
-            setFrozenMs(0);
+        if (running) {
+            wasRunningRef.current = true;
             return;
         }
-        setFrozenMs(Math.max(0, Date.now() - startMs));
+
+        if (!wasRunningRef.current) return; // ยังไม่เคย start มาก่อน ไม่ต้องจับ
+        wasRunningRef.current = false;
+
+        if (startMs == null) return;
+        setFrozenMs(Math.max(0, Date.now() - startMs)); // ✅ stop - start
     }, [running, startMs]);
 
     const elapsedMs =

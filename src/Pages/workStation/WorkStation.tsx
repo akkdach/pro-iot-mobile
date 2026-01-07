@@ -656,6 +656,7 @@ export default function WorkStation() {
                 fontSize: "1.1rem",
                 padding: "12px 24px",
                 minHeight: 60,
+                mb: 7,
               }}
             />
             <Tab
@@ -900,7 +901,7 @@ export default function WorkStation() {
                     startWork();
                   },
                 },
-                { label: "Hold", from: "#f1c40f", to: "#f39c12" },
+                //{ label: "Hold", from: "#f1c40f", to: "#f39c12" },
                 {
                   label: "Finish",
                   from: "#3498db",
