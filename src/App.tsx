@@ -42,8 +42,8 @@ const token = localStorage.getItem('token');
 function App() {
   return (
     <div className="App">
-        
-        <div>
+
+      <div>
         {token ? (<UserProvider><Layout ><Routes>
           <Route path="/" element={<Home />}></Route>
           <Route path="StandardTimeDashboard" element={<StandardTimeDashboard />}></Route>
@@ -59,12 +59,12 @@ function App() {
           <Route path="WithdrawEquipmentScan" element={<WithdrawEquipment />}></Route>
           <Route path="ReceiveEquipmentScan" element={<ReceiveEquipment />}></Route>
           <Route path="ReceiveManyEquipmentScan" element={<ReceiveManyEquipment />}></Route>
-          <Route path="WithdrawManyEquipmentScan" element={<WithdrawManyEquipment/>}></Route>
+          <Route path="WithdrawManyEquipmentScan" element={<WithdrawManyEquipment />}></Route>
           <Route path="Chat" element={<Chat />}></Route>
           <Route path="SetupAndRefurbish" element={<SetupAndRefurbish />}></Route>
           <Route path="DashboardRefurbish" element={<DashboardRefurbish />}></Route>
           <Route path="WorkOrderDetail" element={<WorkOrderDetail />}></Route>
-          <Route path="WorkStation" element={<WorkStation />}></Route>
+          <Route path="WorkStation/:orderId/:operationId" element={<WorkStation />}></Route>
           <Route path="ActionPage" element={<ActionPage />}></Route>
           <Route path="SparePart" element={<SparePart />}></Route>
           <Route path="TestContextPage" element={<TestContextPage />}></Route>
@@ -72,8 +72,8 @@ function App() {
           <Route path="StockReport" element={<StockReport />}></Route>
           <Route path="StockReportItem/:resId" element={<StockReportItem />}></Route>
           <Route path="AddSpareFromStock" element={<AddSpareFromStock />}></Route>
-        </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
-      
+        </Routes></Layout></UserProvider>) : (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
+
       </div>
     </div>
 

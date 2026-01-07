@@ -16,8 +16,8 @@ interface Work {
   weB_STATUS?: string;
   state?: string;
 
-  actuaL_START_DATE?: Date;
-  actuaL_FINISH_DATE?: Date;
+  actuaL_START_DATE?: string;
+  actuaL_FINISH_DATE?: string;
   servicE_TIME?: Number;
   actuaL_START_TIME?: string;
   actuaL_FINISH_TIME?: string;

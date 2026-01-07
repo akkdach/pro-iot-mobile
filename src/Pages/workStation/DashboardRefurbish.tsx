@@ -47,7 +47,7 @@ const DashboardRefurbish = () => {
   useEffect(() => {
     setStep(location.state);
     console.log(location.state);
-  }, [location?.state]);
+  }, []);
 
   useEffect(() => {
     onLoad();
@@ -397,7 +397,9 @@ const DashboardRefurbish = () => {
           sx={{ border: 0, width: "100%" }}
           onRowClick={(params) => {
             if (step.station == null) return;
-            navigate(`/WorkStation`, { state: params.row });
+            console.log("params.row.worK_ORDER_OPERATION_ID : ", params.row.worK_ORDER_OPERATION_ID);
+            console.log("params.row.orderid : ", params.row.orderid);
+            navigate(`/WorkStation/${params.row.orderid}/${params.row.worK_ORDER_OPERATION_ID}`);
           }}
         />
       </Paper>

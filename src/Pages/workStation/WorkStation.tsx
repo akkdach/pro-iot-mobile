@@ -107,8 +107,8 @@ export default function WorkStation() {
     checkListWork,
   } = useWork();
   const location = useLocation();
-  const row = location.state;
-  console.log("row naaaaaa : ", row);
+  //const row = location.state;
+  //console.log("row naaaaaa : ", row);
   const [part, setPart] = useState("");
   const [openAdd, setOpenAdd] = React.useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -134,6 +134,10 @@ export default function WorkStation() {
   const [selectedFiles, setSelectedFiles] = useState<Record<string, FileState>>({});
   const [isWorking, setIsWorking] = useState<boolean>(false);
 
+  const { orderId, operationId } = useParams();
+
+  console.log("orderid from useParams : ", orderId);
+  console.log("operationid from useParams : ", operationId);
 
   // useRef to persist state across renders (workaround for double invocation)
   const selectedFilesRef = React.useRef<Record<string, FileState>>({});
@@ -239,7 +243,7 @@ export default function WorkStation() {
 
   const onLoad = async () => {
     let res = await callApi.get(
-      `/WorkOrderList/items_component/${row.orderid}`
+      `/WorkOrderList/items_component/${orderId}`
     );
     console.log("data Result No 1 : ", res.data.dataResult);
     const data = res.data.dataResult;
@@ -262,14 +266,17 @@ export default function WorkStation() {
   };
 
   const onLoad2 = async () => {
-    console.log(`/WorkOrderList/workOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`);
-    console.log("row operation id : ", row.worK_ORDER_OPERATION_ID);
+    console.log(`/WorkOrderList/workOrder/${orderId}/${operationId}`);
+    console.log("row operation id : ", operationId);
     let res = await callApi.get(
-      `/WorkOrderList/workOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`
+      `/WorkOrderList/workOrder/${orderId}/${operationId}`
     );
     const data = res.data.dataResult;
-    console.log("Each order in frontend in workStation : ", data);
-    if (!data) return;
+    console.log("Each order in frontend in workStation workOrder/{orderId}/{operationId} : ", data);
+    if (!data) {
+      console.log("No data found");
+      return;
+    }
     const item = Array.isArray(data) ? data[0] : data;
 
     setWork(() => ({
@@ -302,10 +309,10 @@ export default function WorkStation() {
   const onLoad3 = async () => {
     try {
       // Fetch both Master Templates and Current Image Data in parallel
-      console.log("row.orderid", row.orderid);
+      console.log("row.orderid", orderId);
       const [resMaster, resBox] = await Promise.all([
-        callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${row.orderid}`),
-        callApi.get(`/WorkOrderList/ImgBox/${row.orderid}`)
+        callApi.get(`/Mobile/GetMasterWorkorderImage?order_id=${orderId}`),
+        callApi.get(`/WorkOrderList/ImgBox/${orderId}`)
       ]);
 
       const masterData = resMaster.data.dataResult || [];
@@ -601,7 +608,7 @@ export default function WorkStation() {
           Swal.update({ html: `กำลังอัพโหลด... (${i + 1}/${filesToUpload.length})<br/>${img.title}` });
 
           await callUploadImage({
-            orderId: row.orderid,
+            orderId: String(orderId),
             image: file,
             imageKey: img.key,
           });
@@ -1032,7 +1039,7 @@ export default function WorkStation() {
                     key={k}
                     title={img.title}
                     imageKey={img.key}
-                    orderid={row.orderid}
+                    orderid={String(orderId)}
                     seq={img.seq}
                     imageUrl={img.imageUrl || img.url}
                     file={state?.file || null}
