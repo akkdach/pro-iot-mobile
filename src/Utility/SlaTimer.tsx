@@ -2,8 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Box, Typography } from "@mui/material";
 
 type SlaTimerProps = {
-    slaFinishDate?: string | null; // "2025-08-28T00:00:00"
-    slaFinishTime?: string | null; // "080000" (HHmmss) หรือ "08:00:00"
+    slaStartDate?: string | null;
+    slaStartTime?: string | null;
+    slaFinishDate?: string | null;
+    slaFinishTime?: string | null;
 };
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
@@ -12,7 +14,6 @@ function parseTimeToHms(time?: string | null): { hh: number; mm: number; ss: num
     if (!time) return null;
     const t = time.trim();
 
-    // "080000"
     if (/^\d{6}$/.test(t)) {
         const hh = Number(t.slice(0, 2));
         const mm = Number(t.slice(2, 4));
@@ -21,7 +22,6 @@ function parseTimeToHms(time?: string | null): { hh: number; mm: number; ss: num
         return { hh, mm, ss };
     }
 
-    // "08:00:00" or "08:00"
     if (/^\d{2}:\d{2}(:\d{2})?$/.test(t)) {
         const [h, m, s = "00"] = t.split(":");
         const hh = Number(h), mm = Number(m), ss = Number(s);
@@ -35,7 +35,7 @@ function parseTimeToHms(time?: string | null): { hh: number; mm: number; ss: num
 function buildTargetMs(dateStr?: string | null, timeStr?: string | null): number | null {
     if (!dateStr) return null;
 
-    const base = new Date(dateStr); // parse เป็น local time (เพราะไม่มี Z)
+    const base = new Date(dateStr); // ไม่มี Z => parse เป็นเวลา local
     if (!Number.isFinite(base.getTime())) return null;
 
     const hms = parseTimeToHms(timeStr);
@@ -45,101 +45,132 @@ function buildTargetMs(dateStr?: string | null, timeStr?: string | null): number
     return base.getTime();
 }
 
-/** คืนสตริง "X วัน HH:MM:SS" (รองรับทั้ง + และ -) */
-function formatDayTimeSigned(ms: number) {
-    const sign = ms < 0 ? "-" : "";
+function formatDayTime(ms: number) {
     const abs = Math.abs(ms);
-
     const totalSec = Math.floor(abs / 1000);
+
     const days = Math.floor(totalSec / 86400);
     const hh = Math.floor((totalSec % 86400) / 3600);
     const mm = Math.floor((totalSec % 3600) / 60);
     const ss = totalSec % 60;
 
     const time = `${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
-    const body = days > 0 ? `${days} วัน ${time}` : time;
-
-    return { sign, body, days };
+    return days > 0 ? `${days} วัน ${time}` : time;
 }
 
-export const SlaTimer: React.FC<SlaTimerProps> = ({ slaFinishDate, slaFinishTime }) => {
-    const targetMs = useMemo(() => buildTargetMs(slaFinishDate, slaFinishTime), [slaFinishDate, slaFinishTime]);
+const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
-    const [diffMs, setDiffMs] = useState<number | null>(() => (targetMs ? targetMs - Date.now() : null));
+export const SlaTimer: React.FC<SlaTimerProps> = ({
+    slaStartDate,
+    slaStartTime,
+    slaFinishDate,
+    slaFinishTime,
+}) => {
+    const startMs = useMemo(
+        () => buildTargetMs(slaStartDate, slaStartTime),
+        [slaStartDate, slaStartTime]
+    );
+
+    const finishMs = useMemo(
+        () => buildTargetMs(slaFinishDate, slaFinishTime),
+        [slaFinishDate, slaFinishTime]
+    );
+
+    const [nowMs, setNowMs] = useState(() => Date.now());
 
     useEffect(() => {
-        if (!targetMs) {
-            setDiffMs(null);
-            return;
-        }
-
-        const tick = () => setDiffMs(targetMs - Date.now());
-        tick();
-
-        const id = window.setInterval(tick, 1000);
+        const id = window.setInterval(() => setNowMs(Date.now()), 1000);
         return () => window.clearInterval(id);
-    }, [targetMs]);
+    }, []);
 
-    if (!targetMs || diffMs === null) {
+    if (!startMs || !finishMs || !Number.isFinite(startMs) || !Number.isFinite(finishMs) || finishMs <= startMs) {
         return <Typography sx={{ color: "text.secondary" }}>SLA: -</Typography>;
     }
 
-    // diffMs > 0 = ยังเหลือเวลา, diffMs < 0 = เลย SLA (ติดลบ)
-    const isOverdue = diffMs < 0;
-    const { body } = formatDayTimeSigned(diffMs);
+    const remainingMs = finishMs - nowMs; // ติดลบได้
+    const totalMs = finishMs - startMs;
 
-    const label = isOverdue ? `เลย SLA +${body}` : `เหลือ ${body}`;
+    const isOverdue = remainingMs < 0;
+
+    // % ที่เหลือ (ตาม timeline start->finish)
+    // - ถ้ายังไม่ถึงเวลาเริ่ม: ให้ 100%
+    // - ถ้าอยู่ในช่วง: remaining/total
+    // - ถ้าเลยแล้ว: จะติดลบ แต่เราจะ clamp เป็น 0 เพื่อเอาไปเทียบสี/แสดงผล
+    const rawPercent =
+        nowMs <= startMs ? 100 : (remainingMs / totalMs) * 100;
+
+    const percent = clamp(rawPercent, 0, 100);
+
+    // สีตามกติกา
+    let tone: "green" | "yellow" | "red";
+    if (isOverdue) tone = "red";
+    else if (percent >= 31) tone = "green";
+    else tone = "yellow";
+
+    const palette =
+        tone === "green"
+            ? { bg: "#e8f5e9", fg: "#2e7d32" }
+            : tone === "yellow"
+                ? { bg: "#fff8e1", fg: "#f9a825" }
+                : { bg: "#ffebee", fg: "#d32f2f" };
+
+    const label = isOverdue
+        ? `เลย SLA +${formatDayTime(remainingMs)}`
+        : `เหลือ ${formatDayTime(remainingMs)}`;
 
     return (
         <Box
             sx={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 0.5,
+                gap: 1,
                 px: 1.5,
                 py: 0.75,
-                borderRadius: 1,
-                bgcolor: isOverdue ? "#ffebee" : "#e3f2fd",
+                borderRadius: 1.5,
+                bgcolor: palette.bg,
             }}
         >
             <Typography
                 variant="caption"
                 sx={{
                     fontSize: { xs: 11, sm: 12 },
-                    fontWeight: 600,
-                    color: isOverdue ? "#d32f2f" : "#1976d2",
-                    opacity: 0.8,
+                    fontWeight: 700,
+                    color: palette.fg,
+                    opacity: 0.85,
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",
+                    whiteSpace: "nowrap",
                 }}
             >
                 SLA
             </Typography>
+
             <Typography
                 sx={{
                     fontSize: { xs: 14, sm: 16 },
-                    fontWeight: 600,
+                    fontWeight: 700,
                     fontVariantNumeric: "tabular-nums",
                     lineHeight: 1.2,
-                    color: isOverdue ? "#d32f2f" : "#1976d2",
+                    color: palette.fg,
                     whiteSpace: "nowrap",
                 }}
             >
-                {body}
+                {label}
             </Typography>
-            {isOverdue && (
-                <Typography
-                    variant="caption"
-                    sx={{
-                        fontSize: { xs: 10, sm: 11 },
-                        fontWeight: 500,
-                        color: "#d32f2f",
-                        opacity: 0.7,
-                    }}
-                >
-                    เกิน
-                </Typography>
-            )}
+
+            <Typography
+                variant="caption"
+                sx={{
+                    fontSize: { xs: 11, sm: 12 },
+                    fontWeight: 700,
+                    color: palette.fg,
+                    opacity: 0.9,
+                    fontVariantNumeric: "tabular-nums",
+                    whiteSpace: "nowrap",
+                }}
+            >
+                {isOverdue ? "0%" : `${Math.round(percent)}%`}
+            </Typography>
         </Box>
     );
 };

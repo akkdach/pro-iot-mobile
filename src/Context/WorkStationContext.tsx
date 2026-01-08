@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { steps } from "../Pages/workStation/SetupAndRefurbish";
 import CountTime from "../Utility/countTime";
 import { useTimer } from "../Context/TimerContext";
+import { RemarkField } from "../Utility/RemarkField";
 
 
 interface Work {
@@ -38,6 +39,8 @@ interface Work {
 
   slA_FINISH_DATE?: Date;
   slA_FINISH_TIME?: string;
+  slA_START_DATE?: Date;
+  slA_START_TIME?: string;
 }
 
 interface Item_Component {
@@ -316,6 +319,13 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
   const returnWork = async () => {
     console.log("work is return", work);
+
+    const remarkOptions: Record<string, string> = {
+      delay: "Delay",
+      waiting_part: "Waiting Part",
+      rework: "Rework",
+    };
+
     try {
       if (!work?.orderid) return;
 
@@ -381,30 +391,63 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       const selectedStation = confirm.value as string;
 
-      const res = await callApi.post(
-        "/WorkOrderList/Return",
-        {
-          ORDERID: work?.orderid,
-          current_operation: selectedStation,
-        },
-        { headers: { "Content-Type": "application/json" } }
-      );
 
-      const data = res.data;
-      console.log("Return Work : ", data);
+      const remarkConfirm = await Swal.fire({
+        title: "Return Remark",
+        text: "Select reason for return:",
+        icon: "question",
+        input: "select",
+        inputOptions: remarkOptions,
+        inputPlaceholder: "Choose reason...",
+        showCancelButton: true,
+        confirmButtonText: "Next",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#1976d2",
+        cancelButtonColor: "#95a5a6",
+        inputValidator: (v) => (!v ? "Please choose a reason" : undefined),
+      });
 
-      if (!data.isSuccess) {
+      if (!remarkConfirm.isConfirmed) return;
+
+      const selectedRemark = remarkConfirm.value as string;
+
+      const payloadReturn = {
+        ORDERID: work?.orderid,
+        current_operation: selectedStation,
+      };
+
+      const payloadRemark = {
+        ORDERID: work?.orderid,
+        return_remark: selectedRemark,
+      };
+
+      const [res_return, res_remark] = await Promise.all([
+        callApi.post("/WorkOrderList/Return", payloadReturn, {
+          headers: { "Content-Type": "application/json" },
+        }),
+        callApi.post("/WorkOrderList/RemarkReturn", payloadRemark, {
+          headers: { "Content-Type": "application/json" },
+        }),
+      ]);
+
+      const data_return = res_return.data;
+      const data_remark = res_remark.data;
+
+      if (!data_return?.isSuccess || !data_remark?.isSuccess) {
         await Swal.fire({
           title: "Failed",
-          text: data.Message ?? data.message ?? "Cannot return this work order",
+          text:
+            data_return?.Message ??
+            data_return?.message ??
+            data_remark?.Message ??
+            data_remark?.message ??
+            "Cannot return / save remark",
           icon: "error",
         });
         return;
       }
 
-      setWork((prev) =>
-        prev ? { ...prev, current_operation: selectedStation } : prev
-      );
+      setWork((prev) => (prev ? { ...prev, current_operation: selectedStation } : prev));
 
       await Swal.fire({
         title: "Finished!",

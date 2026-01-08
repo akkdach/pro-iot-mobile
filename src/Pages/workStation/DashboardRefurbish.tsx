@@ -78,54 +78,57 @@ const DashboardRefurbish = () => {
   };
 
   const columns: GridColDef[] = [
-    {
-      field: "State",
-      headerName: "State",
-      width: 130,
-      renderCell: (params) => {
-        const level = params.row.weB_STATUS;
-        console.log("level : ", level);
-        const dotCount =
-          level === 3
-            ? 3
-            : level === 2
-              ? 2
-              : level === 1
-                ? 1
-                : 0;
-        const activeColor =
-          level === 3 ? "#2e7d32" :
-            level === 2 ? "#f9a825" :
-              level === 1 ? "#d32f2f" :
-                "#e0e0e0";
+    // {
+    //   field: "State",
+    //   headerName: "State",
+    //   width: 130,
+    //   renderCell: (params) => {
+    //     const level = params.row.weB_STATUS;
+    //     console.log("level : ", level);
+    //     const dotCount =
+    //       level === 4
+    //         ? 4
+    //         : level === 3
+    //           ? 3
+    //           : level === 2
+    //             ? 2
+    //             : level === 1
+    //               ? 1
+    //               : 0;
+    //     const activeColor =
+    //       level === 4 ? "#2e7d32" :
+    //         level === 3 ? "#2e7d32" :
+    //           level === 2 ? "#f9a825" :
+    //             level === 1 ? "#d32f2f" :
+    //               "#e0e0e0";
 
-        return (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              height: "100%",
-              width: "100%",
-              gap: 0.8,
-            }}
-          >
-            {[1, 2, 3].map((i) => (
-              <Box
-                key={i}
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: "50%",
-                  backgroundColor: i <= dotCount ? activeColor : "#e0e0e0",
-                  transition: "0.2s",
-                }}
-              />
-            ))}
-          </Box>
-        );
-      },
-    },
+    //     return (
+    //       <Box
+    //         sx={{
+    //           display: "flex",
+    //           alignItems: "center",
+    //           justifyContent: "flex-start",
+    //           height: "100%",
+    //           width: "100%",
+    //           gap: 0.8,
+    //         }}
+    //       >
+    //         {[1, 2, 3].map((i) => (
+    //           <Box
+    //             key={i}
+    //             sx={{
+    //               width: 10,
+    //               height: 10,
+    //               borderRadius: "50%",
+    //               backgroundColor: i <= dotCount ? activeColor : "#e0e0e0",
+    //               transition: "0.2s",
+    //             }}
+    //           />
+    //         ))}
+    //       </Box>
+    //     );
+    //   },
+    // },
     // {
     //   field: "action",
     //   headerName: "Action",
@@ -167,6 +170,8 @@ const DashboardRefurbish = () => {
           <SlaTimer
             slaFinishDate={row.slA_FINISH_DATE ?? row.slaFinishDate ?? params.value}
             slaFinishTime={row.slA_FINISH_TIME ?? row.slaFinishTime}
+            slaStartDate={String(row.slA_START_DATE)}
+            slaStartTime={String(row.slA_START_TIME)}
           />
         );
       },

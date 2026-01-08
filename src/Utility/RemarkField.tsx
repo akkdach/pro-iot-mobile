@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     Button,
@@ -6,85 +6,90 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
-    TextField,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
     Typography,
 } from "@mui/material";
+
+export type RemarkOption = { value: string; label: string };
 
 type RemarkFieldProps = {
     open: boolean;
     onClose: () => void;
 
     title?: string;
-    label?: string;
 
-    value?: string;            // controlled
-    defaultValue?: string;     // uncontrolled
-    maxLength?: number;
-    minRows?: number;
-    placeholder?: string;
+    // --- Dropdown ---
+    dropdownLabel?: string;           // เช่น "Category"
+    dropdownOptions: RemarkOption[];  // รายการ dropdown
+    dropdownValue?: string;           // controlled
+    dropdownDefaultValue?: string;    // uncontrolled
+    onDropdownChange?: (val: string) => void;
+    dropdownDisabled?: boolean;
+
     disabled?: boolean;
-    errorText?: string;
 
-    onChange?: (val: string) => void;
-    onSave: (val: string) => void | Promise<void>;
+    // save ส่งค่า dropdown กลับไป
+    onSave: (dropdown: string) => void | Promise<void>;
 
-    headerSlot?: React.ReactNode; // เช่น ORDERID chip
+    headerSlot?: React.ReactNode; // เช่น Chip ORDERID
 };
 
 export const RemarkField: React.FC<RemarkFieldProps> = ({
     open,
     onClose,
     title = "Remark",
-    label = "Remark",
-    value,
-    defaultValue = "",
-    maxLength = 300,
-    minRows = 4,
-    placeholder = "พิมพ์หมายเหตุ...",
+
+    dropdownLabel = "Type",
+    dropdownOptions,
+    dropdownValue,
+    dropdownDefaultValue = "",
+    onDropdownChange,
+    dropdownDisabled,
+
     disabled,
-    errorText,
-    onChange,
+
     onSave,
     headerSlot,
 }) => {
-    const isControlled = value !== undefined;
+    const isControlledDropdown = dropdownValue !== undefined;
 
-    const [inner, setInner] = useState(defaultValue);
+    const [innerDropdown, setInnerDropdown] = useState(dropdownDefaultValue);
     const [saving, setSaving] = useState(false);
 
-    const text = isControlled ? value! : inner;
+    const ddValue = isControlledDropdown ? dropdownValue! : innerDropdown;
 
     useEffect(() => {
-        // เปิด modal แล้ว sync ค่าเริ่มต้น
         if (!open) return;
-        if (!isControlled) setInner(defaultValue ?? "");
+
+        // sync ค่าเริ่มต้นเมื่อเปิด modal (เฉพาะ uncontrolled)
+        if (!isControlledDropdown) setInnerDropdown(dropdownDefaultValue ?? "");
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open, defaultValue]);
+    }, [open, dropdownDefaultValue]);
 
-    const countText = useMemo(() => `${text.length}/${maxLength}`, [text.length, maxLength]);
-
-    const setText = (next: string) => {
-        const clipped = next.length > maxLength ? next.slice(0, maxLength) : next;
-        if (!isControlled) setInner(clipped);
-        onChange?.(clipped);
+    const setDropdown = (next: string) => {
+        if (!isControlledDropdown) setInnerDropdown(next);
+        onDropdownChange?.(next);
     };
 
     const handleSave = async () => {
         try {
             setSaving(true);
-            await onSave(text);
+            await onSave(ddValue);
             onClose();
         } finally {
             setSaving(false);
         }
     };
 
-    const handleClear = () => {
-        setText("");
-    };
+    // ถ้า default เป็น "" และไม่ได้ส่ง dropdownValue แบบ controlled => อนุญาตให้เลือก "-"
+    const dropdownEmptyAllowed = dropdownDefaultValue === "" && dropdownValue === undefined;
+    const isDropdownMissing = !ddValue;
 
     return (
-        <Dialog open={open} onClose={saving ? undefined : onClose} fullWidth maxWidth="sm">
+        <Dialog open={open} onClose={saving ? undefined : onClose} fullWidth maxWidth="xs">
             <DialogTitle sx={{ fontWeight: 900 }}>
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 2 }}>
                     <span>{title}</span>
@@ -102,45 +107,47 @@ export const RemarkField: React.FC<RemarkFieldProps> = ({
                         p: 2,
                     }}
                 >
-                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-                        <Typography sx={{ fontWeight: 800 }}>{label}</Typography>
-                        <Typography sx={{ fontSize: 12, color: "text.secondary", fontVariantNumeric: "tabular-nums" }}>
-                            {countText}
-                        </Typography>
-                    </Box>
+                    <FormControl fullWidth size="small">
+                        <InputLabel>{dropdownLabel}</InputLabel>
+                        <Select
+                            label={dropdownLabel}
+                            value={ddValue}
+                            onChange={(e) => setDropdown(String(e.target.value))}
+                            disabled={dropdownDisabled || disabled || saving}
+                        >
+                            {dropdownEmptyAllowed && <MenuItem value="">-</MenuItem>}
 
-                    <TextField
-                        value={text}
-                        onChange={(e) => setText(e.target.value)}
-                        placeholder={placeholder}
-                        disabled={disabled || saving}
-                        multiline
-                        minRows={minRows}
-                        fullWidth
-                        error={Boolean(errorText)}
-                        helperText={errorText ?? " "}
-                        inputProps={{ maxLength }}
-                        sx={{
-                            "& .MuiOutlinedInput-root": { borderRadius: 2.5, bgcolor: "white" },
-                        }}
-                    />
+                            {dropdownOptions.map((opt) => (
+                                <MenuItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </MenuItem>
+                            ))}
+                        </Select>
 
-                    <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 1 }}>
-                        <Button variant="outlined" onClick={handleClear} disabled={disabled || saving || text.length === 0}>
-                            Clear
+                        {isDropdownMissing && (
+                            <Typography sx={{ fontSize: 12, color: "error.main", mt: 0.75 }}>
+                                กรุณาเลือก {dropdownLabel}
+                            </Typography>
+                        )}
+                    </FormControl>
+
+                    <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}>
+                        <Button onClick={onClose} disabled={saving}>
+                            Cancel
                         </Button>
-                        <Button variant="contained" onClick={handleSave} disabled={disabled || saving}>
+
+                        <Button
+                            variant="contained"
+                            onClick={handleSave}
+                            disabled={disabled || saving || isDropdownMissing}
+                        >
                             {saving ? "Saving..." : "Save"}
                         </Button>
                     </Box>
                 </Box>
             </DialogContent>
 
-            <DialogActions sx={{ px: 3, pb: 2 }}>
-                <Button onClick={onClose} disabled={saving}>
-                    Cancel
-                </Button>
-            </DialogActions>
+            <DialogActions sx={{ display: "none" }} />
         </Dialog>
     );
 };

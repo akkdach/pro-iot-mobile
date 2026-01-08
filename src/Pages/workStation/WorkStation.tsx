@@ -309,6 +309,8 @@ export default function WorkStation() {
       worK_ORDER_COMPONENT_ID:
         item.worK_ORDER_COMPONENT_ID ?? item.WORK_ORDER_COMPONENT_ID,
       slA_FINISH_DATE: item.slA_FINISH_DATE ?? item.SLA_FINISH_DATE,
+      slA_START_DATE: item.slA_START_DATE ?? item.SLA_START_DATE,
+      slA_START_TIME: item.slA_START_TIME ?? item.SLA_START_TIME,
     }));
   };
 
@@ -845,6 +847,12 @@ export default function WorkStation() {
                       <SlaTimer
                         slaFinishDate={String(work?.slA_FINISH_DATE)}
                         slaFinishTime={String(work?.slA_FINISH_TIME)}
+                        slaStartDate={String(work?.slA_START_DATE)}
+                        slaStartTime={String(work?.slA_START_TIME)}
+                      // slaFinishDate={String("2026-01-29T00:00:00")}
+                      // slaFinishTime={String("080000")}
+                      // slaStartDate={String("2025-12-08T00:00:00")}
+                      // slaStartTime={String("080000")}
                       />
                     </Typography>
                   </ListItem>
@@ -1259,18 +1267,66 @@ export default function WorkStation() {
         <RemarkField
           open={openRemark}
           onClose={() => setOpenRemark(false)}
-          title="Add / Edit Remark"
-          value={remark}                 // controlled
-          onChange={setRemark}
-          headerSlot={<Chip size="small" label="ORDERID: 000123" />}
-          onSave={async (val) => {
-            // call API save
-            console.log("save remark:", val);
+          title="Add Remark"
+          dropdownLabel="Reason"
+          dropdownOptions={[
+            { value: "delay", label: "Delay" },
+            { value: "waiting_part", label: "Waiting Part" },
+            { value: "rework", label: "Rework" },
+          ]}
+          dropdownDefaultValue="delay"
+          onSave={async (dropdown) => {
+            console.log("save:", dropdown);
+            setOpenRemark(false);
+            try {
+              const result = await Swal.fire({
+                title: "ยืนยันการบันทึก?",
+                text: `Remark: ${dropdown}`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "บันทึก",
+                cancelButtonText: "ยกเลิก",
+              });
 
-            // ถ้าจะปิดตอน save สำเร็จ (component จะปิดให้อยู่แล้ว)
-            // setOpen(false);
+              if (!result.isConfirmed) return;
+
+              Swal.fire({
+                title: "กำลังบันทึก...",
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+              });
+
+              const res = await callApi.post("/WorkOrderList/RemarkStop", {
+                WORK_ORDER_OPERATION_ID: work?.worK_ORDER_OPERATION_ID,
+                stop_remark: dropdown,
+              });
+
+              console.log("res:", res.data);
+
+              await Swal.fire({
+                title: "บันทึกสำเร็จ",
+                text: res.data?.message ?? "Saved",
+                icon: "success",
+                timer: 1400,
+                showConfirmButton: false,
+              });
+
+              setOpenRemark(false);
+            } catch (err: any) {
+              console.log(err);
+
+              await Swal.fire({
+                title: "บันทึกไม่สำเร็จ",
+                text:
+                  err?.response?.data?.message ??
+                  err?.message ??
+                  "เกิดข้อผิดพลาด กรุณาลองใหม่",
+                icon: "error",
+              });
+            }
           }}
         />
+
       </div>
     </div>
   );
