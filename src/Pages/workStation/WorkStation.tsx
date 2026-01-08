@@ -656,7 +656,6 @@ export default function WorkStation() {
                 fontSize: "1.1rem",
                 padding: "12px 24px",
                 minHeight: 60,
-                mb: 7,
               }}
             />
             <Tab
@@ -981,7 +980,7 @@ export default function WorkStation() {
         </CustomTabPanel>
 
         <CustomTabPanel value={value} index={1}>
-          <Paper sx={{ height: 740, width: "100%", marginBottom: 9 }}>
+          <Paper sx={{ height: 740, width: "100%" }}>
             <Box
               sx={{
                 display: "flex",
