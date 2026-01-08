@@ -18,6 +18,7 @@ import {
   DialogActions,
   Tab,
   Tabs,
+  Chip,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import List from "@mui/material/List";
@@ -56,6 +57,8 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import { useNavigate } from "react-router-dom";
 import CountTime from "../../Utility/countTime";
 import SimpleElapsedTimer from "../../Utility/SimpleElapsedTimer";
+import { SlaTimer } from "../../Utility/SlaTimer";
+import { RemarkField } from "../../Utility/RemarkField";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -133,6 +136,9 @@ export default function WorkStation() {
   const [masterImages, setMasterImages] = useState<any[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<Record<string, FileState>>({});
   const [isWorking, setIsWorking] = useState<boolean>(false);
+
+  const [openRemark, setOpenRemark] = useState(false);
+  const [remark, setRemark] = useState("");
 
   const { orderId, operationId } = useParams();
 
@@ -835,7 +841,11 @@ export default function WorkStation() {
                   >
                     <ListItemText primary="SLA Time" />
                     <Typography>
-                      {formatTime(Number(work?.slA_FINISH_DATE))}
+                      {/* {formatTime(Number(work?.slA_FINISH_DATE))} */}
+                      <SlaTimer
+                        slaFinishDate={String(work?.slA_FINISH_DATE)}
+                        slaFinishTime={String(work?.slA_FINISH_TIME)}
+                      />
                     </Typography>
                   </ListItem>
                   <Divider component="li" />
@@ -928,6 +938,12 @@ export default function WorkStation() {
                   from: "#e74c3c",
                   to: "#c0392b",
                   onClick: returnWork,
+                },
+                {
+                  label: "Remark",
+                  from: "purple",
+                  to: "blue",
+                  onClick: () => setOpenRemark(true),
                 },
               ]
                 .filter((btn) => !btn.hide)
@@ -1238,6 +1254,23 @@ export default function WorkStation() {
             </Button>
           </DialogActions>
         </Dialog>
+
+
+        <RemarkField
+          open={openRemark}
+          onClose={() => setOpenRemark(false)}
+          title="Add / Edit Remark"
+          value={remark}                 // controlled
+          onChange={setRemark}
+          headerSlot={<Chip size="small" label="ORDERID: 000123" />}
+          onSave={async (val) => {
+            // call API save
+            console.log("save remark:", val);
+
+            // ถ้าจะปิดตอน save สำเร็จ (component จะปิดให้อยู่แล้ว)
+            // setOpen(false);
+          }}
+        />
       </div>
     </div>
   );

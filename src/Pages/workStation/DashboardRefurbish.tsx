@@ -28,6 +28,7 @@ import { formatDate, formatTime } from "../../Utility/DatetimeService";
 import { useWork } from "../../Context/WorkStationContext";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
 import Swal from "sweetalert2";
+import { SlaTimer } from "../../Utility/SlaTimer";
 
 const DashboardRefurbish = () => {
   const { work, setWork } = useWork();
@@ -77,73 +78,96 @@ const DashboardRefurbish = () => {
   };
 
   const columns: GridColDef[] = [
+    {
+      field: "State",
+      headerName: "State",
+      width: 130,
+      renderCell: (params) => {
+        const level = params.row.weB_STATUS;
+        console.log("level : ", level);
+        const dotCount =
+          level === 3
+            ? 3
+            : level === 2
+              ? 2
+              : level === 1
+                ? 1
+                : 0;
+        const activeColor =
+          level === 3 ? "#2e7d32" :
+            level === 2 ? "#f9a825" :
+              level === 1 ? "#d32f2f" :
+                "#e0e0e0";
+
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              height: "100%",
+              width: "100%",
+              gap: 0.8,
+            }}
+          >
+            {[1, 2, 3].map((i) => (
+              <Box
+                key={i}
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  backgroundColor: i <= dotCount ? activeColor : "#e0e0e0",
+                  transition: "0.2s",
+                }}
+              />
+            ))}
+          </Box>
+        );
+      },
+    },
     // {
-    //   field: "State",
-    //   headerName: "State",
-    //   width: 130,
+    //   field: "action",
+    //   headerName: "Action",
+    //   width: 120,
+    //   sortable: false,
+    //   filterable: false,
     //   renderCell: (params) => {
-    //     const level = params.value;
-    //     const dotCount =
-    //       level === "high"
-    //         ? 3
-    //         : level === "medium"
-    //         ? 2
-    //         : level === "low"
-    //         ? 1
-    //         : 0;
+    //     const row = params.row;
+    //     if (step.station != null) {
+    //       return;
+    //     }
 
     //     return (
-    //       <Box
-    //         sx={{
-    //           display: "flex",
-    //           alignItems: "center",
-    //           justifyContent: "flex-start",
-    //           height: "100%",
-    //           width: "100%",
-    //           gap: 0.8,
+    //       <Button
+    //         variant="contained"
+    //         size="small"
+    //         color="success"
+    //         startIcon={<PlayCircleFilledWhiteIcon />}
+    //         onClick={(e) => {
+    //           e.stopPropagation();
+    //           startWork(row.orderid);
     //         }}
     //       >
-    //         {[1, 2, 3].map((i) => (
-    //           <Box
-    //             key={i}
-    //             sx={{
-    //               width: 10,
-    //               height: 10,
-    //               borderRadius: "50%",
-    //               backgroundColor: i <= dotCount ? "#1565c0" : "#e0e0e0",
-    //               transition: "0.2s",
-    //             }}
-    //           />
-    //         ))}
-    //       </Box>
+    //         Start
+    //       </Button>
     //     );
     //   },
     // },
     {
-      field: "action",
-      headerName: "Action",
-      width: 120,
+      field: "slaFinishDate",
+      headerName: "SLA Timer",
+      width: 200,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
-        const row = params.row;
-        if (step.station != null) {
-          return;
-        }
+        const row = params.row as any;
 
         return (
-          <Button
-            variant="contained"
-            size="small"
-            color="success"
-            startIcon={<PlayCircleFilledWhiteIcon />}
-            onClick={(e) => {
-              e.stopPropagation();
-              startWork(row.orderid);
-            }}
-          >
-            Start
-          </Button>
+          <SlaTimer
+            slaFinishDate={row.slA_FINISH_DATE ?? row.slaFinishDate ?? params.value}
+            slaFinishTime={row.slA_FINISH_TIME ?? row.slaFinishTime}
+          />
         );
       },
     },
@@ -173,6 +197,7 @@ const DashboardRefurbish = () => {
       },
       flex: 1,
     },
+
   ];
 
   const startWork = (orderid: string) => {
