@@ -429,7 +429,7 @@ const DashboardRefurbish = () => {
             if (step.station == null) return;
             console.log("params.row.worK_ORDER_OPERATION_ID : ", params.row.worK_ORDER_OPERATION_ID);
             console.log("params.row.orderid : ", params.row.orderid);
-            navigate(`/WorkStation/${params.row.orderid}/${params.row.worK_ORDER_OPERATION_ID}`);
+            navigate(`/WorkStation/${params.row.orderid}/${params.row.worK_ORDER_OPERATION_ID}`, { state: { current_operation: params.row.current_operation } });
           }}
         />
       </Paper>

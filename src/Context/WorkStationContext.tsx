@@ -7,6 +7,7 @@ import { steps } from "../Pages/workStation/SetupAndRefurbish";
 import CountTime from "../Utility/countTime";
 import { useTimer } from "../Context/TimerContext";
 import { RemarkField } from "../Utility/RemarkField";
+import EmployeeMultiSelectModal from "../Utility/EmployeeSelect";
 
 
 interface Work {
@@ -312,6 +313,29 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
           lon: 0,
           code: null,
         };
+
+        const confirmSend = await Swal.fire({
+          title: "ยืนยันข้อมูล",
+          html: `
+    <div style="text-align: left;">
+      <p><strong>Work Order:</strong> ${newCloseType.workOrder ?? "-"}</p>
+      <p><strong>Close Type:</strong> ${newCloseType.closeType ?? "-"}</p>
+      <p><strong>Code:</strong> ${newCloseType.code ?? "-"}</p>
+      <p><strong>เวลาเริ่ม :</strong> ${work?.actuaL_START_DATE ?? "-"}</p>
+      <p><strong>เวลาสิ้นสุด :</strong> ${newCloseType.mobile_remark ?? "-"}</p>
+      <p><strong>Location:</strong> ${newCloseType.lat}, ${newCloseType.lon}</p>
+    </div>
+  `,
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "ยืนยัน",
+          cancelButtonText: "ยกเลิก",
+          confirmButtonColor: "#27ae60",
+          cancelButtonColor: "#e74c3c",
+        });
+        // ถ้าไม่ยืนยัน ให้หยุด
+        if (!confirmSend.isConfirmed) return;
+
         setCheckOutCloseType(newCloseType);
         console.log("CheckOutCloseType: ", newCloseType);
         const send_close_type = await callApi.post("/Mobile/SetCheckOutCloseType", newCloseType);
@@ -335,7 +359,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       return;
     }
 
-    // ✅ ไม่ปกติ -> เรียก API อีกตัว (ตอนนี้ยังไม่เสร็จ)
+    // ไม่ปกติ -> เรียก API อีกตัว (ตอนนี้ยังไม่เสร็จ)
     if (pick.isDenied) {
       console.log("Not normal -> TODO API");
 

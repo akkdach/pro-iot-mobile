@@ -59,6 +59,8 @@ import CountTime from "../../Utility/countTime";
 import SimpleElapsedTimer from "../../Utility/SimpleElapsedTimer";
 import { SlaTimer } from "../../Utility/SlaTimer";
 import { RemarkField } from "../../Utility/RemarkField";
+import EmployeeMultiSelectModal, { Employee } from "../../Utility/EmployeeSelect";
+import WorkerRows from "../../Utility/WorkerRows";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -110,8 +112,8 @@ export default function WorkStation() {
     checkListWork,
   } = useWork();
   const location = useLocation();
-  //const row = location.state;
-  //console.log("row naaaaaa : ", row);
+  const row = location.state;
+  console.log("row naaaaaa : ", row);
   const [part, setPart] = useState("");
   const [openAdd, setOpenAdd] = React.useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -139,6 +141,11 @@ export default function WorkStation() {
 
   const [openRemark, setOpenRemark] = useState(false);
   const [remark, setRemark] = useState("");
+
+  const [openEmpModal, setOpenEmpModal] = useState(false);
+  const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
+
+  const [getWorker, setGetWorker] = useState<any>([]);
 
   const { orderId, operationId } = useParams();
 
@@ -245,6 +252,7 @@ export default function WorkStation() {
     onLoad();
     onLoad2();
     onLoad3();
+    onLoad4();
   }, []);
 
   const onLoad = async () => {
@@ -375,6 +383,36 @@ export default function WorkStation() {
       console.error("Error loading images (Master + Box):", e);
     }
   }
+
+  const onLoad4 = async () => {
+    const res = await callApi.get(`/WorkOrderList/GetEmployee/${orderId}/${row?.current_operation}`);
+    const data = res.data;
+    console.log("data refurbish employees : ", data);
+    setGetWorker(data);
+  }
+
+  const handleConfirmEmployeesAndStart = async (emps: Employee[]) => {
+    setOpenEmpModal(false);
+
+    try {
+      setIsWorking(true);
+      setSelectedEmployees(emps);
+
+      const payload = emps.map((e) => ({
+        ORDERID: work?.orderid,
+        current_operation: work?.current_operation,
+        PERSONNEL_NUMBER: e.personnelNumber,
+        NAME: e.personnelName,
+      }));
+
+      await callApi.post(`/WorkOrderList/Employee/${work?.orderid}/${work?.current_operation}`, payload);
+
+      await startWork();
+    } catch (err) {
+      console.log(err);
+      setIsWorking(false);
+    }
+  };
 
   function CustomToolbar() {
     const navigate = useNavigate();
@@ -667,7 +705,7 @@ export default function WorkStation() {
               }}
             />
             <Tab
-              label="Work Order List"
+              label="Employee"
               {...a11yProps(1)}
               sx={{
                 fontSize: "1.1rem",
@@ -676,8 +714,17 @@ export default function WorkStation() {
               }}
             />
             <Tab
-              label="Upload Image"
+              label="Work Order List"
               {...a11yProps(2)}
+              sx={{
+                fontSize: "1.1rem",
+                padding: "12px 24px",
+                minHeight: 60,
+              }}
+            />
+            <Tab
+              label="Upload Image"
+              {...a11yProps(3)}
               sx={{
                 fontSize: "1.1rem",
                 padding: "12px 24px",
@@ -914,8 +961,9 @@ export default function WorkStation() {
                   from: "#2ecc71",
                   to: "#27ae60",
                   onClick: () => {
-                    setIsWorking(true);
-                    startWork();
+                    // setIsWorking(true);
+                    // startWork();
+                    setOpenEmpModal(true);
                   },
                 },
                 //{ label: "Hold", from: "#f1c40f", to: "#f39c12" },
@@ -1003,7 +1051,13 @@ export default function WorkStation() {
           </div>
         </CustomTabPanel>
 
+
         <CustomTabPanel value={value} index={1}>
+          <WorkerRows dataResult={getWorker.dataResult} />
+
+        </CustomTabPanel>
+
+        <CustomTabPanel value={value} index={2}>
           <Paper sx={{ height: 740, width: "100%" }}>
             <Box
               sx={{
@@ -1041,7 +1095,7 @@ export default function WorkStation() {
           </Paper>
         </CustomTabPanel>
 
-        <CustomTabPanel value={value} index={2} keepMounted>
+        <CustomTabPanel value={value} index={3} keepMounted>
           <Box sx={{ p: 3, maxWidth: 800, margin: '0 auto' }}>
             <Typography variant="h5" sx={{ mb: 3, fontWeight: 900, color: '#2d3a4b' }}>
               Upload Work Order Images
@@ -1325,6 +1379,14 @@ export default function WorkStation() {
               });
             }
           }}
+        />
+
+
+        <EmployeeMultiSelectModal
+          open={openEmpModal}
+          onClose={() => setOpenEmpModal(false)}
+          initialSelected={selectedEmployees}
+          onConfirm={handleConfirmEmployeesAndStart}
         />
 
       </div>
