@@ -306,8 +306,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         console.log("Normal API data:", data);
 
         const newCloseType = {
-          closeType: data.closeType,
-          workOrder: data.workOrder,
+          closeType: 1,
+          workOrder: work?.orderid,
           shortText: "",
           mobile_remark: "",
           lat: 0,
@@ -323,7 +323,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       <p><strong>Close Type:</strong> ${newCloseType.closeType ?? "-"}</p>
       <p><strong>Code:</strong> ${newCloseType.code ?? "-"}</p>
       <p><strong>เวลาเริ่ม :</strong> ${work?.actuaL_START_DATE ?? "-"}</p>
-      <p><strong>เวลาสิ้นสุด :</strong> ${newCloseType.mobile_remark ?? "-"}</p>
+      <p><strong>เวลาสิ้นสุด :</strong> ${work?.actuaL_FINISH_DATE ?? "-"}</p>
       <p><strong>Location:</strong> ${newCloseType.lat}, ${newCloseType.lon}</p>
     </div>
   `,
@@ -363,7 +363,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     // ไม่ปกติ -> เรียก API อีกตัว (ตอนนี้ยังไม่เสร็จ)
     if (pick.isDenied) {
       console.log("work is not normal : ", work?.ordeR_TYPE);
-      const type = work?.ordeR_TYPE; // เช่น "ZC01"
+      const type = work?.ordeR_TYPE;
       const options = CloseWorkMaster(type);
 
       if (!options || options.length === 0) {
@@ -404,7 +404,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       console.log("Selected close type:", selected);
 
-      // ✅ กันกรณีไม่มี orderid
+
       if (!work?.orderid) {
         await Swal.fire({
           title: "Error",
@@ -414,25 +414,69 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      // payload ตามที่ต้องการ
-      const newCloseType = {
-        closeType: Number(selectedValue),          // หรือ selected?.value ก็ได้ (แต่ selectedValue ชัวร์)
-        workOrder: work.orderid,           // ORDERID
+      const newCloseType_not_normal = {
+        closeType: Number(selectedValue),
+        workOrder: work.orderid,
         shortText: "",
         mobile_remark: "",
         lat: 0,
         lon: 0,
-        code: selected?.value,
+        code: String(selected?.value ?? ""),
       };
 
-      const send_close_not_normal = await callApi.post(
-        "/Mobile/SetCheckOutCloseType",
-        newCloseType,
-        { headers: { "Content-Type": "application/json" } }
-      );
+      const confirm = await Swal.fire({
+        title: "ยืนยันการส่งข้อมูล?",
+        html: `
+    <div style="text-align:left; line-height:1.6">
+      <div><b>WorkOrder:</b> ${newCloseType_not_normal.workOrder}</div>
+      <div><b>Close Type:</b> ${newCloseType_not_normal.closeType}</div>
+      <div><b>รายการ:</b> ${selected?.label ?? "-"}</div>
+    </div>
+  `,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "ยืนยันส่ง",
+        cancelButtonText: "ยกเลิก",
+        reverseButtons: true,
+      });
 
-      const data_close_not_normal = send_close_not_normal.data;
-      console.log("Send Close Type Not Normal: ", data_close_not_normal);
+      if (!confirm.isConfirmed) return;
+
+      setCheckOutCloseType(newCloseType_not_normal);
+
+      try {
+        Swal.fire({
+          title: "กำลังส่งข้อมูล...",
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+        });
+
+        const send_close_not_normal = await callApi.post(
+          "/Mobile/SetCheckOutCloseType",
+          newCloseType_not_normal,
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        const data_close_not_normal = send_close_not_normal.data;
+        console.log("Send Close Type Not Normal: ", data_close_not_normal);
+
+        await Swal.fire({
+          title: "ส่งสำเร็จ",
+          text: data_close_not_normal?.Message ?? "บันทึกเรียบร้อย",
+          icon: "success",
+        });
+      } catch (err: any) {
+        console.log(err);
+
+        await Swal.fire({
+          title: "ส่งไม่สำเร็จ",
+          text:
+            err?.response?.data?.Message ||
+            err?.message ||
+            "เกิดข้อผิดพลาดระหว่างส่งข้อมูล",
+          icon: "error",
+        });
+      }
 
       return;
     }
