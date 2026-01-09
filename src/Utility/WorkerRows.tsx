@@ -35,7 +35,7 @@ const getInitial = (name?: string) => {
     return t ? t[0] : "?";
 };
 
-export default function WorkerRows({ dataResult, dedupe = true, onRowClick }: Props) {
+export default function WorkerRows({ dataResult, dedupe = false, onRowClick }: Props) {
     const rows = useMemo<NormalizedWorker[]>(() => {
         if (!Array.isArray(dataResult)) return [];
 

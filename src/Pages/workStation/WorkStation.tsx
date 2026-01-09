@@ -61,6 +61,7 @@ import { SlaTimer } from "../../Utility/SlaTimer";
 import { RemarkField } from "../../Utility/RemarkField";
 import EmployeeMultiSelectModal, { Employee } from "../../Utility/EmployeeSelect";
 import WorkerRows from "../../Utility/WorkerRows";
+import { CloseWorkMaster } from "../../Utility/CloseWorkMaster";
 
 interface TabPanelProps {
   children?: React.ReactNode;

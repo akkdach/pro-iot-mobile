@@ -6,9 +6,7 @@ import Swal from "sweetalert2";
 import { steps } from "../Pages/workStation/SetupAndRefurbish";
 import CountTime from "../Utility/countTime";
 import { useTimer } from "../Context/TimerContext";
-import { RemarkField } from "../Utility/RemarkField";
-import EmployeeMultiSelectModal from "../Utility/EmployeeSelect";
-
+import { CloseWorkMaster } from "../Utility/CloseWorkMaster";
 
 interface Work {
   orderid?: string;
@@ -131,6 +129,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     CheckOutCloseType | null
   >(null);
 
+
   const timer = useTimer();
 
   const startWork = async () => {
@@ -139,6 +138,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       if (!work?.orderid) return;
 
       console.log("Work is start", work.orderid);
+
+
 
 
       const confirm = await Swal.fire({
@@ -307,11 +308,11 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         const newCloseType = {
           closeType: data.closeType,
           workOrder: data.workOrder,
-          shortText: null,
-          mobile_remark: null,
+          shortText: "",
+          mobile_remark: "",
           lat: 0,
           lon: 0,
-          code: null,
+          code: "",
         };
 
         const confirmSend = await Swal.fire({
@@ -361,17 +362,77 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
     // ไม่ปกติ -> เรียก API อีกตัว (ตอนนี้ยังไม่เสร็จ)
     if (pick.isDenied) {
-      console.log("Not normal -> TODO API");
+      console.log("work is not normal : ", work?.ordeR_TYPE);
+      const type = work?.ordeR_TYPE; // เช่น "ZC01"
+      const options = CloseWorkMaster(type);
 
-      // โครงไว้ก่อน
-      await Swal.fire({
+      if (!options || options.length === 0) {
+        await Swal.fire({
+          title: "Not normal",
+          text: `ไม่พบตัวเลือกการปิดงานสำหรับ OrderType: ${type ?? "-"}`,
+          icon: "warning",
+        });
+        return;
+      }
+
+      const inputOptions: Record<string, string> = Object.fromEntries(
+        options.map((item: any) => [String(item.value), String(item.label)])
+      );
+
+      const defaultValue = String(
+        options.find((x: any) => x.checked)?.value ?? options[0].value
+      );
+
+      const { isConfirmed, value } = await Swal.fire({
         title: "Not normal",
-        text: "TODO: call fallback API (not ready yet).",
+        text: "กรุณาเลือกประเภทการปิดงาน",
         icon: "info",
+        input: "select",
+        inputOptions,
+        inputValue: defaultValue,
+        inputPlaceholder: "เลือกการปิดงาน",
+        showCancelButton: true,
+        confirmButtonText: "ยืนยัน",
+        cancelButtonText: "ยกเลิก",
+        inputValidator: (v) => (!v ? "กรุณาเลือกประเภทการปิดงาน" : undefined),
       });
 
-      // TODO: ตัวอย่างโครงเรียก API ในอนาคต
-      // await callApi.post("/Mobile/YourFutureApi", { ORDERID: work.orderid });
+      if (!isConfirmed) return;
+
+      const selectedValue = String(value);
+      const selected = options.find((x: any) => String(x.value) === selectedValue);
+
+      console.log("Selected close type:", selected);
+
+      // ✅ กันกรณีไม่มี orderid
+      if (!work?.orderid) {
+        await Swal.fire({
+          title: "Error",
+          text: "ไม่พบ workOrder (orderid)",
+          icon: "error",
+        });
+        return;
+      }
+
+      // payload ตามที่ต้องการ
+      const newCloseType = {
+        closeType: Number(selectedValue),          // หรือ selected?.value ก็ได้ (แต่ selectedValue ชัวร์)
+        workOrder: work.orderid,           // ORDERID
+        shortText: "",
+        mobile_remark: "",
+        lat: 0,
+        lon: 0,
+        code: selected?.value,
+      };
+
+      const send_close_not_normal = await callApi.post(
+        "/Mobile/SetCheckOutCloseType",
+        newCloseType,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      const data_close_not_normal = send_close_not_normal.data;
+      console.log("Send Close Type Not Normal: ", data_close_not_normal);
 
       return;
     }
