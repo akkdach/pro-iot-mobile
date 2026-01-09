@@ -68,6 +68,16 @@ interface CartItem {
   qty: number;
 }
 
+interface CheckOutCloseType {
+  workOrder?: string;
+  closeType?: number;
+  code?: string | null;
+  shortText?: string | null;
+  lat?: number;
+  lon?: number;
+  mobile_remark?: string | null;
+}
+
 interface WorkContextType {
   work: Work | null;
   setWork: React.Dispatch<React.SetStateAction<Work | null>>;
@@ -75,6 +85,11 @@ interface WorkContextType {
   item_component: Item_Component[] | null;
   setItem_Component: React.Dispatch<
     React.SetStateAction<Item_Component[] | null>
+  >;
+
+  checkOutCloseType: CheckOutCloseType | null;
+  setCheckOutCloseType: React.Dispatch<
+    React.SetStateAction<CheckOutCloseType | null>
   >;
 
   sparePart: SparePartApi[] | null;
@@ -110,6 +125,10 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
   const [hasStarted, setHasStarted] = useState<boolean | null>(false);
   const [sparePart, setSparePart] = useState<SparePartApi[] | null>(null);
   const [cartItem, setCartItem] = useState<CartItem[] | null>(null);
+
+  const [checkOutCloseType, setCheckOutCloseType] = useState<
+    CheckOutCloseType | null
+  >(null);
 
   const timer = useTimer();
 
@@ -251,12 +270,97 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const checkListWork = () => {
+  const checkListWork = async () => {
     console.log("work is check list");
+    if (!work?.orderid) return;
+
+    const pick = await Swal.fire({
+      title: "Choose Mode",
+      text: "Select action type:",
+      icon: "question",
+      showCancelButton: true,
+
+      confirmButtonText: "ปกติ",
+      confirmButtonColor: "#1976d2",
+
+      showDenyButton: true,
+      denyButtonText: "ไม่ปกติ",
+      denyButtonColor: "#f39c12",
+
+      cancelButtonText: "Cancel",
+      cancelButtonColor: "#95a5a6",
+    });
+
+    // ยกเลิก
+    if (pick.isDismissed) return;
+
+    // ปกติ -> เรียก API ตัวเดิม
+    if (pick.isConfirmed) {
+      try {
+        const res = await callApi.get(
+          `/Mobile/GetCheckOutCloseType?WorkOrder=${encodeURIComponent(String(work.orderid))}`
+        );
+        const data = res.data.dataResult;
+        console.log("Normal API data:", data);
+
+        const newCloseType = {
+          closeType: data.closeType,
+          workOrder: data.workOrder,
+          shortText: null,
+          mobile_remark: null,
+          lat: 0,
+          lon: 0,
+          code: null,
+        };
+        setCheckOutCloseType(newCloseType);
+        console.log("CheckOutCloseType: ", newCloseType);
+        const send_close_type = await callApi.post("/Mobile/SetCheckOutCloseType", newCloseType);
+        const data_close_normal = send_close_type.data;
+        console.log("Send Close Type Normal: ", data_close_normal);
+
+        // TODO: เอา data ไปทำ swal select ต่อ
+        await Swal.fire({
+          title: "ปกติ",
+          text: "Loaded close type (TODO: show select).",
+          icon: "success",
+        });
+      } catch (err) {
+        console.log("Normal flow error:", err);
+        await Swal.fire({
+          title: "Error",
+          text: "Cannot load close type.",
+          icon: "error",
+        });
+      }
+      return;
+    }
+
+    // ✅ ไม่ปกติ -> เรียก API อีกตัว (ตอนนี้ยังไม่เสร็จ)
+    if (pick.isDenied) {
+      console.log("Not normal -> TODO API");
+
+      // โครงไว้ก่อน
+      await Swal.fire({
+        title: "Not normal",
+        text: "TODO: call fallback API (not ready yet).",
+        icon: "info",
+      });
+
+      // TODO: ตัวอย่างโครงเรียก API ในอนาคต
+      // await callApi.post("/Mobile/YourFutureApi", { ORDERID: work.orderid });
+
+      return;
+    }
   };
 
   const completed = async () => {
     console.log("work is completed");
+
+    const CompletedOptions: Record<string, string> = {
+      completed: "Completed",
+      waiting_part: "Waiting Part",
+      rework: "Rework",
+    };
     try {
       if (!work?.orderid) return;
 
@@ -631,6 +735,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         setSparePart,
         cartItem,
         setCartItem,
+        checkOutCloseType,
+        setCheckOutCloseType,
       }}
     >
       {children}
