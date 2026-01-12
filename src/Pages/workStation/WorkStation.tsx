@@ -445,22 +445,26 @@ export default function WorkStation() {
     const data = res.data;
     console.log("data checked in onLoad5 : ", data);
 
-    // ✅ ดึง isActive ให้เจอแน่ ๆ (กันชื่อ key คนละเคส)
-    const actives: (boolean | null)[] =
-      data?.dataResult?.isActive ??
-      data?.dataResult?.IsActive ??
-      data?.DataResult?.isActive ??
-      data?.DataResult?.IsActive ??
-      [];
+    // ✅ dataResult คือ Array ของ objects
+    const items: { code: string; isActive: boolean | null }[] =
+      data?.dataResult ?? [];
 
-    // ✅ โชว์ checkbox เท่าที่ DB มี (สมมติ actives เรียงตรงกับ checkItems)
-    const itemsToShow = checkItems.slice(0, actives.length);
+    if (items.length === 0) {
+      setVisibleItems(checkItems);
+      setCheckedCodes([]);
+      return;
+    }
+
+    // ✅ แสดง checkbox ตามจำนวนที่ได้มา
+    const itemsToShow = checkItems.filter((c) =>
+      items.some((i) => i.code === c.code)
+    );
     setVisibleItems(itemsToShow);
 
     // ✅ ติ๊กเฉพาะอันที่เป็น true
-    const codes = itemsToShow
-      .filter((_, i) => actives[i] === true)
-      .map((item) => item.code);
+    const codes = items
+      .filter((i) => i.isActive === true)
+      .map((i) => i.code);
 
     setCheckedCodes(codes);
   };
@@ -632,8 +636,36 @@ export default function WorkStation() {
     setOpenCamera(true);
   };
 
-  const onCapture = (files: File[]) => {
+  const onCapture = async (files: File[]) => {
+    setOpenCamera(false);
     console.log("HHH ", files);
+    if (files.length === 0) return;
+    Swal.fire({
+      title: 'กำลังอัพโหลด...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+    let successCount = 0;
+    let failCount = 0;
+    for (const file of files) {
+      try {
+        await callUploadImage({
+          orderId: String(orderId),
+          image: file,
+          // ไม่ส่ง imageKey → อัพโหลดอย่างเดียว ไม่บันทึกลง DB
+        });
+        successCount++;
+      } catch (error) {
+        console.error('Upload failed:', error);
+        failCount++;
+      }
+    }
+    Swal.fire({
+      icon: failCount === 0 ? 'success' : 'warning',
+      title: 'ดำเนินการเสร็จสิ้น',
+      text: `อัพโหลดสำเร็จ ${successCount} รูป${failCount > 0 ? `, ล้มเหลว ${failCount} รูป` : ''}`,
+      confirmButtonText: 'ตกลง',
+    });
   };
 
   const handleUpload = () => {
