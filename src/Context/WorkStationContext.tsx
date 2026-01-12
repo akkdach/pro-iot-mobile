@@ -77,6 +77,10 @@ interface CheckOutCloseType {
   mobile_remark?: string | null;
 }
 
+interface CheckList {
+  code?: string;
+}
+
 interface WorkContextType {
   work: Work | null;
   setWork: React.Dispatch<React.SetStateAction<Work | null>>;
@@ -100,9 +104,12 @@ interface WorkContextType {
   hasStarted: boolean | null;
   setHasStarted: React.Dispatch<React.SetStateAction<boolean | null>>;
 
+  checkList: CheckList[] | null;
+  setCheckList: React.Dispatch<React.SetStateAction<CheckList[] | null>>;
+
   startWork: () => void;
   pauseWork: () => void;
-  finishWork: () => void;
+  finishWork: (codes?: { code?: string }[]) => void;
   checkListWork: () => void;
   completed: () => void;
   returnWork: () => void;
@@ -129,6 +136,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     CheckOutCloseType | null
   >(null);
 
+  const [checkList, setCheckList] = useState<CheckList[] | null>(null);
 
   const timer = useTimer();
 
@@ -207,8 +215,9 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("work is pause");
   };
 
-  const finishWork = async () => {
+  const finishWork = async (codes?: { code?: string }[]) => {
     console.log("work is finish");
+    console.log("checkList in context : ", codes);
     try {
       if (!work?.orderid) return;
 
@@ -227,7 +236,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       const res = await callApi.post(
         "/WorkOrderList/Finish",
-        { ORDERID: work?.orderid, current_operation: work?.current_operation },
+        { ORDERID: work?.orderid, current_operation: work?.current_operation, CHECKED_CODE: codes?.map((c) => c.code) },
         { headers: { "Content-Type": "application/json" } }
       );
 
@@ -866,6 +875,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         setCartItem,
         checkOutCloseType,
         setCheckOutCloseType,
+        checkList,
+        setCheckList,
       }}
     >
       {children}

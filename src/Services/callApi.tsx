@@ -18,7 +18,7 @@ interface AxiosResponse<T = any> {
 // });
 const callApi = axios.create({
   baseURL: 'http://localhost:44496/api/v1', // เปลี่ยนเป็น URL จริงของคุณ
-  timeout: 10000,
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
   },

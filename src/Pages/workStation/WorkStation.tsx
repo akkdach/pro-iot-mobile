@@ -75,18 +75,21 @@ type FileState = {
   isEditable: boolean;
 };
 
+type DbItem = { code: string; isActive: boolean | null };
+
 const paginationModel = { page: 0, pageSize: 5 };
 
-const listCheck = [
-  "Inspector",
-  "Remove Part",
-  "Clean",
-  "Color",
-  "Fix Cooling",
-  "Assembly Part",
-  "Test",
-  "Qc",
+const checkItems = [
+  { code: "0010", label: "Inspector" },
+  { code: "0020", label: "Remove Part" },
+  { code: "0030", label: "Clean" },
+  { code: "0040", label: "Color" },
+  { code: "0050", label: "Fix Cooling" },
+  { code: "0060", label: "Assembly Part" },
+  { code: "0070", label: "Test" },
+  { code: "0080", label: "Qc" },
 ];
+
 
 const style = {
   py: 0,
@@ -111,6 +114,8 @@ export default function WorkStation() {
     returnWork,
     completed,
     checkListWork,
+    checkList,
+    setCheckList,
   } = useWork();
   const location = useLocation();
   const row = location.state;
@@ -147,6 +152,11 @@ export default function WorkStation() {
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
 
   const [getWorker, setGetWorker] = useState<any>([]);
+
+  const [checkedCodes, setCheckedCodes] = React.useState<string[]>([]);
+
+  const [dbItems, setDbItems] = useState<DbItem[]>([]);
+  const [visibleItems, setVisibleItems] = useState(checkItems);
 
   const { orderId, operationId } = useParams();
 
@@ -250,11 +260,32 @@ export default function WorkStation() {
   };
 
   useEffect(() => {
+    console.log("checked codes:", checkedCodes);
+  }, [checkedCodes]);
+
+  useEffect(() => {
     onLoad();
     onLoad2();
     onLoad3();
     onLoad4();
   }, []);
+
+  const normalizeStation = (s?: string) => (s ? s.toString().padStart(4, "0") : "");
+  const pad4 = (s: string) => s.toString().padStart(4, "0");
+
+  useEffect(() => {
+    const st = normalizeStation(row?.current_operation);
+
+    if (!orderId) return;
+
+    // if (st !== "0010") {
+    //   onLoad5();
+    // } else {
+
+    //   setCheckedCodes([]);
+    // }
+    onLoad5();
+  }, [orderId, row?.current_operation]);
 
   const onLoad = async () => {
     let res = await callApi.get(
@@ -391,6 +422,51 @@ export default function WorkStation() {
     console.log("data refurbish employees : ", data);
     setGetWorker(data);
   }
+
+  // const onLoad5 = async () => {
+  //   const res = await callApi.get(`/WorkOrderList/Checked/${orderId}`);
+  //   const data = res.data;
+  //   console.log("data checked in onLoad5 : ", data);
+
+  //   const actives: (boolean | null)[] =
+  //     data?.dataResult?.isActive ??
+  //     data?.DataResult?.isActive ??
+  //     [];
+
+  //   const codes = checkItems
+  //     .filter((_, i) => actives[i] === true)
+  //     .map((item) => item.code);
+
+  //   setCheckedCodes(codes);
+  // }
+
+  const onLoad5 = async () => {
+    const res = await callApi.get(`/WorkOrderList/Checked/${orderId}`);
+    const data = res.data;
+    console.log("data checked in onLoad5 : ", data);
+
+    // ✅ ดึง isActive ให้เจอแน่ ๆ (กันชื่อ key คนละเคส)
+    const actives: (boolean | null)[] =
+      data?.dataResult?.isActive ??
+      data?.dataResult?.IsActive ??
+      data?.DataResult?.isActive ??
+      data?.DataResult?.IsActive ??
+      [];
+
+    // ✅ โชว์ checkbox เท่าที่ DB มี (สมมติ actives เรียงตรงกับ checkItems)
+    const itemsToShow = checkItems.slice(0, actives.length);
+    setVisibleItems(itemsToShow);
+
+    // ✅ ติ๊กเฉพาะอันที่เป็น true
+    const codes = itemsToShow
+      .filter((_, i) => actives[i] === true)
+      .map((item) => item.code);
+
+    setCheckedCodes(codes);
+  };
+
+
+
 
   const handleConfirmEmployeesAndStart = async (emps: Employee[]) => {
     setOpenEmpModal(false);
@@ -687,6 +763,16 @@ export default function WorkStation() {
 
   //console.log("Item component : ", item_component);
 
+  const station = String(row?.current_operation ?? "");
+  const canEditChecklist = station === "0010";
+
+  const toggleCode = (code: string) => {
+    setCheckedCodes((prev) =>
+      prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]
+    );
+
+  };
+
   return (
     <div className="scrollable-div bigBox">
       <Box sx={{ width: "100%" }}>
@@ -759,63 +845,91 @@ export default function WorkStation() {
                 borderRadius: 5,
               }}
             >
-              <Box sx={{ minWidth: 250, maxWidth: 600, flexShrink: 0 }}>
-                <FormControl fullWidth size="small">
-                  <InputLabel id="demo-simple-select-label">Part</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    value={part}
-                    label="Part"
-                    onChange={handleChange}
-                  >
-                    <MenuItem value={10}>Ten</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
-                  </Select>
-                </FormControl>
+
+
+              {/* <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", p: 3 }}>
+                {checkItems.map((item) => {
+                  const checked = checkedCodes.includes(item.code);
+
+                  return (
+                    <FormControlLabel
+                      key={item.code}
+                      disabled={!canEditChecklist}
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={checked}
+                          onChange={() => {
+                            if (!canEditChecklist) return;
+                            toggleCode(item.code);
+                            console.log("checked station code:", item.code);
+                          }}
+                          sx={{
+                            color: "#1976d2",
+                            "&.Mui-checked": { color: "#0d47a1" },
+                          }}
+                        />
+                      }
+                      label={`${item.label}`}
+                      sx={{
+                        m: 0,
+                        p: 1,
+                        px: 2,
+                        borderRadius: "8px",
+                        border: "1px solid #e0e0e0",
+                        backgroundColor: "#fafafa",
+                        transition: "0.2s",
+                        "&:hover": canEditChecklist
+                          ? { backgroundColor: "#f0f7ff", borderColor: "#90caf9" }
+                          : undefined,
+                      }}
+                    />
+                  );
+                })}
+              </Box> */}
+
+              <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", p: 3 }}>
+                {visibleItems.map((item) => {
+                  const checked = checkedCodes.includes(item.code);
+
+                  return (
+                    <FormControlLabel
+                      key={item.code}
+                      disabled={!canEditChecklist}
+                      control={
+                        <Checkbox
+                          size="small"
+                          checked={checked}
+                          onChange={() => {
+                            if (!canEditChecklist) return;
+                            toggleCode(item.code);
+                            console.log("checked station code:", item.code);
+                          }}
+                          sx={{
+                            color: "#1976d2",
+                            "&.Mui-checked": { color: "#0d47a1" },
+                          }}
+                        />
+                      }
+                      label={`${item.label}`}
+                      sx={{
+                        m: 0,
+                        p: 1,
+                        px: 2,
+                        borderRadius: "8px",
+                        border: "1px solid #e0e0e0",
+                        backgroundColor: "#fafafa",
+                        transition: "0.2s",
+                        "&:hover": canEditChecklist
+                          ? { backgroundColor: "#f0f7ff", borderColor: "#90caf9" }
+                          : undefined,
+                      }}
+                    />
+                  );
+                })}
               </Box>
 
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 1.5,
-                  flexWrap: "wrap",
-                  padding: 3,
-                }}
-              >
-                {Array.from({ length: 8 }).map((_, index) => (
-                  <FormControlLabel
-                    key={index}
-                    control={
-                      <Checkbox
-                        size="small"
-                        sx={{
-                          color: "#1976d2",
-                          "&.Mui-checked": {
-                            color: "#0d47a1",
-                          },
-                        }}
-                      />
-                    }
-                    label={listCheck[index]}
-                    sx={{
-                      m: 0,
-                      p: 1,
-                      px: 2,
-                      borderRadius: "8px",
-                      border: "1px solid #e0e0e0",
-                      backgroundColor: "#fafafa",
 
-                      transition: "0.2s",
-                      "&:hover": {
-                        backgroundColor: "#f0f7ff",
-                        borderColor: "#90caf9",
-                      },
-                    }}
-                  />
-                ))}
-              </Box>
             </Box>
           </div>
           <div>
@@ -973,8 +1087,10 @@ export default function WorkStation() {
                   from: "#3498db",
                   to: "#2980b9",
                   onClick: () => {
+                    const mapped = checkedCodes.map((code) => ({ code }));
+                    setCheckList(mapped);
                     setIsWorking(false);
-                    finishWork();
+                    finishWork(mapped);
                   },
                 },
                 {
