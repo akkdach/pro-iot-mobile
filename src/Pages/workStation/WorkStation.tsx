@@ -445,28 +445,40 @@ export default function WorkStation() {
     const data = res.data;
     console.log("data checked in onLoad5 : ", data);
 
-    // ✅ dataResult คือ Array ของ objects
+    // dataResult คือ Array ของ objects
     const items: { code: string; isActive: boolean | null }[] =
       data?.dataResult ?? [];
 
     if (items.length === 0) {
       setVisibleItems(checkItems);
-      setCheckedCodes([]);
+      // setCheckedCodes([]);
+      const station = String(row?.current_operation ?? "");
+      if (station === "0010") {
+        setCheckedCodes(checkItems.map(c => c.code));
+      } else {
+        setCheckedCodes([]);
+      }
+
       return;
     }
 
-    // ✅ แสดง checkbox ตามจำนวนที่ได้มา
+    // แสดง checkbox ตามจำนวนที่ได้มา
     const itemsToShow = checkItems.filter((c) =>
       items.some((i) => i.code === c.code)
     );
     setVisibleItems(itemsToShow);
-
-    // ✅ ติ๊กเฉพาะอันที่เป็น true
-    const codes = items
-      .filter((i) => i.isActive === true)
-      .map((i) => i.code);
-
-    setCheckedCodes(codes);
+    // เพิ่มเช็ค station 0010 ตรงนี้
+    const station = String(row?.current_operation ?? "");
+    if (station === "0010") {
+      // Station 0010 → ติ๊กทั้งหมดเสมอ
+      setCheckedCodes(checkItems.map(c => c.code));
+    } else {
+      // Station อื่น → ติ๊กตาม Backend
+      const codes = items
+        .filter((i) => i.isActive === true)
+        .map((i) => i.code);
+      setCheckedCodes(codes);
+    }
   };
 
 
@@ -632,41 +644,6 @@ export default function WorkStation() {
     setValue(newValue);
   };
 
-  const handleCamera = () => {
-    setOpenCamera(true);
-  };
-
-  const onCapture = async (files: File[]) => {
-    setOpenCamera(false);
-    console.log("HHH ", files);
-    if (files.length === 0) return;
-    Swal.fire({
-      title: 'กำลังอัพโหลด...',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-    });
-    let successCount = 0;
-    let failCount = 0;
-    for (const file of files) {
-      try {
-        await callUploadImage({
-          orderId: String(orderId),
-          image: file,
-          // ไม่ส่ง imageKey → อัพโหลดอย่างเดียว ไม่บันทึกลง DB
-        });
-        successCount++;
-      } catch (error) {
-        console.error('Upload failed:', error);
-        failCount++;
-      }
-    }
-    Swal.fire({
-      icon: failCount === 0 ? 'success' : 'warning',
-      title: 'ดำเนินการเสร็จสิ้น',
-      text: `อัพโหลดสำเร็จ ${successCount} รูป${failCount > 0 ? `, ล้มเหลว ${failCount} รูป` : ''}`,
-      confirmButtonText: 'ตกลง',
-    });
-  };
 
   const handleUpload = () => {
     setOpenUpload(true);
@@ -855,16 +832,7 @@ export default function WorkStation() {
 
         <CustomTabPanel value={value} index={0}>
           <div>
-            {/* <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <DriveFolderUploadIcon
-                sx={{ fontSize: 40 }}
-                onClick={handleUpload}
-              />
-              <CameraAltIcon sx={{ fontSize: 40 }} onClick={handleCamera} />
-              {openUpload && (
-                <UploadPicture open={openUpload} setOpen={setOpenUpload} />
-              )}
-            </Box> */}
+
             <Box
               sx={{
                 display: "flex",
@@ -877,48 +845,6 @@ export default function WorkStation() {
                 borderRadius: 5,
               }}
             >
-
-
-              {/* <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", p: 3 }}>
-                {checkItems.map((item) => {
-                  const checked = checkedCodes.includes(item.code);
-
-                  return (
-                    <FormControlLabel
-                      key={item.code}
-                      disabled={!canEditChecklist}
-                      control={
-                        <Checkbox
-                          size="small"
-                          checked={checked}
-                          onChange={() => {
-                            if (!canEditChecklist) return;
-                            toggleCode(item.code);
-                            console.log("checked station code:", item.code);
-                          }}
-                          sx={{
-                            color: "#1976d2",
-                            "&.Mui-checked": { color: "#0d47a1" },
-                          }}
-                        />
-                      }
-                      label={`${item.label}`}
-                      sx={{
-                        m: 0,
-                        p: 1,
-                        px: 2,
-                        borderRadius: "8px",
-                        border: "1px solid #e0e0e0",
-                        backgroundColor: "#fafafa",
-                        transition: "0.2s",
-                        "&:hover": canEditChecklist
-                          ? { backgroundColor: "#f0f7ff", borderColor: "#90caf9" }
-                          : undefined,
-                      }}
-                    />
-                  );
-                })}
-              </Box> */}
 
               <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", p: 3 }}>
                 {visibleItems.map((item) => {
@@ -1349,29 +1275,6 @@ export default function WorkStation() {
           </DialogActions>
         </Dialog>
 
-
-
-        {/* Camera */}
-        <Dialog
-          open={openCamera}
-          onClose={() => setOpenCamera(false)}
-          fullWidth
-        >
-          <DialogTitle>ถ่ายภาพ</DialogTitle>
-          <DialogContent>
-            <CameraCaptureFile
-              // onCapture={(files) => {
-              //   console.log("Captured:", files);
-              //   setOpenCamera(false);
-              // }}
-              onCapture={onCapture}
-            />
-          </DialogContent>
-
-          <DialogActions>
-            <Button onClick={() => setOpenCamera(false)}>ปิด</Button>
-          </DialogActions>
-        </Dialog>
 
 
         {/* Edit Qty Dialog */}
