@@ -1,4 +1,4 @@
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+// DataGrid ถูกแทนที่ด้วย MaterialReactTable
 import Paper from "@mui/material/Paper";
 import {
   Box,
@@ -18,6 +18,7 @@ import React, {
   useState,
   createContext,
   useContext,
+  useMemo,
 } from "react";
 import { useNavigate, Link, useParams, useLocation } from "react-router-dom";
 import AppHeader from "../../Component/AppHeader";
@@ -29,6 +30,51 @@ import { useWork } from "../../Context/WorkStationContext";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
 import Swal from "sweetalert2";
 import { SlaTimer } from "../../Utility/SlaTimer";
+import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
+
+// Copy จาก SlaTimer.tsx
+function parseTimeToHms(time?: string | null) {
+  if (!time) return null;
+  const t = time.trim();
+  if (/^\d{6}$/.test(t)) {
+    const hh = Number(t.slice(0, 2));
+    const mm = Number(t.slice(2, 4));
+    const ss = Number(t.slice(4, 6));
+    if ([hh, mm, ss].some(Number.isNaN)) return null;
+    return { hh, mm, ss };
+  }
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(t)) {
+    const [h, m, s = "00"] = t.split(":");
+    return { hh: Number(h), mm: Number(m), ss: Number(s) };
+  }
+  return null;
+}
+
+function buildTargetMs(dateStr?: string | null, timeStr?: string | null) {
+  if (!dateStr) return null;
+  const base = new Date(dateStr);
+  if (!Number.isFinite(base.getTime())) return null;
+  const hms = parseTimeToHms(timeStr);
+  if (!hms) return null;
+  base.setHours(hms.hh, hms.mm, hms.ss, 0);
+  return base.getTime();
+}
+
+function getSlaStatus(row: any): "green" | "yellow" | "red" | "none" {
+  const startMs = buildTargetMs(row.slA_START_DATE, row.slA_START_TIME);
+  const finishMs = buildTargetMs(row.slA_FINISH_DATE, row.slA_FINISH_TIME);
+  if (!startMs || !finishMs || finishMs <= startMs) return "none";
+
+  const nowMs = Date.now();
+  const remainingMs = finishMs - nowMs;
+  const totalMs = finishMs - startMs;
+
+  if (remainingMs < 0) return "red";
+  const percent = nowMs <= startMs ? 100 : (remainingMs / totalMs) * 100;
+  if (percent >= 31) return "green";
+  return "yellow";
+}
+
 
 const DashboardRefurbish = () => {
   const { work, setWork } = useWork();
@@ -44,6 +90,32 @@ const DashboardRefurbish = () => {
   const [dateFilter, setDateFilter] = useState(today);
   const [items, setItems] = useState<any[]>([]);
   const [itemEach, setItemEach] = useState();
+
+
+
+  type WorkOrderRow = {
+    orderid: string;
+    ordeR_TYPE?: string;
+    shorT_TEXT?: string;
+    equipment?: string;
+    weB_STATUS?: string;
+
+    slA_FINISH_DATE?: any;
+    slA_FINISH_TIME?: any;
+    slA_START_DATE?: any;
+    slA_START_TIME?: any;
+
+    slaFinishDate?: any;
+    slaFinishTime?: any;
+    slaStartDate?: any;
+    slaStartTime?: any;
+
+    actuaL_START_DATE?: any;
+    actuaL_FINISH_DATE?: any;
+
+    worK_ORDER_OPERATION_ID?: string;
+    current_operation?: string;
+  };
 
   useEffect(() => {
     setStep(location.state);
@@ -77,133 +149,52 @@ const DashboardRefurbish = () => {
     }
   };
 
-  const columns: GridColDef[] = [
-    // {
-    //   field: "State",
-    //   headerName: "State",
-    //   width: 130,
-    //   renderCell: (params) => {
-    //     const level = params.row.weB_STATUS;
-    //     console.log("level : ", level);
-    //     const dotCount =
-    //       level === 4
-    //         ? 4
-    //         : level === 3
-    //           ? 3
-    //           : level === 2
-    //             ? 2
-    //             : level === 1
-    //               ? 1
-    //               : 0;
-    //     const activeColor =
-    //       level === 4 ? "#2e7d32" :
-    //         level === 3 ? "#2e7d32" :
-    //           level === 2 ? "#f9a825" :
-    //             level === 1 ? "#d32f2f" :
-    //               "#e0e0e0";
-
-    //     return (
-    //       <Box
-    //         sx={{
-    //           display: "flex",
-    //           alignItems: "center",
-    //           justifyContent: "flex-start",
-    //           height: "100%",
-    //           width: "100%",
-    //           gap: 0.8,
-    //         }}
-    //       >
-    //         {[1, 2, 3].map((i) => (
-    //           <Box
-    //             key={i}
-    //             sx={{
-    //               width: 10,
-    //               height: 10,
-    //               borderRadius: "50%",
-    //               backgroundColor: i <= dotCount ? activeColor : "#e0e0e0",
-    //               transition: "0.2s",
-    //             }}
-    //           />
-    //         ))}
-    //       </Box>
-    //     );
-    //   },
-    // },
-    // {
-    //   field: "action",
-    //   headerName: "Action",
-    //   width: 120,
-    //   sortable: false,
-    //   filterable: false,
-    //   renderCell: (params) => {
-    //     const row = params.row;
-    //     if (step.station != null) {
-    //       return;
-    //     }
-
-    //     return (
-    //       <Button
-    //         variant="contained"
-    //         size="small"
-    //         color="success"
-    //         startIcon={<PlayCircleFilledWhiteIcon />}
-    //         onClick={(e) => {
-    //           e.stopPropagation();
-    //           startWork(row.orderid);
-    //         }}
-    //       >
-    //         Start
-    //       </Button>
-    //     );
-    //   },
-    // },
-    {
-      field: "slaFinishDate",
-      headerName: "SLA Timer",
-      width: 200,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => {
-        const row = params.row as any;
-
-        return (
+  // Material React Table Columns
+  const columns = useMemo<MRT_ColumnDef<WorkOrderRow>[]>(
+    () => [
+      {
+        header: "SLA Timer",
+        accessorKey: "slaFinishDate",
+        enableSorting: false,
+        enableColumnFilter: false,
+        Cell: ({ row }) => (
           <SlaTimer
-            slaFinishDate={row.slA_FINISH_DATE ?? row.slaFinishDate ?? params.value}
-            slaFinishTime={row.slA_FINISH_TIME ?? row.slaFinishTime}
-            slaStartDate={String(row.slA_START_DATE)}
-            slaStartTime={String(row.slA_START_TIME)}
+            slaFinishDate={row.original.slA_FINISH_DATE ?? row.original.slaFinishDate}
+            slaFinishTime={row.original.slA_FINISH_TIME ?? row.original.slaFinishTime}
+            slaStartDate={String(row.original.slA_START_DATE)}
+            slaStartTime={String(row.original.slA_START_TIME)}
           />
-        );
+        ),
       },
-    },
-    { field: "orderid", headerName: "Work Order", width: 130, flex: 1 },
-    { field: "ordeR_TYPE", headerName: "Order Type", width: 130, flex: 1 },
-    { field: "shorT_TEXT", headerName: "Description", width: 200, flex: 1 },
-    { field: "equipment", headerName: "Equipment", width: 100, flex: 1 },
-    { field: "weB_STATUS", headerName: "Status", width: 100, flex: 1 },
-    {
-      field: "actuaL_START_DATE",
-      headerName: "Start Date",
-      // type: "date",
-      width: 130,
-      renderCell: (params) => {
-        return formatDate(params.value);
+      {
+        accessorKey: "orderid",
+        header: "Work Order",
       },
-      flex: 1,
-    },
-
-    {
-      field: "actuaL_FINISH_DATE",
-      headerName: "Finish Date",
-      // type: "date",
-      width: 130,
-      renderCell: (params) => {
-        return formatDate(params.value);
+      {
+        accessorKey: "ordeR_TYPE",
+        header: "Order Type",
       },
-      flex: 1,
-    },
-
-  ];
+      {
+        accessorKey: "equipment",
+        header: "Equipment",
+      },
+      {
+        accessorKey: "actuaL_START_DATE",
+        header: "Start Date",
+        Cell: ({ cell }) => formatDate(cell.getValue<string>()),
+      },
+      {
+        accessorKey: "actuaL_FINISH_DATE",
+        header: "Finish Date",
+        Cell: ({ cell }) => formatDate(cell.getValue<string>()),
+      },
+      {
+        accessorKey: "shorT_TEXT",
+        header: "Description",
+      },
+    ],
+    []
+  );
 
   const startWork = (orderid: string) => {
     Swal.fire({
@@ -255,9 +246,6 @@ const DashboardRefurbish = () => {
 
   const safeItems = Array.isArray(items) ? items : [];
 
-  const orderTypes = Array.from(
-    new Set(safeItems.map((row) => row.order_TYPE))
-  );
 
   const filteredRows = safeItems.filter((row) => {
     const matchWorkOrder = row.orderid
@@ -265,61 +253,18 @@ const DashboardRefurbish = () => {
       .toLowerCase()
       .includes(workOrderFilter.toLowerCase());
 
-    const matchStatus = statusFilter === "" || row.weB_STATUS === statusFilter;
-
-    const matchOrderType =
-      orderTypeFilter === "" || row.ordeR_TYPE === orderTypeFilter;
-
-    // const matchDate =
-    //   !dateFilter ||
-    //   (row.StartDate instanceof Date &&
-    //     row.StartDate.toISOString().split("T")[0] === dateFilter);
-
-    return matchWorkOrder && matchStatus && matchOrderType;
+    const matchSlaStatus = stationToFilter === "" ||
+      getSlaStatus(row) === stationToFilter;
+    return matchWorkOrder && matchSlaStatus;
   });
+
 
   return (
     <div style={{ height: "100%" }}>
       <AppHeader title={step?.title} icon={<BackupTableIcon />} />
       <Stack direction="row" spacing={2} mb={2} mt={10} px={5}>
-        <TextField
-          label="ค้นหา Work Order"
-          placeholder="เช่น WO-1001"
-          size="small"
-          value={workOrderFilter}
-          onChange={(e) => setWorkOrderFilter(e.target.value)}
-        />
 
-        {/* <TextField
-          label="วันที่"
-          type="date"
-          size="small"
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        /> */}
-
-        <FormControl size="small" sx={{ minWidth: 160 }}>
-          <InputLabel id="status-label">Status</InputLabel>
-          <Select
-            labelId="status-label"
-            label="Status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>ทั้งหมด</em>
-            </MenuItem>
-            <MenuItem value="1">1</MenuItem>
-            <MenuItem value="2">2</MenuItem>
-            <MenuItem value="3">3</MenuItem>
-            <MenuItem value="4">4</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 140 }}>
+        {/* <FormControl size="small" sx={{ minWidth: 140 }}>
           <InputLabel id="order-type-label">Order Type</InputLabel>
           <Select
             labelId="order-type-label"
@@ -337,61 +282,8 @@ const DashboardRefurbish = () => {
               </MenuItem>
             ))}
           </Select>
-        </FormControl>
+        </FormControl> */}
 
-        <FormControl size="small" sx={{ minWidth: 160 }}>
-          <InputLabel id="station-to-label">Station From</InputLabel>
-          <Select
-            labelId="station-to-label"
-            label="Station To"
-            value={stationToFilter}
-            onChange={(e) => setStationToFilter(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>ทั้งหมด</em>
-            </MenuItem>
-
-            <MenuItem value="A">Station A</MenuItem>
-            <MenuItem value="B">Station B</MenuItem>
-            <MenuItem value="C">Station C</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 160 }}>
-          <InputLabel id="station-to-label">Station To</InputLabel>
-          <Select
-            labelId="station-to-label"
-            label="Station To"
-            value={stationToFilter}
-            onChange={(e) => setStationToFilter(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>ทั้งหมด</em>
-            </MenuItem>
-
-            <MenuItem value="A">Station A</MenuItem>
-            <MenuItem value="B">Station B</MenuItem>
-            <MenuItem value="C">Station C</MenuItem>
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 160 }}>
-          <InputLabel id="station-to-label">Work Center</InputLabel>
-          <Select
-            labelId="station-to-label"
-            label="Station To"
-            value={stationToFilter}
-            onChange={(e) => setStationToFilter(e.target.value)}
-          >
-            <MenuItem value="">
-              <em>ทั้งหมด</em>
-            </MenuItem>
-
-            <MenuItem value="A">Station A</MenuItem>
-            <MenuItem value="B">Station B</MenuItem>
-            <MenuItem value="C">Station C</MenuItem>
-          </Select>
-        </FormControl>
 
         <FormControl size="small" sx={{ minWidth: 160 }}>
           <InputLabel id="station-to-label">SLA Status</InputLabel>
@@ -405,34 +297,59 @@ const DashboardRefurbish = () => {
               <em>ทั้งหมด</em>
             </MenuItem>
 
-            <MenuItem value="A">Station A</MenuItem>
-            <MenuItem value="B">Station B</MenuItem>
-            <MenuItem value="C">Station C</MenuItem>
+            <MenuItem value="green">🟢 เวลาเหลือเยอะ</MenuItem>
+            <MenuItem value="yellow">🟡 ใกล้ถึงเวลา</MenuItem>
+            <MenuItem value="red">🔴 เลย SLA</MenuItem>
           </Select>
         </FormControl>
       </Stack>
 
-      <Paper sx={{ height: "100vh", width: "100%", paddingBottom: 8 }}>
-        <DataGrid
-          checkboxSelection={false}
-          rows={filteredRows}
-          getRowId={(items) => items.orderid}
+      <Box sx={{ width: "100%", height: "calc(100vh - 180px)", mt: 2, mb: 8 }}>
+        <MaterialReactTable
+          enableGlobalFilter={true}
           columns={columns}
+          data={filteredRows as WorkOrderRow[]}
+          enableColumnFilters={true}
+          enablePagination={true}
+          enableRowSelection={false}
           initialState={{
-            pagination: {
-              paginationModel: { pageSize: 30, page: 0 },
+            showGlobalFilter: true,
+            pagination: { pageSize: 30, pageIndex: 0 },
+          }}
+          muiTablePaperProps={{
+            sx: {
+              display: "flex",
+              flexDirection: "column",
+              height: "100%",
+
             },
           }}
-          pageSizeOptions={[10, 20, 30]}
-          sx={{ border: 0, width: "100%" }}
-          onRowClick={(params) => {
-            if (step.station == null) return;
-            console.log("params.row.worK_ORDER_OPERATION_ID : ", params.row.worK_ORDER_OPERATION_ID);
-            console.log("params.row.orderid : ", params.row.orderid);
-            navigate(`/WorkStation/${params.row.orderid}/${params.row.worK_ORDER_OPERATION_ID}`, { state: { current_operation: params.row.current_operation } });
+          muiTableContainerProps={{
+            sx: {
+              flexGrow: 1,
+              minHeight: "calc(100vh - 280px)",
+
+            },
+          }}
+          muiTableBodyRowProps={({ row }) => ({
+            onClick: () => {
+              if (step.station == null) return;
+              console.log("row.original.worK_ORDER_OPERATION_ID : ", row.original.worK_ORDER_OPERATION_ID);
+              console.log("row.original.orderid : ", row.original.orderid);
+              navigate(`/WorkStation/${row.original.orderid}/${row.original.worK_ORDER_OPERATION_ID}`, {
+                state: { current_operation: row.original.current_operation },
+              });
+            },
+            sx: { cursor: step.station != null ? "pointer" : "default" },
+          })}
+          muiSearchTextFieldProps={{
+            placeholder: "ค้นหา Work Order...",
+            sx: { minWidth: 300 },
+            variant: "outlined",
+            size: "small",
           }}
         />
-      </Paper>
+      </Box>
     </div>
   );
 };
