@@ -855,7 +855,7 @@ export default function WorkStation() {
 
         <CustomTabPanel value={value} index={0}>
           <div>
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+            {/* <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
               <DriveFolderUploadIcon
                 sx={{ fontSize: 40 }}
                 onClick={handleUpload}
@@ -864,7 +864,7 @@ export default function WorkStation() {
               {openUpload && (
                 <UploadPicture open={openUpload} setOpen={setOpenUpload} />
               )}
-            </Box>
+            </Box> */}
             <Box
               sx={{
                 display: "flex",
