@@ -566,20 +566,7 @@ const StockReport: React.FC = () => {
               </Stack>
 
               <Divider />
-              <Typography fontWeight={800}>Raw JSON</Typography>
-              <Box
-                component="pre"
-                sx={{
-                  m: 0,
-                  p: 1.2,
-                  borderRadius: 2,
-                  background: "rgba(0,0,0,0.04)",
-                  overflow: "auto",
-                  fontSize: 12,
-                }}
-              >
-                {JSON.stringify(selected, null, 2)}
-              </Box>
+
             </Stack>
           ) : (
             <Typography color="text.secondary">-</Typography>
