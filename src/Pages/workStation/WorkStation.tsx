@@ -213,10 +213,6 @@ export default function WorkStation() {
         };
       });
 
-      // Special check: If for some reason the editItem wasn't found in item_component (rare but possible if fresh add),
-      // we might need to append it. But typically in this View, we only edit existing.
-      // So we assume it's covered by the map.
-
       Swal.fire({
         title: "กำลังบันทึก...",
         allowOutsideClick: false,
@@ -271,19 +267,11 @@ export default function WorkStation() {
   }, []);
 
   const normalizeStation = (s?: string) => (s ? s.toString().padStart(4, "0") : "");
-  const pad4 = (s: string) => s.toString().padStart(4, "0");
 
   useEffect(() => {
     const st = normalizeStation(row?.current_operation);
 
     if (!orderId) return;
-
-    // if (st !== "0010") {
-    //   onLoad5();
-    // } else {
-
-    //   setCheckedCodes([]);
-    // }
     onLoad5();
   }, [orderId, row?.current_operation]);
 
@@ -423,29 +411,13 @@ export default function WorkStation() {
     setGetWorker(data);
   }
 
-  // const onLoad5 = async () => {
-  //   const res = await callApi.get(`/WorkOrderList/Checked/${orderId}`);
-  //   const data = res.data;
-  //   console.log("data checked in onLoad5 : ", data);
-
-  //   const actives: (boolean | null)[] =
-  //     data?.dataResult?.isActive ??
-  //     data?.DataResult?.isActive ??
-  //     [];
-
-  //   const codes = checkItems
-  //     .filter((_, i) => actives[i] === true)
-  //     .map((item) => item.code);
-
-  //   setCheckedCodes(codes);
-  // }
 
   const onLoad5 = async () => {
     const res = await callApi.get(`/WorkOrderList/Checked/${orderId}`);
     const data = res.data;
     console.log("data checked in onLoad5 : ", data);
 
-    // dataResult คือ Array ของ objects
+    // dataResult คือ Array ของ object
     const items: { code: string; isActive: boolean | null }[] =
       data?.dataResult ?? [];
 
@@ -1052,17 +1024,17 @@ export default function WorkStation() {
                   },
                 },
                 {
-                  label: "Check List",
+                  label: "Completed",
                   from: "#9b59b6",
                   to: "#8e44ad",
                   onClick: checkListWork,
                 },
                 {
-                  label: "Completed",
+                  label: "Completed.",
                   from: "#2980b9",
                   to: "#2471a3",
                   onClick: completed,
-                  hide: normalizedOp !== "0080",
+                  hide: normalizedOp !== "0090",
                 },
                 {
                   label: "Return",
