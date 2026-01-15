@@ -8,7 +8,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import QuestionAnswerRoundedIcon from '@mui/icons-material/QuestionAnswerRounded';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
-
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 
 export default function Home() {
 
@@ -31,59 +31,66 @@ export default function Home() {
                 </Grid>
             </Grid>
             <Grid container spacing={2} sx={{ flex: 1, flexDirection: 'row', justifyContent: 'center', marginTop: 2 }}>
-                <Grid size={12} sx={{width:'100%'}}>
+                <Grid size={12} sx={{ width: '100%' }}>
                     <Link to={'StandardTimeDashboard'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px'}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <Dashboard sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Dashboard</span>
                         </Box>
                     </Link>
                     <Link to={'/checkin'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px'}}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <Map sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Check in-out</span>
                         </Box>
                     </Link>
 
                     <Link to={'/List'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <DeviceThermostatIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>IoT Service</span>
                         </Box>
                     </Link>
 
                     <Link to={'/InventoryList'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <Inventory sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Inventory Counting</span>
                         </Box>
                     </Link>
 
                     <Link to={'/MyDocument'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <UploadFileIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>My Document</span>
                         </Box>
                     </Link>
 
                     <Link to={'/EquipmentDashboard'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <ConstructionIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Equipment</span>
                         </Box>
                     </Link>
 
                     <Link to={'/Chat'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <QuestionAnswerRoundedIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Chat</span>
                         </Box>
                     </Link>
 
                     <Link to={'/SetupAndRefurbish'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px',margin:'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <HomeWorkIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Station</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/DashboardQC'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <FactCheckIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>QC</span>
                         </Box>
                     </Link>
                 </Grid>

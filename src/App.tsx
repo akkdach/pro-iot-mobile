@@ -38,6 +38,7 @@ import StockReport from './Pages/workStation/StockReport';
 import StockReportItem from './Pages/workStation/StockReportItem';
 import AddSpareFromStock from './Pages/workStation/AddSpareFromStock';
 import DashboardMonitoring from './Pages/workStation/DashboardMonitoring';
+import DashboardQC from './Pages/Qc/DashboardQC';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -74,6 +75,7 @@ function App() {
           <Route path="StockReportItem/:resId" element={<StockReportItem />}></Route>
           <Route path="AddSpareFromStock" element={<AddSpareFromStock />}></Route>
           <Route path="DashboardMonitoring" element={<DashboardMonitoring />}></Route>
+          <Route path="DashboardQC" element={<DashboardQC />}></Route>
         </Routes></Layout></UserProvider>) : (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
 
       </div>
