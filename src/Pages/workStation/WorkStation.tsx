@@ -101,6 +101,16 @@ const style = {
   backgroundColor: "background.paper",
 };
 
+// แปลง station พิเศษ → station หลัก เพื่อดึงพนักงาน
+const getParentStation = (station: string): string => {
+  const specialStationMap: Record<string, string> = {
+    "0049": "0040",
+    "0079": "0070",
+    "0089": "0080",
+  };
+  return specialStationMap[station] ?? station;
+};
+
 export default function WorkStation() {
   const {
     addPart,
@@ -405,7 +415,12 @@ export default function WorkStation() {
   }
 
   const onLoad4 = async () => {
-    const res = await callApi.get(`/WorkOrderList/GetEmployee/${orderId}/${row?.current_operation}`);
+    // ถ้าเป็น station พิเศษ ให้ดึงพนักงานจาก station หลักแทน
+    const currentStation = String(row?.current_operation ?? "").padStart(4, "0");
+    const fetchStation = getParentStation(currentStation);
+    console.log(`[onLoad4] currentStation: ${currentStation}, fetchStation: ${fetchStation}`);
+
+    const res = await callApi.get(`/WorkOrderList/GetEmployee/${orderId}/${fetchStation}`);
     const data = res.data;
     console.log("data refurbish employees : ", data);
     setGetWorker(data);
@@ -1376,7 +1391,8 @@ export default function WorkStation() {
 
               const res = await callApi.post("/WorkOrderList/RemarkStop", {
                 WORK_ORDER_OPERATION_ID: work?.worK_ORDER_OPERATION_ID,
-                stop_remark: dropdown,
+                stop_remark: dropdown, current_operation: work?.current_operation,
+                ORDERID: work?.orderid,
               });
 
               console.log("res:", res.data);
