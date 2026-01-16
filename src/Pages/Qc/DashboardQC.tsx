@@ -6,7 +6,6 @@ import {
     Typography,
     Stack,
     Chip,
-    IconButton,
     Button,
     Divider,
     FormControl,
@@ -15,89 +14,21 @@ import {
     InputLabel,
     TextField,
     Pagination,
-    Tooltip,
+    IconButton,
 } from "@mui/material";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import PlayCircleIcon from "@mui/icons-material/PlayCircle";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import HourglassTopIcon from "@mui/icons-material/HourglassTop";
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import DoneIcon from "@mui/icons-material/Done";
-import ReplayIcon from "@mui/icons-material/Replay";
-
+import AppHearder from "../../Component/AppHeader";
 import callApi from "../../Services/callApi";
+import { useNavigate } from "react-router-dom";
+import {
+    WorkOrderRow,
+    WorkOrderTodoCard,
+    isCompleted,
+    isInProgress,
+    isPending
+} from "./Detail";
 
-
-// ====== types ======
-export type WorkOrderRow = {
-    orderid: string;
-    ordeR_TYPE?: string;
-    shorT_TEXT?: string;
-    equipment?: string;
-
-    weB_STATUS?: number | string;
-    userstatus?: string;
-    slA_FLAG?: number;
-
-    plant?: string;
-    mN_WK_CTR?: string | null;
-
-    current_operation?: string;
-    station?: string;
-
-    slA_FINISH_DATE?: string | null;
-    slA_FINISH_TIME?: string | null;
-    slA_START_DATE?: string | null;
-    slA_START_TIME?: string | null;
-
-    productioN_START_DATE?: string | null;
-    productioN_START_TIME?: string | null;
-
-    slaFinishDate?: any;
-    slaFinishTime?: any;
-    slaStartDate?: any;
-    slaStartTime?: any;
-
-    actuaL_START_DATE?: string | null;
-    actuaL_START_TIME?: string | null;
-    actuaL_FINISH_DATE?: string | null;
-    actuaL_FINISH_TIME?: string | null;
-
-    acT_START_DATE?: string | null;
-    acT_START_TIME?: string | null;
-    acT_END_DATE?: string | null;
-    acT_END_TIME?: string | null;
-
-    worK_ACTUAL?: number;
-    servicE_TIME?: number;
-
-    worK_ORDER_OPERATION_ID?: number;
-    worK_ORDER_COMPONENT_ID?: number;
-};
-
-// ====== helpers ======
-const formatDate = (value: any) => {
-    if (!value) return "-";
-    try {
-        const d = value instanceof Date ? value : new Date(value);
-        if (Number.isNaN(d.getTime())) return String(value);
-        return d.toLocaleString();
-    } catch {
-        return String(value);
-    }
-};
-
-const isCompleted = (r: WorkOrderRow) => r.weB_STATUS === 4 || r.weB_STATUS === "4";
-const isInProgress = (r: WorkOrderRow) => !!r.actuaL_START_DATE && !r.actuaL_FINISH_DATE;
-const isPending = (r: WorkOrderRow) => !r.actuaL_START_DATE && !r.actuaL_FINISH_DATE;
-
-const getStatusMeta = (r: WorkOrderRow) => {
-    if (isCompleted(r)) return { label: "Completed", color: "success" as const };
-    if (isInProgress(r)) return { label: "In Progress", color: "info" as const };
-    if (isPending(r)) return { label: "Pending", color: "warning" as const };
-    return { label: "Unknown", color: "default" as const };
-};
 
 function KpiCard(props: {
     title: string;
@@ -160,118 +91,11 @@ function KpiCard(props: {
     );
 }
 
-function WorkOrderTodoCard(props: {
-    row: WorkOrderRow;
-    onOpen?: (row: WorkOrderRow) => void;
-    onApprove?: (row: WorkOrderRow) => void;
-    onRework?: (row: WorkOrderRow) => void;
-}) {
-    const { row, onOpen, onApprove, onRework } = props;
-    const status = getStatusMeta(row);
-
-    const stationLabelMap: Record<string, string> = {
-        "0010": "Inspector",
-        "0020": "Remove Part",
-        "0030": "Clean",
-        "0040": "Color",
-        "0050": "Fix Cooling",
-        "0060": "Assembly Part",
-        "0070": "Test",
-        "0080": "QC",
-    };
-
-    const stationCode = row.current_operation ?? row.station ?? "-";
-    const stationName = stationLabelMap[stationCode] ?? stationCode;
-
-    return (
-        <Card
-            variant="outlined"
-            sx={{
-                borderRadius: 3,
-                overflow: "hidden",
-                boxShadow: "0 10px 28px rgba(0,0,0,0.06)",
-            }}
-        >
-            {/* accent bar */}
-            <Box
-                sx={{
-                    height: 4,
-                    bgcolor:
-                        status.color === "success"
-                            ? "success.main"
-                            : status.color === "info"
-                                ? "info.main"
-                                : status.color === "warning"
-                                    ? "warning.main"
-                                    : "grey.400",
-                }}
-            />
-
-            <CardContent sx={{ p: 2 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
-                    <Box sx={{ minWidth: 0 }}>
-                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-                            <Chip size="small" label={status.label} color={status.color} />
-                            <Chip size="small" variant="outlined" label={`Station: ${stationName}`} />
-                            {!!row.equipment && <Chip size="small" variant="outlined" label={`EQ: ${row.equipment}`} />}
-                        </Stack>
-
-                        <Typography sx={{ fontWeight: 900, mt: 1, lineHeight: 1.2 }} noWrap>
-                            {row.orderid}
-                        </Typography>
-
-                        <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }} noWrap>
-                            {row.shorT_TEXT || "-"}
-                        </Typography>
-                    </Box>
-
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Tooltip title="Open">
-                            <IconButton size="small" onClick={() => onOpen?.(row)}>
-                                <OpenInNewIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-
-                    </Stack>
-                </Stack>
-
-                <Divider sx={{ my: 1.5 }} />
-
-                <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
-                    <Box>
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                            SLA Timer
-                        </Typography>
-                    </Box>
-
-                    <Box sx={{ textAlign: "right" }}>
-                        <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                            Start / Finish
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                            {formatDate(row.actuaL_START_DATE)}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                            {formatDate(row.actuaL_FINISH_DATE)}
-                        </Typography>
-                    </Box>
-                </Stack>
-            </CardContent>
-        </Card>
-    );
-}
-
 export default function Dashboard_QC_CardTodo() {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [filterType, setFilterType] = useState<"all" | "completed" | "inProgress" | "pending">("all");
     const [stationFilter, setStationFilter] = useState<string | null>(null);
-
-    // Date filter state
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1;
-    const [startMonth, setStartMonth] = useState<string>(`${currentYear}-01`);
-    const [endMonth, setEndMonth] = useState<string>(`${currentYear}-${String(currentMonth).padStart(2, "0")}`);
-
     const [rows, setRows] = useState<WorkOrderRow[]>([]);
 
     // extra: search + sort + paging (สำหรับ card list)
@@ -280,15 +104,14 @@ export default function Dashboard_QC_CardTodo() {
     const [page, setPage] = useState(1);
     const pageSize = 12;
 
-    const onLoad = async (start?: string, end?: string) => {
+    const onLoad = async () => {
         setLoading(true);
         try {
-            const startDate = start || startMonth;
-            const endDate = end || endMonth;
-            const url = `/WorkOrderList/workOrderList?startMonth=${startDate}&endMonth=${endDate}`;
-            const res = await callApi.get(url);
-            const data = res.data.dataResult;
-            setRows(data ?? []);
+            const res = await callApi.get("/WorkOrderList/Qc_Check");
+            console.log("API Response:", res.data); // Debug: ดูโครงสร้าง response
+            const data = res.data?.DataResult ?? res.data?.dataResult;
+            // ป้องกัน error ถ้า data ไม่ใช่ array
+            setRows(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error loading work orders:", error);
         } finally {
@@ -307,7 +130,7 @@ export default function Dashboard_QC_CardTodo() {
         const inProgress = rows.filter(isInProgress).length;
         const pending = rows.filter(isPending).length;
 
-        const stations = ["0010", "0020", "0030", "0040", "0050", "0060", "0070", "0080"];
+        const stations = ["0049", "0079", "0089"];
         const stationKpis = stations.reduce((acc, station) => {
             const stationRows = rows.filter((r) => r.current_operation === station);
             acc[station] = {
@@ -369,7 +192,7 @@ export default function Dashboard_QC_CardTodo() {
     // reset page เมื่อ filter เปลี่ยน
     useEffect(() => {
         setPage(1);
-    }, [filterType, stationFilter, q, sortMode, startMonth, endMonth]);
+    }, [filterType, stationFilter, q, sortMode]);
 
     const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
     const pagedRows = filteredRows.slice((page - 1) * pageSize, page * pageSize);
@@ -382,8 +205,10 @@ export default function Dashboard_QC_CardTodo() {
     const onRefresh = async () => {
         setLoading(true);
         try {
-            const res = await callApi.get("/WorkOrderList/WorkOrderList");
-            setRows(res.data.dataResult ?? []);
+            const res = await callApi.get("/WorkOrderList/Qc_Check");
+            console.log("Refresh API Response:", res.data); // Debug
+            const data = res.data.dataResult;
+            setRows(Array.isArray(data) ? data : []);
         } finally {
             setLoading(false);
         }
@@ -392,7 +217,8 @@ export default function Dashboard_QC_CardTodo() {
     return (
         <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1500, mx: "auto" }}>
             {/* Header */}
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+            <AppHearder title="QC Dashboard" />
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2, mt: 7 }}>
                 <Box>
                     <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: -0.5 }}>
                         QC Dashboard
@@ -401,54 +227,7 @@ export default function Dashboard_QC_CardTodo() {
                 </Box>
 
                 <Stack direction="row" gap={2} alignItems="center">
-                    {/* Date Filter */}
-                    <FormControl size="small" sx={{ minWidth: 130 }}>
-                        <InputLabel>เริ่มต้น</InputLabel>
-                        <Select
-                            value={startMonth}
-                            label="เริ่มต้น"
-                            onChange={(e) => {
-                                setStartMonth(e.target.value);
-                                onLoad(e.target.value, endMonth);
-                            }}
-                        >
-                            {Array.from({ length: 12 }, (_, i) => {
-                                const m = String(i + 1).padStart(2, "0");
-                                const key = `${currentYear}-${m}`;
-                                const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-                                return (
-                                    <MenuItem key={key} value={key}>
-                                        {thaiMonths[i]} {currentYear}
-                                    </MenuItem>
-                                );
-                            })}
-                        </Select>
-                    </FormControl>
 
-                    <Typography variant="body2">ถึง</Typography>
-
-                    <FormControl size="small" sx={{ minWidth: 130 }}>
-                        <InputLabel>สิ้นสุด</InputLabel>
-                        <Select
-                            value={endMonth}
-                            label="สิ้นสุด"
-                            onChange={(e) => {
-                                setEndMonth(e.target.value);
-                                onLoad(startMonth, e.target.value);
-                            }}
-                        >
-                            {Array.from({ length: 12 }, (_, i) => {
-                                const m = String(i + 1).padStart(2, "0");
-                                const key = `${currentYear}-${m}`;
-                                const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-                                return (
-                                    <MenuItem key={key} value={key}>
-                                        {thaiMonths[i]} {currentYear}
-                                    </MenuItem>
-                                );
-                            })}
-                        </Select>
-                    </FormControl>
 
                     <IconButton onClick={onRefresh} disabled={loading}>
                         <RefreshIcon />
@@ -469,9 +248,9 @@ export default function Dashboard_QC_CardTodo() {
                 }}
             >
                 {[
-                    { station: "0030", title: "โป้กสี" },
-                    { station: "0040", title: "ขัดสี" },
-                    { station: "0050", title: "ทำสี" },
+                    { station: "0049", title: "QC 1" },
+                    { station: "0079", title: "QC 2" },
+                    { station: "0089", title: "QC 3" },
                 ].map((item, idx) => {
                     const colors = ["#e67e22", "#3498db", "#9b59b6"]; // โทนสีแต่ละการ์ด
                     const stationData =
@@ -496,7 +275,7 @@ export default function Dashboard_QC_CardTodo() {
             </Box>
 
             {/* Card Todo List */}
-            <Card sx={{ borderRadius: 3, boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}>
+            <Card sx={{ borderRadius: 3, boxShadow: "0 10px 30px rgba(0,0,0,0.08)", mb: 5 }}>
                 <CardContent sx={{ p: 2.2 }}>
                     <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems={{ xs: "stretch", md: "center" }} sx={{ mb: 1 }} gap={1.5}>
                         <Box>
@@ -544,7 +323,9 @@ export default function Dashboard_QC_CardTodo() {
                                 row={r}
                                 onOpen={(row) => {
                                     console.log("open:", row.orderid);
-                                    // TODO: ไปหน้ารายละเอียด หรือเปิด dialog
+                                    navigate(`/WorkStation/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`, {
+                                        state: row
+                                    });
                                 }}
                                 onApprove={(row) => {
                                     console.log("approve:", row.orderid);
