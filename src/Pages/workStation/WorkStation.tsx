@@ -471,16 +471,22 @@ export default function WorkStation() {
     setVisibleItems(itemsToShow);
     // เพิ่มเช็ค station 0010 ตรงนี้
     const station = String(row?.current_operation ?? "");
-    if (station === "0010") {
-      // Station 0010 → ติ๊กทั้งหมดเสมอ
-      setCheckedCodes(checkItems.map(c => c.code));
-    } else {
-      // Station อื่น → ติ๊กตาม Backend
-      const codes = items
-        .filter((i) => i.isActive === true)
-        .map((i) => i.code);
-      setCheckedCodes(codes);
-    }
+
+    // if (station === "0010") {
+    //   // Station 0010 → ติ๊กทั้งหมดเสมอ
+    //   setCheckedCodes(checkItems.map(c => c.code));
+    // } else {
+    //   // Station อื่น → ติ๊กตาม Backend
+    //   const codes = items
+    //     .filter((i) => i.isActive === true)
+    //     .map((i) => i.code);
+    //   setCheckedCodes(codes);
+    // }
+
+    const codes = items
+      .filter((i) => i.isActive === true)
+      .map((i) => i.code);
+    setCheckedCodes(codes);
   };
 
 
