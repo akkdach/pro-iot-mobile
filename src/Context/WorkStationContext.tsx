@@ -571,38 +571,84 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (!work?.orderid) return;
 
+      const pad4 = (v: any) => String(v ?? "").trim().padStart(4, "0");
+
+      const injectedToBase: Record<string, string> = {
+        "0049": "0040",
+        "0079": "0070",
+      };
+
+      // const getReturnableStations = (currentStation?: string | String) => {
+      //   if (!currentStation) return {};
+
+      //   const stationCode = currentStation.toString().padStart(4, "0");
+      //   console.log(
+      //     "currentStation raw >>>",
+      //     currentStation,
+      //     "normalized >>>",
+      //     stationCode
+      //   );
+
+      //   const stationSteps = steps.filter((s) => s.station);
+
+      //   const currentIndex = stationSteps.findIndex(
+      //     (s) => s.station === stationCode
+      //   );
+
+      //   console.log("currentIndex >>>", currentIndex);
+
+      //   if (currentIndex <= 0) return {};
+
+      //   const available: Record<string, string> = {};
+
+      //   for (let i = 0; i < currentIndex; i++) {
+      //     const item = stationSteps[i];
+      //     if (item.station) {
+      //       available[item.station] = item.title;
+      //     }
+      //   }
+
+      //   return available;
+      // };
+
       const getReturnableStations = (currentStation?: string | String) => {
         if (!currentStation) return {};
 
-        const stationCode = currentStation.toString().padStart(4, "0");
+        const stationCode = pad4(currentStation);
+        const lookupCode = injectedToBase[stationCode] ?? stationCode;
+
         console.log(
           "currentStation raw >>>",
           currentStation,
           "normalized >>>",
-          stationCode
+          stationCode,
+          "lookup >>>",
+          lookupCode
         );
 
-        const stationSteps = steps.filter((s) => s.station);
+        const stationSteps = steps
+          .filter((s) => s.station)
+          .map((s) => ({ ...s, station: pad4(s.station) })); // normalize steps ด้วย
 
-        const currentIndex = stationSteps.findIndex(
-          (s) => s.station === stationCode
-        );
+        const currentIndex = stationSteps.findIndex((s) => s.station === lookupCode);
 
         console.log("currentIndex >>>", currentIndex);
 
-        if (currentIndex <= 0) return {};
+        if (currentIndex <= 0) return {}; // -1 หรือ 0 = return ไม่ได้
 
         const available: Record<string, string> = {};
-
         for (let i = 0; i < currentIndex; i++) {
           const item = stationSteps[i];
-          if (item.station) {
-            available[item.station] = item.title;
-          }
+          if (item.station) available[item.station] = item.title;
         }
+
+        // ถ้าอยากให้เลือก “รวมสถานีฐาน” ด้วย (0040/0070) ก็ต้องใส่ให้ถูก
+        available[lookupCode] =
+          stationSteps.find((s) => s.station === lookupCode)?.title ?? lookupCode;
 
         return available;
       };
+
 
       const visitedStations = getReturnableStations(work.current_operation);
 
