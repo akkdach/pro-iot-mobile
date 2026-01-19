@@ -248,9 +248,9 @@ export default function Dashboard_QC_CardTodo() {
                 }}
             >
                 {[
-                    { station: "0049", title: "QC 1" },
-                    { station: "0079", title: "QC 2" },
-                    { station: "0089", title: "QC 3" },
+                    { station: "0049", title: "QC สี" },
+                    { station: "0079", title: "QC ทดสอบ" },
+                    { station: "0089", title: "QC final" },
                 ].map((item, idx) => {
                     const colors = ["#e67e22", "#3498db", "#9b59b6"]; // โทนสีแต่ละการ์ด
                     const stationData =

@@ -415,15 +415,30 @@ export default function WorkStation() {
   }
 
   const onLoad4 = async () => {
-    // ถ้าเป็น station พิเศษ ให้ดึงพนักงานจาก station หลักแทน
     const currentStation = String(row?.current_operation ?? "").padStart(4, "0");
-    const fetchStation = getParentStation(currentStation);
-    console.log(`[onLoad4] currentStation: ${currentStation}, fetchStation: ${fetchStation}`);
+    const parentStation = getParentStation(currentStation);
+    console.log(`[onLoad4] currentStation: ${currentStation}, parentStation: ${parentStation}`);
 
-    const res = await callApi.get(`/WorkOrderList/GetEmployee/${orderId}/${fetchStation}`);
-    const data = res.data;
-    console.log("data refurbish employees : ", data);
-    setGetWorker(data);
+    // ถ้าเป็น station พิเศษ → ดึงพนักงานจากทั้ง station หลักและ station พิเศษ
+    if (currentStation !== parentStation) {
+      const [res1, res2] = await Promise.all([
+        callApi.get(`/WorkOrderList/GetEmployee/${orderId}/${parentStation}`),  // พนักงาน station หลัก (เช่น 0040)
+        callApi.get(`/WorkOrderList/GetEmployee/${orderId}/${currentStation}`), // พนักงาน station พิเศษ (เช่น 0049)
+      ]);
+
+      // รวมข้อมูลพนักงานทั้ง 2 station
+      const combined = [
+        ...(res1.data?.dataResult ?? []),
+        ...(res2.data?.dataResult ?? []),
+      ];
+      console.log("data refurbish employees (combined) : ", combined);
+      setGetWorker({ dataResult: combined });
+    } else {
+      // station ปกติ → ดึงแค่ station เดียว
+      const res = await callApi.get(`/WorkOrderList/GetEmployee/${orderId}/${currentStation}`);
+      console.log("data refurbish employees : ", res.data);
+      setGetWorker(res.data);
+    }
   }
 
 
