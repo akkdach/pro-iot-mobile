@@ -32,15 +32,18 @@ import WorkOrderDetail from './Pages/workStation/WorkOrderDetail';
 import ActionPage from './Pages/workStation/ActionPage';
 import WorkStation from './Pages/workStation/WorkStation';
 import SparePart from './Pages/workStation/SparePart';
+import MobileCheckList from './Pages/MobileCheckList/MobileCheckList';
+import CountingScreen from './Pages/Counting';
 
 const token = localStorage.getItem('token');
 function App() {
   return (
     <div className="App">
-        
-        <div>
+
+      <div>
         {token ? (<UserProvider><Layout ><Routes>
           <Route path="/" element={<Home />}></Route>
+          <Route path="MobileCheckList" element={<MobileCheckList />}></Route>
           <Route path="StandardTimeDashboard" element={<StandardTimeDashboard />}></Route>
           <Route path="checkin" element={<CheckIn />}></Route>
           <Route path="profile" element={<ProfileCard />}></Route>
@@ -48,13 +51,15 @@ function App() {
           <Route path="Action/:simEmi" element={<ActionPages />}></Route>
           <Route path="InventoryList" element={<InventoryList />}></Route>
           <Route path="NewInventoryCount" element={<NewInventoryCount />}></Route>
+          <Route path="Counting" element={<CountingScreen />}></Route>
+          <Route path="Counting/:vehicleId" element={<CountingScreen />}></Route>
           <Route path="MyDocument" element={<MyDocument />}></Route>
           <Route path="UploadFile" element={<Upload />}></Route>
           <Route path="EquipmentDashboard" element={<EquipmentDashboard />}></Route>
           <Route path="WithdrawEquipmentScan" element={<WithdrawEquipment />}></Route>
           <Route path="ReceiveEquipmentScan" element={<ReceiveEquipment />}></Route>
           <Route path="ReceiveManyEquipmentScan" element={<ReceiveManyEquipment />}></Route>
-          <Route path="WithdrawManyEquipmentScan" element={<WithdrawManyEquipment/>}></Route>
+          <Route path="WithdrawManyEquipmentScan" element={<WithdrawManyEquipment />}></Route>
           <Route path="Chat" element={<Chat />}></Route>
           <Route path="SetupAndRefurbish" element={<SetupAndRefurbish />}></Route>
           <Route path="DashboardRefurbish" element={<DashboardRefurbish />}></Route>
@@ -62,8 +67,8 @@ function App() {
           <Route path="WorkStation" element={<WorkStation />}></Route>
           <Route path="ActionPage" element={<ActionPage />}></Route>
           <Route path="SparePart" element={<SparePart />}></Route>
-        </Routes></Layout></UserProvider>): (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
-      
+        </Routes></Layout></UserProvider>) : (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
+
       </div>
     </div>
 
