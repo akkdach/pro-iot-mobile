@@ -8,14 +8,24 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import ConstructionIcon from '@mui/icons-material/Construction';
 import QuestionAnswerRoundedIcon from '@mui/icons-material/QuestionAnswerRounded';
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
-
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import SafetyCheckIcon from '@mui/icons-material/SafetyCheck';
 
 export default function Home() {
 
     const { user } = useUser();
 
     return (
+
         <Box sx={{ p: 2, marginTop: 1, marginBottom: 8 }}>
+            <div>
+                <h1>
+                    {user?.wk_ctr}
+                </h1>
+                <h1>
+                    {user?.role}
+                </h1>
+            </div>
             <Header />
             <Grid container spacing={2} sx={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
                 <Grid size={50}>
@@ -88,6 +98,20 @@ export default function Home() {
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <HomeWorkIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Station</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/DashboardQC'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <FactCheckIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>QC</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/CheckSheet'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <SafetyCheckIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Safety</span>
                         </Box>
                     </Link>
                 </Grid>

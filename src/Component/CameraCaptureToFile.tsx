@@ -1,4 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
+import { Box, Button, Stack } from "@mui/material";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import FlipCameraAndroidIcon from "@mui/icons-material/FlipCameraAndroid";
 
 interface CameraCaptureProps {
   onCapture: (files: File[]) => void;
@@ -8,6 +11,7 @@ const CameraCaptureFile: React.FC<CameraCaptureProps> = ({ onCapture }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("environment");
+  const [photos, setPhotos] = useState<File[]>([]);
 
   // Start camera
   const startCamera = async () => {
@@ -59,36 +63,88 @@ const CameraCaptureFile: React.FC<CameraCaptureProps> = ({ onCapture }) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <video
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+      <Box
+        component="video"
         ref={videoRef}
         autoPlay
         playsInline
-        className="w-full max-w-md rounded-lg shadow"
+        sx={{
+          width: '100%',
+          maxWidth: '600px',
+          borderRadius: 3,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+          bgcolor: '#000',
+        }}
       />
 
-      <div className="flex gap-2 mt-2">
-        <button
+      <Stack direction="row" spacing={2} sx={{ width: '100%', maxWidth: '600px', justifyContent: 'center' }}>
+        <Button
           onClick={captureImage}
-          className="bg-green-500 text-white px-4 py-2 rounded"
+          variant="contained"
+          size="large"
+          startIcon={<CameraAltIcon sx={{ fontSize: 28 }} />}
+          sx={{
+            flex: 1,
+            background: 'linear-gradient(135deg, #16A34A 0%, #15803D 100%)',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            py: 2,
+            px: 4,
+            borderRadius: 2.5,
+            boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)',
+            textTransform: 'none',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #15803D 0%, #166534 100%)',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 16px rgba(22, 163, 74, 0.4)',
+            },
+            '&:active': {
+              transform: 'translateY(0px)',
+              boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)',
+            },
+            transition: 'all 0.2s ease',
+          }}
         >
           ถ่ายภาพ
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={() =>
             setFacingMode((prev) => (prev === "user" ? "environment" : "user"))
           }
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          variant="contained"
+          size="large"
+          startIcon={<FlipCameraAndroidIcon sx={{ fontSize: 28 }} />}
+          sx={{
+            flex: 1,
+            background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '1.1rem',
+            py: 2,
+            px: 4,
+            borderRadius: 2.5,
+            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.3)',
+            textTransform: 'none',
+            '&:hover': {
+              background: 'linear-gradient(135deg, #1D4ED8 0%, #1E40AF 100%)',
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 16px rgba(37, 99, 235, 0.4)',
+            },
+            '&:active': {
+              transform: 'translateY(0px)',
+              boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
+            },
+            transition: 'all 0.2s ease',
+          }}
         >
           สลับกล้อง
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Stack>
+    </Box>
   );
 };
 
 export default CameraCaptureFile;
-
-
-

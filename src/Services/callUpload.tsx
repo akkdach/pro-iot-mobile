@@ -10,13 +10,13 @@ import fs from 'fs';
  * @param {string} fieldName - Name of the form field (e.g., 'contents').
  * @returns {Promise<any>} - Response from the server.
  */
-export async function uploadFile(file:File[], url:string, fieldName = 'contents') {
-  var baseURL= `https://service.bevproasia.com/api/${url}`
+export async function uploadFile(file: File[], url: string, fieldName = 'contents') {
+  var baseURL = `https://service.bevproasia.com/api/${url}`
   try {
     const form = new FormData();
-    file.forEach((file,i) => {
+    file.forEach((file, i) => {
       form.append(`files${i}`, file);
-  });
+    });
 
     const response = await axios.post(baseURL, form, {
       headers: {
@@ -25,7 +25,7 @@ export async function uploadFile(file:File[], url:string, fieldName = 'contents'
     });
 
     return response.data;
-  } catch (error:any) {
+  } catch (error: any) {
     console.error('Upload failed:', error.message);
     throw error;
   }

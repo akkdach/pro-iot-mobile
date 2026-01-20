@@ -3,6 +3,8 @@ import './Header.css'; // Import CSS file for styling
 import avatar from "./avatar.png";
 import { Box, Grid, Typography } from '@mui/material';
 import { useUser } from '../../Context/userContext';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 const Header = () => {
       const { user } = useUser();
     return (
@@ -13,7 +15,8 @@ const Header = () => {
                 </div>
                 <div style={{ margin: '5px', fontWeight: 500, fontSize: '1rem', color: '#333' }}>
                     <Typography variant="h6" sx={{ fontWeight: 600, color: '#003264', mb: 1 }}>{user?.fullname}</Typography>
-                    <small>{user?.department} - {user?.position}</small>
+                    <small><Chip color="primary" label={user?.wk_ctr} />  <Chip color="primary" variant="outlined" label={user?.role} /></small>
+                    
                 </div>
             </div>
 
