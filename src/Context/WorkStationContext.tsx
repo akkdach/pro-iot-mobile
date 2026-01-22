@@ -9,41 +9,28 @@ import { useTimer } from "../Context/TimerContext";
 import { CloseWorkMaster } from "../Utility/CloseWorkMaster";
 
 interface Work {
+  // id?: number;
+
   orderid?: string;
   ordeR_TYPE?: string;
   shorT_TEXT?: string;
   equipment?: string;
   weB_STATUS?: string;
+  // current_operation?: string;
   state?: string;
 
-  actuaL_START_DATE?: string;
-  actuaL_FINISH_DATE?: string;
-  servicE_TIME?: Number;
-  actuaL_START_TIME?: string;
-  actuaL_FINISH_TIME?: string;
+  slA_FINISH_TIME?: String;
+  actuaL_START_DATE?: Date;
+  actuaL_FINISH_DATE?: Date;
+  servicE_TIME?: String;
+  actuaL_START_TIME?: String;
+  actuaL_FINISH_TIME?: String;
 
-  current_operation?: string;
-
-  acT_START_DATE?: Date;
-  acT_START_TIME?: Date;
-  acT_END_DATE?: Date;
-  acT_END_TIME?: Date;
-
-  worK_ACTUAL?: string;
-
-  worK_ORDER_OPERATION_ID?: number;
-  worK_ORDER_COMPONENT_ID?: number;
-
-  mN_WK_CTR?: string;
-
-  slA_FINISH_DATE?: Date;
-  slA_FINISH_TIME?: string;
-  slA_START_DATE?: Date;
-  slA_START_TIME?: string;
+  current_operation?: String;
 }
 
 interface Item_Component {
-  worK_ORDER_COMPONENT_ID?: number;
+  worK_ORDER_COMPONENT_ID?: Number;
   orderid?: string;
   reS_ITEM?: string;
   reserV_NO?: string;
@@ -51,34 +38,6 @@ interface Item_Component {
   actuaL_QUANTITY?: number;
   actuaL_QUANTITY_UNIT?: string;
   material?: string;
-}
-
-interface SparePartApi {
-  imageUrl?: string;
-  material: string;
-  materialDescription?: string;
-  onWithdraw?: number;
-  quotaStock?: number;
-  znew?: number;
-}
-
-interface CartItem {
-  item: SparePartApi;
-  qty: number;
-}
-
-interface CheckOutCloseType {
-  workOrder?: string;
-  closeType?: number;
-  code?: string | null;
-  shortText?: string | null;
-  lat?: number;
-  lon?: number;
-  mobile_remark?: string | null;
-}
-
-interface CheckList {
-  code?: string;
 }
 
 interface WorkContextType {
@@ -89,23 +48,6 @@ interface WorkContextType {
   setItem_Component: React.Dispatch<
     React.SetStateAction<Item_Component[] | null>
   >;
-
-  checkOutCloseType: CheckOutCloseType | null;
-  setCheckOutCloseType: React.Dispatch<
-    React.SetStateAction<CheckOutCloseType | null>
-  >;
-
-  sparePart: SparePartApi[] | null;
-  setSparePart: React.Dispatch<React.SetStateAction<SparePartApi[] | null>>;
-
-  cartItem: CartItem[] | null;
-  setCartItem: React.Dispatch<React.SetStateAction<CartItem[] | null>>;
-
-  hasStarted: boolean | null;
-  setHasStarted: React.Dispatch<React.SetStateAction<boolean | null>>;
-
-  checkList: CheckList[] | null;
-  setCheckList: React.Dispatch<React.SetStateAction<CheckList[] | null>>;
 
   startWork: () => void;
   pauseWork: () => void;
@@ -128,9 +70,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
   const [item_component, setItem_Component] = useState<Item_Component[] | null>(
     null
   );
-  const [hasStarted, setHasStarted] = useState<boolean | null>(false);
-  const [sparePart, setSparePart] = useState<SparePartApi[] | null>(null);
-  const [cartItem, setCartItem] = useState<CartItem[] | null>(null);
 
   const [checkOutCloseType, setCheckOutCloseType] = useState<
     CheckOutCloseType | null
@@ -141,7 +80,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
   const timer = useTimer();
 
   const startWork = async () => {
-    console.log("Work is start", work);
+    console.log("Work is start");
     try {
       if (!work?.orderid) return;
 
@@ -163,14 +102,15 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!confirm.isConfirmed) return;
 
-
-      const res = await callApi.post("/WorkOrderList/Start", {
-        ORDERID: work?.orderid,
-        current_operation: work?.current_operation ?? "",
-      });
+      const res = await callApi.post(
+        "/WorkOrderList/Start",
+        { ORDERID: work?.orderid, current_operation: work?.current_operation },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
       const data = res.data;
-      // console.log("Start Work : ", res);
+      console.log("Start Work : ", data);
+
       if (!data.isSuccess) {
         await Swal.fire({
           title: "Failed",
@@ -184,14 +124,12 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       setWork((prev) => ({
         ...prev!,
-        orderid: data.dataResult?.orderid,
-        acT_START_DATE: data.dataResult?.acT_START_DATE,
-        acT_START_TIME: data.dataResult?.acT_START_TIME,
+        orderid: data.dataResult?.ORDERID,
+        actuaL_START_DATE: data.dataResult?.actuaL_START_DATE,
+        actuaL_START_TIME: data.dataResult?.ACTUAL_START_TIME,
         weB_STATUS: data.dataResult?.WEB_STATUS,
         current_operation: data.dataResult?.current_operation,
       }));
-
-      setHasStarted(true);
 
       await Swal.fire({
         title: "Success!",
@@ -254,12 +192,11 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       setWork((prev) => ({
         ...prev!,
-        orderid: data.dataResult?.orderid,
-        acT_END_DATE: data.dataResult?.acT_END_DATE,
-        acT_END_TIME: data.dataResult?.acT_END_TIME,
+        orderid: data.dataResult?.ORDERID,
+        actuaL_FINISH_DATE: data.dataResult?.ACTUAL_FINISH_DATE,
+        actuaL_FINISH_TIME: data.dataResult?.ACTUAL_FINISH_TIME,
         weB_STATUS: data.dataResult?.WEB_STATUS,
         current_operation: data.dataResult?.current_operation,
-        worK_ACTUAL: data.dataResult?.worK_ACTUAL,
       }));
 
       timer.stop();
@@ -677,8 +614,14 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!confirm.isConfirmed) return;
 
-      const selectedStation = confirm.value as string;
-
+      const res = await callApi.post(
+        "/WorkOrderList/Return",
+        {
+          ORDERID: work?.orderid,
+          current_station: work?.current_operation,
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
       const remarkConfirm = await Swal.fire({
         title: "Return Remark",
@@ -734,8 +677,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         });
         return;
       }
-
-      setWork((prev) => (prev ? { ...prev, current_operation: selectedStation } : prev));
 
       await Swal.fire({
         title: "Finished!",
@@ -913,16 +854,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         submitWork,
         item_component,
         setItem_Component,
-        hasStarted,
-        setHasStarted,
-        sparePart,
-        setSparePart,
-        cartItem,
-        setCartItem,
-        checkOutCloseType,
-        setCheckOutCloseType,
-        checkList,
-        setCheckList,
       }}
     >
       {children}
@@ -937,6 +868,3 @@ export const useWork = () => {
   }
   return ctx;
 };
-function setHasStarted(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
