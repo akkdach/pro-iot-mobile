@@ -94,22 +94,31 @@
                     ผู้ใช้งานไปยังกระบวนการที่ถูกต้อง
                     โดยมีการจัดวาง Layout แบบ <em>Hexagonal Grid</em> เพื่อรองรับจำนวน Station ที่อาจเพิ่มขึ้นในอนาคต
                     และยังมีระบบ Visual Navigation โดยใช้ไอคอนสื่อความหมายชัดเจน
+                    ทำให้พนักงานสามารถเข้าถึงเมนูที่ต้องการได้อย่างรวดเร็ว
+                </p>
+                <p class="mt-4">
+                    <strong>ข้อดีหลักของ Hexagonal Layout:</strong> ช่วยให้ปุ่มแต่ละปุ่มมีพื้นที่กว้างขึ้น
+                    เหมาะสำหรับการทำงานบน Tablet
+                    หรือ Touch Screen ในสภาพแวดล้อมโรงงาน โดยสามารถเพิ่ม Station ใหม่ได้โดยไม่กระทบต่อ Layout เดิม
+                    และยังช่วยลดความผิดพลาดจากการกดผิดปุ่ม
                 </p>
                 <ul class="list-none space-y-3 mt-4">
                     <li class="flex items-start">
                         <i class="fa-solid fa-check-circle text-green-500 mt-1.5 mr-3"></i>
                         <span><strong>Authentication & Authorization:</strong>
-                            ระบบตรวจสอบสิทธิ์พนักงานก่อนเข้าถึงเมนูต่างๆ</span>
+                            ระบบตรวจสอบสิทธิ์พนักงานก่อนเข้าถึงเมนูต่างๆ เชื่อมต่อกับ Active Directory และบันทึก Audit
+                            Log เพื่อความปลอดภัย</span>
                     </li>
                     <li class="flex items-start">
                         <i class="fa-solid fa-check-circle text-green-500 mt-1.5 mr-3"></i>
-                        <span><strong>Responsive Layout:</strong> รองรับการใช้งานผ่าน Tablet
-                            และมาตรฐานหน้าจออุตสาหกรรม</span>
+                        <span><strong>Responsive Layout:</strong> รองรับการใช้งานผ่าน Tablet (10-12 นิ้ว), Desktop
+                            และมาตรฐานหน้าจออุตสาหกรรม
+                            ปรับขนาดอัตโนมัติตาม Resolution</span>
                     </li>
                     <li class="flex items-start">
                         <i class="fa-solid fa-check-circle text-green-500 mt-1.5 mr-3"></i>
-                        <span><strong>Easy Navigation:</strong> ลดความซับซ้อนในการเข้าถึงเมนูด้วย Graphic-based
-                            UI</span>
+                        <span><strong>Easy Navigation:</strong> ลดความซับซ้อนในการเข้าถึงเมนูด้วย Graphic-based UI
+                            ใช้ไอคอนและสีแยกประเภทงาน ช่วยให้พนักงานใหม่เรียนรู้ได้เร็วขึ้น</span>
                     </li>
                 </ul>
             </div>
@@ -199,9 +208,16 @@
                     <div class="prose prose-lg text-slate-600">
                         <h3 class="text-2xl font-bold text-slate-800 mb-4">Intelligent Work List</h3>
                         <p>
-                            ระบบแสดงรายการใบงานแบบ Real-time โดยดึงข้อมูลจาก SAP/ERP เชื่อมต่อโดยตรง
-                            ช่วยให้หัวหน้างานและช่างเทคนิคเห็นภาพรวมของงานที่ค้างอยู่ (Backlog)
-                            และสามารถตัดสินใจเลือกทำงานได้ทันที
+                            ระบบแสดงรายการใบงานแบบ <strong>Real-time</strong> โดยดึงข้อมูลจาก SAP/ERP เชื่อมต่อผ่าน API
+                            Gateway
+                            ช่วยให้หัวหน้างานและช่างเทคนิคเห็นภาพรวมของงานที่ค้างอยู่ (Backlog) ทั้งหมด
+                            และสามารถตัดสินใจเลือกทำงานได้ทันที โดยคำนึงถึง Priority และ SLA ของแต่ละงาน
+                        </p>
+                        <p class="mt-4">
+                            <strong>จุดเด่น:</strong> Dashboard นี้ช่วยลดปัญหาการหาใบงาน (Work Order)
+                            ที่เคยต้องใช้กระดาษหรือ Excel
+                            โดยมีการ Sync ข้อมูลทุก 30 วินาที และแสดงเฉพาะงานที่ยังไม่เสร็จสมบูรณ์
+                            พร้อมไฮไลต์งานที่ใกล้เกิน SLA
                         </p>
 
                         <div class="my-8 space-y-4">
@@ -369,6 +385,70 @@
                             </div>
                             <p class="text-base text-slate-600 leading-relaxed">อัปโหลดภาพหลักฐาน Before/After
                                 พร้อมกำหนด Master Images ที่บังคับถ่าย</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 4: Spare Parts Inventory -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-orange-100 transform hover:shadow-orange-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-orange-600 to-orange-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    4
+                                </div>
+                            </div>
+                            <img src="./presentation_images/workOrderList.png" alt="Spare Parts Inventory"
+                                class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-orange-900/80 via-orange-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-orange-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-boxes-stacked text-orange-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Spare Parts Inventory</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">
+                                แสดงรายการอะไหล่คงคลังที่สามารถเบิกใช้งานได้ทันที พร้อมระบุตำแหน่งจัดเก็บ (Bin Location)
+                                และจำนวนคงเหลือแบบ Real-time เชื่อมต่อกับระบบ Master Data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 5: Spare Parts Cart -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-blue-100 transform hover:shadow-blue-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    5
+                                </div>
+                            </div>
+                            <img src="./presentation_images/cartInStation.png" alt="Parts Request Cart"
+                                class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-blue-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-cart-arrow-down text-blue-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Parts Request Cart</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">
+                                ระบบตะกร้าเบิกอะไหล่ที่ช่วยรวบรวมรายการที่ต้องการเบิกในครั้งเดียว ลดขั้นตอนเอกสารซ้ำซ้อน
+                                และเชื่อมต่อกับระบบตัดสต็อกอัตโนมัติเมื่อได้รับการอนุมัติ</p>
                         </div>
                     </div>
                 </div>
