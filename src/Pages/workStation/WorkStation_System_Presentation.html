@@ -281,7 +281,7 @@
                 <p class="text-slate-600">แสดงตัวอย่างหน้าจอจริงจากระบบที่พัฒนาขึ้น ครอบคลุมทุกฟีเจอร์หลัก</p>
             </div>
 
-            <div class="space-y-16 mb-20">
+            <div class="space-y-16 mb-20 max-w-4xl mx-auto">
                 <!-- Image 1: Work Order -->
                 <div class="group">
                     <div
@@ -443,7 +443,7 @@
             </div>
 
             <!-- Image Flow: 3 Images Stacked -->
-            <div class="space-y-16 mb-20">
+            <div class="space-y-16 mb-20 max-w-4xl mx-auto">
                 <!-- Image 1: Stock Report List -->
                 <div class="group">
                     <div
@@ -569,6 +569,84 @@
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 mb-2">Usage Analytics</h3>
                     <p class="text-slate-600">วิเคราะห์การใช้งานอะไหล่ เพื่อคาดการณ์ความต้องการและวางแผนจัดซื้อ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Quality Control (QC) -->
+    <section id="qc-dashboard" class="py-24 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-16 text-center">
+                <span
+                    class="bg-emerald-100 text-emerald-800 text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">PHASE
+                    5: QUALITY ASSURANCE</span>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 leading-tight">QC Dashboard</h2>
+                <p class="text-xl text-slate-600 mt-4 max-w-3xl mx-auto leading-relaxed">
+                    ระบบตรวจสอบคุณภาพและจัดการงาน QC แบบ Real-time พร้อมติดตามสถานะงานในแต่ละสถานี
+                </p>
+            </div>
+
+            <!-- Gallery Title -->
+            <div class="mb-12 text-center">
+                <h3 class="text-3xl font-bold text-slate-800 mb-3">QC Management Interface</h3>
+                <p class="text-slate-600">แดชบอร์ดสำหรับติดตาม Order ที่อยู่ในกระบวนการ QC และจัดการงานตรวจสอบคุณภาพ</p>
+            </div>
+
+            <!-- Screenshot -->
+            <div class="mb-16 max-w-4xl mx-auto">
+                <div
+                    class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-emerald-100 transform hover:shadow-emerald-200 hover:-translate-y-2 transition-all duration-500">
+                    <div class="relative">
+                        <img src="./presentation_images/Qc.png" alt="QC Dashboard Screenshot" class="w-full h-auto">
+                        <!-- Hover Overlay -->
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-emerald-900/80 via-emerald-600/20 to-transparent opacity-0 hover:opacity-100 transition duration-500">
+                        </div>
+                    </div>
+                    <!-- Caption -->
+                    <div class="p-8 bg-gradient-to-br from-emerald-50 to-white">
+                        <div class="flex items-center mb-3">
+                            <i class="fa-solid fa-list-check text-emerald-600 text-2xl mr-4"></i>
+                            <h4 class="text-2xl font-bold text-slate-800">QC Order Tracking</h4>
+                        </div>
+                        <p class="text-base text-slate-600 leading-relaxed">หน้าจอแสดงรายการ Work Order
+                            ที่อยู่ในกระบวนการ QC พร้อมสถานะการตรวจสอบและผู้รับผิดชอบ</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Breakdown -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Feature 1 -->
+                <div class="bg-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Quality Inspection</h3>
+                    <p class="text-slate-600">ตรวจสอบคุณภาพตามมาตรฐาน พร้อมบันทึกผลการตรวจสอบและรูปภาพหลักฐาน</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Order Status Tracking</h3>
+                    <p class="text-slate-600">ติดตามสถานะ Order ใน QC แบบ Real-time รู้ว่างานไหนผ่าน ไม่ผ่าน หรือรอตรวจ
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Defect Management</h3>
+                    <p class="text-slate-600">บันทึกและจัดการข้อบกพร่องที่พบ พร้อมระบบ Reject & Rework</p>
                 </div>
             </div>
         </div>
