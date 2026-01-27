@@ -611,21 +611,19 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
           const normalizedCode = pad4(code);
           const stepIndex = steps.findIndex(s => s.station === normalizedCode);
 
-          // Filter: show only if station exists in steps AND is strictly BEFORE current station
-          if (stepIndex !== -1 && stepIndex < currentStepIndex) {
+          // Filter: show only if station exists in steps AND is not ahead of current station
+          if (stepIndex !== -1 && stepIndex <= currentStepIndex) {
             const step = steps[stepIndex];
             // Use title from steps, fallback to code if missing
             stationOptions[code] = step.title || `Station ${code}`;
           }
         });
       } else if (typeof visitedStations === 'object' && visitedStations !== null) {
-        // If it's an object, we might need manual filtering if keys are station codes
-        // Assuming API returns array as per latest log shared by user.
-        // But keeping fallback just in case, logic would be harder without array.
+
         Object.entries(visitedStations).forEach(([key, value]) => {
           const normalizedCode = pad4(key);
           const stepIndex = steps.findIndex(s => s.station === normalizedCode);
-          if (stepIndex !== -1 && stepIndex < currentStepIndex) {
+          if (stepIndex !== -1 && stepIndex <= currentStepIndex) {
             stationOptions[key] = String(value);
           }
         });

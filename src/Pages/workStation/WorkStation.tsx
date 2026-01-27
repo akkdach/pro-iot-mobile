@@ -350,6 +350,19 @@ export default function WorkStation() {
       slA_START_DATE: item.slA_START_DATE ?? item.SLA_START_DATE,
       slA_START_TIME: item.slA_START_TIME ?? item.SLA_START_TIME,
     }));
+
+
+
+    // Check if work is currently in progress
+    const startDate = item.acT_START_DATE ?? item.ACT_START_DATE;
+    const endDate = item.acT_END_DATE ?? item.ACT_END_DATE;
+
+    // If we have a start date but no end date, it means work is in progress.
+    if (startDate && !endDate) {
+      setIsWorking(true);
+    } else {
+      setIsWorking(false);
+    }
   };
 
   const onLoad3 = async () => {
@@ -959,7 +972,10 @@ export default function WorkStation() {
                       filter: "drop-shadow(0px 2px 4px rgba(37, 99, 235, 0.2))"
                     }}
                   >
-                    <SimpleElapsedTimer startAt={work?.acT_START_DATE ?? "00:00:00"} running={isWorking} />
+                    <SimpleElapsedTimer
+                      startAt={work?.acT_START_DATE ?? "00:00:00"}
+                      running={isWorking}
+                    />
                   </Typography>
                 </Stack>
               </Paper>
