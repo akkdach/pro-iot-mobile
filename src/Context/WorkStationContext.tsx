@@ -559,8 +559,34 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  //---------------Return Work------------------------------------------------
   const returnWork = async () => {
     console.log("work is return", work);
+    const pad4 = (v: any) => String(v ?? "").trim().padStart(4, "0");
+
+    const injectedToBase: Record<string, string> = {
+      "0049": "0040",
+      "0079": "0070",
+      // "0059": "0050", // Add if needed based on previous discussion
+    };
+
+    const currentStation = work?.current_operation;
+    const stationCode = pad4(currentStation);
+    // Use lookup code if it exists, otherwise use original code
+    const normalizedStation = injectedToBase[stationCode] ?? stationCode;
+
+    const payloadRe_Station = {
+      ORDERID: work?.orderid,
+      current_operation: normalizedStation,
+    };
+    const re_station = await callApi.get("/WorkOrderList/ReturnStation", {
+      params: payloadRe_Station,
+      headers: { "Content-Type": "application/json" },
+    });
+
+
+    const data_re_station = re_station.data;
+    console.log("Return Station : ", data_re_station);
 
     const remarkOptions: Record<string, string> = {
       delay: "Delay",
@@ -571,88 +597,43 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       if (!work?.orderid) return;
 
-      const pad4 = (v: any) => String(v ?? "").trim().padStart(4, "0");
+      const visitedStations = data_re_station.isSuccess ? data_re_station.dataResult : [];
+      let stationOptions: Record<string, string> = {};
 
-      const injectedToBase: Record<string, string> = {
-        "0049": "0040",
-        "0079": "0070",
-      };
+      const currentStationCode = pad4(normalizedStation); // Use normalized current station
+      const currentStepIndex = steps.findIndex(s => s.station === currentStationCode);
 
-      // const getReturnableStations = (currentStation?: string | String) => {
-      //   if (!currentStation) return {};
+      if (Array.isArray(visitedStations)) {
+        visitedStations.forEach((item: any) => {
+          const code = item.activity;
+          if (!code) return;
 
-      //   const stationCode = currentStation.toString().padStart(4, "0");
-      //   console.log(
-      //     "currentStation raw >>>",
-      //     currentStation,
-      //     "normalized >>>",
-      //     stationCode
-      //   );
+          const normalizedCode = pad4(code);
+          const stepIndex = steps.findIndex(s => s.station === normalizedCode);
 
-      //   const stationSteps = steps.filter((s) => s.station);
+          // Filter: show only if station exists in steps AND is strictly BEFORE current station
+          if (stepIndex !== -1 && stepIndex < currentStepIndex) {
+            const step = steps[stepIndex];
+            // Use title from steps, fallback to code if missing
+            stationOptions[code] = step.title || `Station ${code}`;
+          }
+        });
+      } else if (typeof visitedStations === 'object' && visitedStations !== null) {
+        // If it's an object, we might need manual filtering if keys are station codes
+        // Assuming API returns array as per latest log shared by user.
+        // But keeping fallback just in case, logic would be harder without array.
+        Object.entries(visitedStations).forEach(([key, value]) => {
+          const normalizedCode = pad4(key);
+          const stepIndex = steps.findIndex(s => s.station === normalizedCode);
+          if (stepIndex !== -1 && stepIndex < currentStepIndex) {
+            stationOptions[key] = String(value);
+          }
+        });
+      }
 
-      //   const currentIndex = stationSteps.findIndex(
-      //     (s) => s.station === stationCode
-      //   );
+      console.log("Mapped & Filtered stationOptions:", stationOptions);
 
-      //   console.log("currentIndex >>>", currentIndex);
-
-      //   if (currentIndex <= 0) return {};
-
-      //   const available: Record<string, string> = {};
-
-      //   for (let i = 0; i < currentIndex; i++) {
-      //     const item = stationSteps[i];
-      //     if (item.station) {
-      //       available[item.station] = item.title;
-      //     }
-      //   }
-
-      //   return available;
-      // };
-
-      const getReturnableStations = (currentStation?: string | String) => {
-        if (!currentStation) return {};
-
-        const stationCode = pad4(currentStation);
-        const lookupCode = injectedToBase[stationCode] ?? stationCode;
-
-        console.log(
-          "currentStation raw >>>",
-          currentStation,
-          "normalized >>>",
-          stationCode,
-          "lookup >>>",
-          lookupCode
-        );
-
-        const stationSteps = steps
-          .filter((s) => s.station)
-          .map((s) => ({ ...s, station: pad4(s.station) })); // normalize steps ด้วย
-
-        const currentIndex = stationSteps.findIndex((s) => s.station === lookupCode);
-
-        console.log("currentIndex >>>", currentIndex);
-
-        if (currentIndex <= 0) return {}; // -1 หรือ 0 = return ไม่ได้
-
-        const available: Record<string, string> = {};
-        for (let i = 0; i < currentIndex; i++) {
-          const item = stationSteps[i];
-          if (item.station) available[item.station] = item.title;
-        }
-
-        // ถ้าอยากให้เลือก “รวมสถานีฐาน” ด้วย (0040/0070) ก็ต้องใส่ให้ถูก
-        available[lookupCode] =
-          stationSteps.find((s) => s.station === lookupCode)?.title ?? lookupCode;
-
-        return available;
-      };
-
-
-      const visitedStations = getReturnableStations(work.current_operation);
-
-      if (!visitedStations || Object.keys(visitedStations).length === 0) {
+      if (!stationOptions || Object.keys(stationOptions).length === 0) {
         await Swal.fire({
           title: "Cannot Return",
           text: "This work order cannot be returned to any previous station.",
@@ -666,7 +647,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         text: "Select station to rollback:",
         icon: "warning",
         input: "select",
-        inputOptions: visitedStations,
+        inputOptions: stationOptions,
         inputPlaceholder: "Choose station...",
         showCancelButton: true,
         confirmButtonText: "Confirm",
