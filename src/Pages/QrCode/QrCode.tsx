@@ -24,12 +24,16 @@ import {
     Alert,
 } from "@mui/material";
 import AppHeader from "../../Component/AppHeader";
+import callApi from "../../Services/callApi";
+import { callApiOneleke } from "../../Services/callApiOneleke";
 
 type QrItem = {
     id: string;
     title: string;
-    subtitle?: string;
-    payload: any;
+    subtitle?: string; // Description
+    tradeName?: string; // BPC Trade Name
+    objectID?: string; // Service Object ID
+    payload: string; // QR Value
     createdAt: string;
 };
 
@@ -38,6 +42,9 @@ type LayoutPreset = "2x3" | "3x4" | "4x6";
 const PRINT_AREA_ID = "qr-print-area";
 
 const toQrValue = (payload: any) => JSON.stringify(payload);
+
+
+
 
 const buildMock = (): QrItem[] => {
     const now = new Date();
@@ -62,12 +69,7 @@ const buildMock = (): QrItem[] => {
         id: `${x.orderId}-${x.activity}-${i}`,
         title: `WO: ${x.orderId}`,
         subtitle: `OP: ${x.activity} • ${x.station}`,
-        payload: {
-            ORDERID: x.orderId,
-            ACTIVITY: x.activity,
-            STATION: x.station,
-            createdAt: fmt(now),
-        },
+        payload: x.orderId,
         createdAt: fmt(now),
     }));
 };
@@ -79,6 +81,45 @@ const presetToCols = (preset: LayoutPreset) => {
 };
 
 export default function PrintQRCodes() {
+    useEffect(() => {
+        onLoad()
+    }, [])
+
+    const onLoad = async () => {
+        try {
+            setLoading(true);
+            const res = await callApiOneleke("GET", "qrcode", {
+                params: { page: 0, limit: 100 }
+            })
+
+            // Validate response structure
+            const list = res.data?.data || [];
+
+            const newItems: QrItem[] = list.map((item: any) => ({
+                id: item.serviceorderid,
+                title: item.serviceorderid,
+                subtitle: item.description,
+                tradeName: item.bpc_tradename,
+                objectID: item.serviceobjectid,
+                payload: item.serviceobjectid, // QR Content
+                createdAt: new Date().toISOString()
+            }));
+
+            setItems(newItems);
+
+            // Auto select all
+            const initSel: Record<string, boolean> = {};
+            newItems.forEach((x) => (initSel[x.id] = true));
+            setSelected(initSel);
+
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load data from API");
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -111,6 +152,7 @@ export default function PrintQRCodes() {
                         id: item.id,
                         title: item.title,
                         subtitle: item.subtitle,
+                        tradeName: item.tradeName,
                         qrDataUrl: dataUrl
                     };
                 })
@@ -125,33 +167,8 @@ export default function PrintQRCodes() {
         }
     };
 
-    useEffect(() => {
-        let alive = true;
-        (async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                await new Promise((r) => setTimeout(r, 600));
-                const data = buildMock();
-
-                if (!alive) return;
-                setItems(data);
-
-                const initSel: Record<string, boolean> = {};
-                data.forEach((x) => (initSel[x.id] = true));
-                setSelected(initSel);
-            } catch (e: any) {
-                setError(e?.message ?? "Load failed");
-            } finally {
-                if (alive) setLoading(false);
-            }
-        })();
-
-        return () => {
-            alive = false;
-        };
-    }, []);
+    // Removed Mock Data Loading Effect
+    // useEffect(() => { ... }, []);
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -436,7 +453,7 @@ export default function PrintQRCodes() {
                                 >
                                     {/* For screen preview: stack vertical. For Print: Row (via CSS) */}
                                     <Box className="qr-container" sx={{ display: 'grid', placeItems: 'center', mr: { print: 1, xs: 0 } }}>
-                                        <QRCodeSVG value={toQrValue(x.payload)} size={54} />
+                                        <QRCodeSVG value={x.payload} size={54} />
                                     </Box>
 
                                     <Box sx={{
@@ -464,26 +481,28 @@ export default function PrintQRCodes() {
                                             variant="body2"
                                             fontWeight={800}
                                             sx={{
-                                                lineHeight: 1,
-                                                fontSize: { print: '12px', xs: '14px' },
+                                                lineHeight: 1.1,
+                                                fontSize: { print: '10px', xs: '12px' }, // Reduce font slightly for description
                                                 m: 0,
                                                 mb: { print: 0.5 },
-                                                py: { print: 2.5 }
+                                                py: { print: 0 } // Reset py
                                             }}
                                         >
-                                            THAINAMTHIP
+                                            THAIMAPTHIP {/* Description */}
                                         </Typography>
-                                        {x.subtitle && (
+
+                                        {x.tradeName && (
                                             <Typography
                                                 variant="caption"
+                                                fontWeight={700}
                                                 sx={{
                                                     color: "text.secondary",
                                                     lineHeight: 1,
-                                                    fontSize: { print: '10px', xs: '12px' },
+                                                    fontSize: { print: '9px', xs: '11px' },
                                                     m: 0
                                                 }}
                                             >
-                                                {x.subtitle}
+                                                {x.tradeName}
                                             </Typography>
                                         )}
                                     </Box>

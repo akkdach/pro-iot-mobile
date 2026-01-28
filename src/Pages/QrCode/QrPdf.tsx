@@ -50,6 +50,12 @@ const styles = StyleSheet.create({
     payload: {
         fontSize: 6,
         color: '#666',
+    },
+    tradeName: {
+        fontSize: 9,
+        fontWeight: 'bold',
+        color: '#555',
+        marginTop: 2,
     }
 });
 
@@ -57,6 +63,7 @@ export interface PdfItem {
     id: string;
     title: string;
     subtitle?: string;
+    tradeName?: string;
     qrDataUrl: string;
 }
 
@@ -94,9 +101,8 @@ export const QrPdfDocument: React.FC<QrPdfDocumentProps> = ({ items, showPayload
                         </View>
                         <View style={styles.infoSection}>
                             <Text style={styles.title}>{item.title}</Text>
-                            <Text style={{ ...styles.title, marginTop: 5, marginBottom: 5 }}>THAINAMTHIP</Text>
-                            {/* Break invalid long words if necessary? react-pdf handles wrapping */}
                             {item.subtitle && <Text style={styles.subtitle}>{item.subtitle}</Text>}
+                            {item.tradeName && <Text style={styles.tradeName}>{item.tradeName}</Text>}
                             {showPayload && (
                                 <Text style={styles.payload}>
                                     {/* Payload hint if requested */}

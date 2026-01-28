@@ -106,7 +106,7 @@ export default function Home() {
                     <Link to={'/QrCode'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <QrCodeIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>Safety</span>
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Qr Code</span>
                         </Box>
                     </Link>
                 </Grid>
