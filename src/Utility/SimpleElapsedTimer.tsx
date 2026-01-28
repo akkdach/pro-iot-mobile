@@ -27,8 +27,7 @@ const parseToMs = (v: StartAt): number | null => {
 
     const s = v.trim();
 
-    // ลอง parse แบบ ISO ก่อน (replace space เป็น T, เติม Z ให้เป็น UTC)
-    // ถ้า Backend ส่งมาเป็น Local Time จริงๆ อาจต้องลบ Z ออก แต่เคสนี้มีปัญหา +7 ชม. แสดงว่า Backend น่าจะเป็น UTC
+
     let safeS = s.replace(" ", "T");
     if (!safeS.endsWith("Z") && !safeS.includes("+")) {
         safeS += "Z";

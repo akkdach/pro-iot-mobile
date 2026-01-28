@@ -83,6 +83,70 @@ export const getStatusMeta = (r: WorkOrderRow) => {
     return { label: "Unknown", color: "default" as const };
 };
 
+// ====== SLA Helpers (Reused from SlaTimer logic) ======
+const pad2 = (n: number) => String(n).padStart(2, "0");
+
+function parseTimeToHms(time?: string | null): { hh: number; mm: number; ss: number } | null {
+    if (!time) return null;
+    const t = time.trim();
+    if (/^\d{6}$/.test(t)) {
+        const hh = Number(t.slice(0, 2));
+        const mm = Number(t.slice(2, 4));
+        const ss = Number(t.slice(4, 6));
+        if ([hh, mm, ss].some(Number.isNaN)) return null;
+        return { hh, mm, ss };
+    }
+    if (/^\d{2}:\d{2}(:\d{2})?$/.test(t)) {
+        const [h, m, s = "00"] = t.split(":");
+        const hh = Number(h), mm = Number(m), ss = Number(s);
+        if ([hh, mm, ss].some(Number.isNaN)) return null;
+        return { hh, mm, ss };
+    }
+    return null;
+}
+
+function buildTargetMs(dateStr?: string | null, timeStr?: string | null): number | null {
+    if (!dateStr) return null;
+    const base = new Date(dateStr);
+    if (!Number.isFinite(base.getTime())) return null;
+    const hms = parseTimeToHms(timeStr);
+    if (!hms) return null;
+    base.setHours(hms.hh, hms.mm, hms.ss, 0);
+    return base.getTime();
+}
+
+const getSlaColor = (row: WorkOrderRow) => {
+    const slaStartDate = row.slA_START_DATE ?? row.slaStartDate ?? row.productioN_START_DATE;
+    const slaStartTime = row.slA_START_TIME ?? row.slaStartTime ?? row.productioN_START_TIME;
+    const slaFinishDate = row.slA_FINISH_DATE ?? row.slaFinishDate;
+    const slaFinishTime = row.slA_FINISH_TIME ?? row.slaFinishTime;
+
+    const startMs = buildTargetMs(slaStartDate, slaStartTime);
+    const finishMs = buildTargetMs(slaFinishDate, slaFinishTime);
+
+    if (!startMs || !finishMs || !Number.isFinite(startMs) || !Number.isFinite(finishMs) || finishMs <= startMs) {
+        return "grey.400";
+    }
+
+    const nowMs = Date.now();
+    const remainingMs = finishMs - nowMs;
+    const totalMs = finishMs - startMs;
+    const isOverdue = remainingMs < 0;
+
+    // Logic matches SlaTimer.tsx
+    // <= 0% (Overdue) -> Red
+    // <= 30% remaining -> Yellow
+    // > 30% remaining -> Green
+
+    if (isOverdue) return "#d32f2f"; // Red
+
+    const rawPercent = nowMs <= startMs ? 100 : (remainingMs / totalMs) * 100;
+    const percent = Math.max(0, Math.min(100, rawPercent));
+
+    if (percent >= 31) return "#2e7d32"; // Green
+    return "#f9a825"; // Yellow
+};
+
 // ====== WorkOrderTodoCard Component ======
 export function WorkOrderTodoCard(props: {
     row: WorkOrderRow;
@@ -120,14 +184,7 @@ export function WorkOrderTodoCard(props: {
             <Box
                 sx={{
                     height: 4,
-                    bgcolor:
-                        status.color === "success"
-                            ? "success.main"
-                            : status.color === "info"
-                                ? "info.main"
-                                : status.color === "warning"
-                                    ? "warning.main"
-                                    : "grey.400",
+                    bgcolor: getSlaColor(row),
                 }}
             />
 
@@ -135,7 +192,7 @@ export function WorkOrderTodoCard(props: {
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
                     <Box sx={{ minWidth: 0 }}>
                         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
-                            <Chip size="small" label={status.label} color={status.color} />
+
                             <Chip size="small" variant="outlined" label={`Station: ${stationName}`} />
                             {!!row.equipment && <Chip size="small" variant="outlined" label={`EQ: ${row.equipment}`} />}
                         </Stack>
