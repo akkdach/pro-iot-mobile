@@ -41,6 +41,7 @@ import DashboardMonitoring from './Pages/workStation/DashboardMonitoring';
 import DashboardQC from './Pages/Qc/DashboardQC';
 import CheckSheet from './Pages/Safety/CheckSheet';
 import CheckList from './Pages/Safety/CheckList';
+import QrCode from './Pages/QrCode/QrCode';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -80,6 +81,7 @@ function App() {
           <Route path="DashboardQC" element={<DashboardQC />}></Route>
           <Route path="CheckSheet" element={<CheckSheet />}></Route>
           <Route path="CheckList" element={<CheckList />}></Route>
+          <Route path="QrCode" element={<QrCode />}></Route>
         </Routes></Layout></UserProvider>) : (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
 
       </div>
