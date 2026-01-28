@@ -33,6 +33,12 @@ export default function Home() {
             </Grid>
             <Grid container spacing={2} sx={{ flex: 1, flexDirection: 'row', justifyContent: 'center', marginTop: 2 }}>
                 <Grid size={12} sx={{ width: '100%' }}>
+                    <Link to={'MobileCheckList'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <Dashboard sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Mobile Check List (เฉพาะกิจ)</span>
+                        </Box>
+                    </Link>
                     <Link to={'StandardTimeDashboard'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <Dashboard sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
@@ -57,6 +63,13 @@ export default function Home() {
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <Inventory sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Inventory Counting</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/Counting'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <Inventory sx={{ marginLeft: '10px', fontSize: 32, color: '#4CAF50' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>ตรวจนับอะไหล่บนรถ</span>
                         </Box>
                     </Link>
 
