@@ -46,7 +46,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "start:env": "env-cmd -f .env react-scripts start",
+    "start:local": "env-cmd -f .env.local react-scripts start",
     "build": "react-scripts build",
+    "build:env": "env-cmd -f .env react-scripts build",
+    "build:local": "env-cmd -f .env.local react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -71,6 +75,7 @@
   "devDependencies": {
     "@types/file-saver": "^2.0.7",
     "@types/react": "^19.1.4",
-    "@types/react-dom": "^19.1.5"
+    "@types/react-dom": "^19.1.5",
+    "env-cmd": "^10.1.0"
   }
 }
