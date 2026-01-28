@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorkStation System Presentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-industry text-xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-800 tracking-tight">WorkStation System</h1>
+            </div>
+            <div class="hidden md:flex space-x-6 text-sm font-semibold text-slate-600">
+                <a href="#overview" class="hover:text-blue-600 transition">ภาพรวมระบบ</a>
+                <a href="#setup" class="hover:text-blue-600 transition">Setup & Refurbish</a>
+                <a href="#operation" class="hover:text-blue-600 transition">ขั้นตอนการทำงาน</a>
+                <a href="#sparepart" class="hover:text-blue-600 transition">คลังอะไหล่</a>
+                <a href="#upload" class="hover:text-blue-600 transition">อัปโหลดรูปภาพ</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative py-24 bg-gradient-to-br from-blue-50 to-indigo-50 overflow-hidden">
+        <div
+            class="absolute inset-0 opacity-10 bg-[radial-gradient(#2563EB_1px,transparent_1px)] [background-size:20px_20px]">
+        </div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10 text-center">
+            <span class="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-700 text-sm font-bold mb-4">Internal
+                Tool Documentation</span>
+            <h1 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight text-slate-900">
+                ระบบบริหารจัดการ <br> <span class="gradient-text">WorkStation & Refurbish</span>
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                คู่มือการใช้งานและรายละเอียดฟังก์ชันสำหรับเจ้าหน้าที่ปฏิบัติงาน ครอบคลุมตั้งแต่นำเข้างาน
+                การเบิกอะไหล่ ไปจนถึงการปิดงานและตรวจสอบคุณภาพ
+            </p>
+        </div>
+    </header>
+
+    <!-- Section 1: Setup & Refurbish Hub (Start Here) -->
+    <section id="setup" class="py-24 max-w-7xl mx-auto px-6 border-b border-slate-200">
+        <div class="mb-16 text-center">
+            <span class="bg-blue-100 text-blue-800 text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">PHASE 1:
+                ACCESS POINT</span>
+            <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 leading-tight">Setup & Refurbish Hub</h2>
+            <p class="text-xl text-slate-600 mt-4 max-w-3xl mx-auto leading-relaxed">
+                จุดเริ่มต้นของการปฏิบัติงาน (Entry Point) ออกแบบมาเพื่อให้เจ้าหน้าที่สามารถเลือกสถานีงาน (Work Station)
+                ได้อย่างรวดเร็วและแม่นยำ ผ่านอินเทอร์เฟซแบบกราฟิกที่เข้าใจง่าย
+            </p>
+        </div>
+
+        <!-- Full Width Screenshot -->
+        <div class="mb-16">
+            <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-blue-100">
+                <img src="./presentation_images/setup.png" alt="Setup Hub Screenshot" class="w-full h-auto">
+            </div>
+        </div>
+
+        <!-- Description Below -->
+        <div class="grid md:grid-cols-2 gap-10">
+            <div class="prose prose-lg text-slate-600">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">Functional Overview</h3>
+                <p>
+                    หน้าจอนี้ทำหน้าที่เป็น <strong>Central Hub</strong> สำหรับการ Routing
+                    ผู้ใช้งานไปยังกระบวนการที่ถูกต้อง
+                    โดยมีการจัดวาง Layout แบบ <em>Hexagonal Grid</em> เพื่อรองรับจำนวน Station ที่อาจเพิ่มขึ้นในอนาคต
+                    และยังมีระบบ Visual Navigation โดยใช้ไอคอนสื่อความหมายชัดเจน
+                    ทำให้พนักงานสามารถเข้าถึงเมนูที่ต้องการได้อย่างรวดเร็ว
+                </p>
+                <p class="mt-4">
+                    <strong>ข้อดีหลักของ Hexagonal Layout:</strong> ช่วยให้ปุ่มแต่ละปุ่มมีพื้นที่กว้างขึ้น
+                    เหมาะสำหรับการทำงานบน Tablet
+                    หรือ Touch Screen ในสภาพแวดล้อมโรงงาน โดยสามารถเพิ่ม Station ใหม่ได้โดยไม่กระทบต่อ Layout เดิม
+                    และยังช่วยลดความผิดพลาดจากการกดผิดปุ่ม
+                </p>
+                <ul class="list-none space-y-3 mt-4">
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-check-circle text-green-500 mt-1.5 mr-3"></i>
+                        <span><strong>Authentication & Authorization:</strong>
+                            ระบบตรวจสอบสิทธิ์พนักงานก่อนเข้าถึงเมนูต่างๆ เชื่อมต่อกับ Active Directory และบันทึก Audit
+                            Log เพื่อความปลอดภัย</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-check-circle text-green-500 mt-1.5 mr-3"></i>
+                        <span><strong>Responsive Layout:</strong> รองรับการใช้งานผ่าน Tablet (10-12 นิ้ว), Desktop
+                            และมาตรฐานหน้าจออุตสาหกรรม
+                            ปรับขนาดอัตโนมัติตาม Resolution</span>
+                    </li>
+                    <li class="flex items-start">
+                        <i class="fa-solid fa-check-circle text-green-500 mt-1.5 mr-3"></i>
+                        <span><strong>Easy Navigation:</strong> ลดความซับซ้อนในการเข้าถึงเมนูด้วย Graphic-based UI
+                            ใช้ไอคอนและสีแยกประเภทงาน ช่วยให้พนักงานใหม่เรียนรู้ได้เร็วขึ้น</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-indigo-50 p-8 rounded-3xl border border-indigo-100 shadow-sm">
+                <h4 class="font-bold text-indigo-900 text-xl mb-6 flex items-center">
+                    <i class="fa-solid fa-sitemap mr-3"></i> Available Work Stations
+                </h4>
+                <div class="grid grid-cols-1 gap-4">
+                    <div class="flex items-center p-3 bg-white rounded-xl shadow-sm border border-indigo-100">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-4">01</span>
+                        <div>
+                            <div class="font-bold text-slate-800">Inspector & Incoming Check</div>
+                            <div class="text-sm text-slate-500">ตรวจสอบสภาพสินค้าขาเข้า บันทึกความเสียหายเบื้องต้น</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-white rounded-xl shadow-sm border border-indigo-100">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-4">02</span>
+                        <div>
+                            <div class="font-bold text-slate-800">Disassembly & Remove Parts</div>
+                            <div class="text-sm text-slate-500">ขั้นตอนการถอดชิ้นส่วนและแยกประเภทอะไหล่</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-white rounded-xl shadow-sm border border-indigo-100">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-4">03</span>
+                        <div>
+                            <div class="font-bold text-slate-800">Cleaning & Preparation</div>
+                            <div class="text-sm text-slate-500">ทำความสะอาดชิ้นงาน เตรียมพื้นผิว</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center p-3 bg-white rounded-xl shadow-sm border border-indigo-100">
+                        <span
+                            class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold mr-4">04</span>
+                        <div>
+                            <div class="font-bold text-slate-800">Assembly, QC & Finishing</div>
+                            <div class="text-sm text-slate-500">ประกอบงาน ตรวจสอบคุณภาพ และส่งมอบ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-xl">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <i class="fa-solid fa-lightbulb text-yellow-500"></i>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-bold text-yellow-800">Presentation Tip</h3>
+                    <div class="mt-2 text-sm text-yellow-700">
+                        <p>ควรอธิบายเพิ่มเติมว่า "Hex Grid" ช่วยให้กดปุ่มได้ง่ายบนหน้าจอสัมผัส (Touch Screen
+                            Friendly) และรองรับการขยาย Station ใหม่ๆ ได้โดยไม่เสีย Layout</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Dashboard Refurbish (The List) -->
+    <section id="dashboard" class="py-24 bg-slate-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-16 text-center">
+                <span
+                    class="bg-indigo-100 text-indigo-800 text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">PHASE
+                    2: MANAGEMENT VIEW</span>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 leading-tight">Dashboard Refurbish
+                </h2>
+                <p class="text-xl text-slate-600 mt-4 max-w-2xl mx-auto leading-relaxed">
+                    ศูนย์รวมรายการใบงาน (Work Orders) ที่รอการดำเนินการ พร้อมเครื่องช่วยจัดลำดับความสำคัญอัจฉริยะ (SLA
+                    Priority)
+                </p>
+            </div>
+
+            <!-- Full Width Screenshot -->
+            <div class="mb-16">
+                <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border-2 border-indigo-100">
+                    <img src="./presentation_images/dash.png" alt="Dashboard Screenshot" class="w-full h-auto">
+                </div>
+            </div>
+
+            <!-- Description Below -->
+            <div class="grid md:grid-cols-2 gap-10">
+                <div class="space-y-10">
+                    <div class="prose prose-lg text-slate-600">
+                        <h3 class="text-2xl font-bold text-slate-800 mb-4">Intelligent Work List</h3>
+                        <p>
+                            ระบบแสดงรายการใบงานแบบ <strong>Real-time</strong> โดยดึงข้อมูลจาก SAP/ERP เชื่อมต่อผ่าน API
+                            Gateway
+                            ช่วยให้หัวหน้างานและช่างเทคนิคเห็นภาพรวมของงานที่ค้างอยู่ (Backlog) ทั้งหมด
+                            และสามารถตัดสินใจเลือกทำงานได้ทันที โดยคำนึงถึง Priority และ SLA ของแต่ละงาน
+                        </p>
+                        <p class="mt-4">
+                            <strong>จุดเด่น:</strong> Dashboard นี้ช่วยลดปัญหาการหาใบงาน (Work Order)
+                            ที่เคยต้องใช้กระดาษหรือ Excel
+                            โดยมีการ Sync ข้อมูลทุก 30 วินาที และแสดงเฉพาะงานที่ยังไม่เสร็จสมบูรณ์
+                            พร้อมไฮไลต์งานที่ใกล้เกิน SLA
+                        </p>
+
+                        <div class="my-8 space-y-4">
+                            <div class="flex items-start">
+                                <span
+                                    class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold mr-4">
+                                    <i class="fa-solid fa-filter"></i>
+                                </span>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-lg">Advanced Filtering</h4>
+                                    <p class="text-sm text-slate-500">กรองงานตามสถานะ SLA (Normal, Warning, Overdue)
+                                        หรือค้นหาด้วยเลข Work Order</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <span
+                                    class="flex-shrink-0 w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold mr-4">
+                                    <i class="fa-solid fa-stopwatch"></i>
+                                </span>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-lg">SLA Countdown</h4>
+                                    <p class="text-sm text-slate-500">แสดงเวลาที่เหลือก่อนกำหนดส่งมอบงาน (Countdown
+                                        Timer) ช่วยกระตุ้นให้ทำงานเสร็จตามเวลา</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <span
+                                    class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-4">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </span>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-lg">Quick Information</h4>
+                                    <p class="text-sm text-slate-500">แสดงรายละเอียดสำคัญทันที เช่น Equipment, Order
+                                        Type และ Description โดยไม่ต้องกดเข้าไปดูข้างใน</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-100 p-6 rounded-2xl border border-slate-200">
+                            <h4 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-computer-mouse mr-2"></i>
+                                User Interaction</h4>
+                            <p class="text-sm">
+                                ผู้ใช้งานสามารถ <strong>คลิกที่แถว (Row Click)</strong> ของรายการใบงาน
+                                เพื่อเข้าสู่หน้าจอลงรายละเอียดการปฏิบัติงาน (Execution Screen) ในขั้นตอนถัดไป
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-20 text-center">
+                <i class="fa-solid fa-arrow-down-long text-4xl text-slate-300 animate-bounce"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: WorkStation Detail Execution -->
+    <section id="detail" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-16 text-center">
+                <span
+                    class="bg-purple-100 text-purple-800 text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">PHASE
+                    3: ACTION & EXECUTION</span>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 leading-tight">WorkStation Execution
+                </h2>
+                <p class="text-xl text-slate-600 mt-4 max-w-3xl mx-auto leading-relaxed">
+                    หน้าจอการทำงานหลักที่รวมทุกฟังก์ชันไว้ในจุดเดียว
+                    เพื่อให้ช่างเทคนิคปฏิบัติงานได้ต่อเนื่องโดยไม่ต้องเปลี่ยนหน้าจอ
+                </p>
+            </div>
+
+            <!-- Screenshots Gallery -->
+            <div class="mb-12 text-center">
+                <h3 class="text-3xl font-bold text-slate-800 mb-3">Interface Showcase</h3>
+                <p class="text-slate-600">แสดงตัวอย่างหน้าจอจริงจากระบบที่พัฒนาขึ้น ครอบคลุมทุกฟีเจอร์หลัก</p>
+            </div>
+
+            <div class="space-y-16 mb-20 max-w-4xl mx-auto">
+                <!-- Image 1: Work Order -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-purple-100 transform hover:shadow-purple-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    1
+                                </div>
+                            </div>
+                            <img src="./presentation_images/workOrder.png" alt="Work Order Screen"
+                                class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-purple-900/80 via-purple-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-purple-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-file-invoice text-purple-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Job Details & SLA</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">หน้าจอแสดงข้อมูลงาน พร้อม Timer
+                                นับถอยหลังเพื่อควบคุม SLA แบบ Real-time</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 2: Employee -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-purple-100 transform hover:shadow-purple-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-green-600 to-green-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    2
+                                </div>
+                            </div>
+                            <img src="./presentation_images/employee.png" alt="Employee Screen" class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-green-900/80 via-green-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-green-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-users text-green-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Employee Team</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">จัดการทีมงาน เพิ่ม-ลบพนักงาน
+                                พร้อมระบุบทบาท (Leader/Technician)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 3: Evidence -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-purple-100 transform hover:shadow-purple-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-pink-600 to-pink-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    3
+                                </div>
+                            </div>
+                            <img src="./presentation_images/image.png" alt="Evidence Screen" class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-pink-900/80 via-pink-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-pink-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-camera text-pink-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Evidence Upload</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">อัปโหลดภาพหลักฐาน Before/After
+                                พร้อมกำหนด Master Images ที่บังคับถ่าย</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 4: Spare Parts Inventory -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-orange-100 transform hover:shadow-orange-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-orange-600 to-orange-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    4
+                                </div>
+                            </div>
+                            <img src="./presentation_images/workOrderList.png" alt="Spare Parts Inventory"
+                                class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-orange-900/80 via-orange-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-orange-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-boxes-stacked text-orange-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Spare Parts Inventory</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">
+                                แสดงรายการอะไหล่คงคลังที่สามารถเบิกใช้งานได้ทันที พร้อมระบุตำแหน่งจัดเก็บ (Bin Location)
+                                และจำนวนคงเหลือแบบ Real-time เชื่อมต่อกับระบบ Master Data</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 5: Spare Parts Cart -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-blue-100 transform hover:shadow-blue-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    5
+                                </div>
+                            </div>
+                            <img src="./presentation_images/cartInStation.png" alt="Parts Request Cart"
+                                class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-blue-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-cart-arrow-down text-blue-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Parts Request Cart</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">
+                                ระบบตะกร้าเบิกอะไหล่ที่ช่วยรวบรวมรายการที่ต้องการเบิกในครั้งเดียว ลดขั้นตอนเอกสารซ้ำซ้อน
+                                และเชื่อมต่อกับระบบตัดสต็อกอัตโนมัติเมื่อได้รับการอนุมัติ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Feature Breakdown -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        1</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Job Details & SLA</h3>
+                    <p class="text-slate-600">แสดงข้อมูล Work Order, Equipment และเวลานับถอยหลัง (Timer) เพื่อควบคุม
+                        SLA
+                        อย่างเคร่งครัด</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        2</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Employee Management</h3>
+                    <p class="text-slate-600">จัดการรายชื่อพนักงานที่ปฏิบัติงานใน Job นั้นๆ รองรับการทำงานแบบทีม
+                        (Leader/Technician)</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        3</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Spare Parts Inventory</h3>
+                    <p class="text-slate-600">แท็บสำหรับเบิก-จ่ายอะไหล่ ตัดสต็อกจริง (Stock Deduction)
+                        และบันทึกยอดการใช้งานตามจริง</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-pink-100 text-pink-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        4</div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Evidence Upload</h3>
+                    <p class="text-slate-600">รองรับการอัปโหลดรูปภาพหลักฐาน (Before/After) โดยมีการกำหนด Master
+                        Images
+                        ที่จำเป็นต้องถ่าย</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    </section>
+
+    <!-- Section 4: Stock Report Module -->
+    <section id="stock-report" class="py-24 bg-gradient-to-br from-slate-50 to-blue-50 border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-16 text-center">
+                <span
+                    class="bg-orange-100 text-orange-800 text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">PHASE
+                    4: INVENTORY MANAGEMENT</span>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 leading-tight">Stock Report System
+                </h2>
+                <p class="text-xl text-slate-600 mt-4 max-w-3xl mx-auto leading-relaxed">
+                    ระบบจัดการคลังอะไหล่และการขอเบิกวัสดุ เพื่อควบคุมสต็อกและติดตามการใช้งาน Real-time
+                </p>
+            </div>
+
+            <!-- Gallery Title -->
+            <div class="mb-12 text-center">
+                <h3 class="text-3xl font-bold text-slate-800 mb-3">Stock Management Interface</h3>
+                <p class="text-slate-600">ระบบจัดการคลังอะไหล่ครบวงจร ตั้งแต่การเบิก ตรวจสอบ จนถึงการอนุมัติ</p>
+            </div>
+
+            <!-- Image Flow: 3 Images Stacked -->
+            <div class="space-y-16 mb-20 max-w-4xl mx-auto">
+                <!-- Image 1: Stock Report List -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-orange-100 transform hover:shadow-orange-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-orange-600 to-orange-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    1
+                                </div>
+                            </div>
+                            <img src="./presentation_images/stock.png" alt="Stock Report Page" class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-orange-900/80 via-orange-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-orange-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-clipboard-list text-orange-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Stock Report List</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">หน้าจอแสดงรายการอะไหล่ทั้งหมดในคลัง
+                                พร้อมข้อมูล Stock Level, Location และสถานะพร้อมใช้งาน</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 2: Add Spare Cart -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-orange-100 transform hover:shadow-orange-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    2
+                                </div>
+                            </div>
+                            <img src="./presentation_images/cartStock.png" alt="Spare Parts Cart" class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-blue-900/80 via-blue-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-blue-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-cart-shopping text-blue-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Cart & Request System</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">
+                                ระบบตะกร้าสำหรับรวบรวมอะไหล่ที่ต้องการเบิก พร้อมระบุจำนวน หน่วย และ Work Order
+                                ที่เกี่ยวข้อง</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image 3: Stock Item Detail -->
+                <div class="group">
+                    <div
+                        class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-orange-100 transform hover:shadow-orange-200 hover:-translate-y-2 transition-all duration-500">
+                        <div class="relative">
+                            <!-- Sequence Badge -->
+                            <div class="absolute top-6 left-6 z-10">
+                                <div
+                                    class="w-14 h-14 bg-gradient-to-br from-teal-600 to-teal-800 rounded-full flex items-center justify-center text-white font-bold text-2xl shadow-lg border-4 border-white">
+                                    3
+                                </div>
+                            </div>
+                            <img src="./presentation_images/stockDetail.png" alt="Stock Item Detail"
+                                class="w-full h-auto">
+                            <!-- Hover Overlay -->
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-teal-900/80 via-teal-600/20 to-transparent opacity-0 group-hover:opacity-100 transition duration-500">
+                            </div>
+                        </div>
+                        <!-- Caption -->
+                        <div class="p-8 bg-gradient-to-br from-teal-50 to-white">
+                            <div class="flex items-center mb-3">
+                                <i class="fa-solid fa-magnifying-glass-chart text-teal-600 text-2xl mr-4"></i>
+                                <h4 class="text-2xl font-bold text-slate-800">Item Details & History</h4>
+                            </div>
+                            <p class="text-base text-slate-600 leading-relaxed">แสดงรายละเอียดครบถ้วนของอะไหล่
+                                ประวัติการเบิก-จ่าย, ตำแหน่งจัดเก็บ และข้อมูล Specification</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Breakdown -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Feature 1 -->
+                <div class="bg-white p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Real-time Inventory</h3>
+                    <p class="text-slate-600">เชื่อมต่อกับระบบ SAP เพื่อดึงข้อมูล Stock แบบ Real-time รวมถึงสถานะ
+                        Reservation</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-white p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-check-double"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Approval Workflow</h3>
+                    <p class="text-slate-600">ระบบอนุมัติการเบิกหลายระดับ ตามจำนวนและมูลค่า พร้อมแจ้งเตือนผู้เกี่ยวข้อง
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white p-8 rounded-2xl border border-orange-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-teal-100 text-teal-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Usage Analytics</h3>
+                    <p class="text-slate-600">วิเคราะห์การใช้งานอะไหล่ เพื่อคาดการณ์ความต้องการและวางแผนจัดซื้อ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Quality Control (QC) -->
+    <section id="qc-dashboard" class="py-24 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-16 text-center">
+                <span
+                    class="bg-emerald-100 text-emerald-800 text-sm font-bold px-4 py-1.5 rounded-full tracking-wide">PHASE
+                    5: QUALITY ASSURANCE</span>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-900 mt-6 leading-tight">QC Dashboard</h2>
+                <p class="text-xl text-slate-600 mt-4 max-w-3xl mx-auto leading-relaxed">
+                    ระบบตรวจสอบคุณภาพและจัดการงาน QC แบบ Real-time พร้อมติดตามสถานะงานในแต่ละสถานี
+                </p>
+            </div>
+
+            <!-- Gallery Title -->
+            <div class="mb-12 text-center">
+                <h3 class="text-3xl font-bold text-slate-800 mb-3">QC Management Interface</h3>
+                <p class="text-slate-600">แดชบอร์ดสำหรับติดตาม Order ที่อยู่ในกระบวนการ QC และจัดการงานตรวจสอบคุณภาพ</p>
+            </div>
+
+            <!-- Screenshot -->
+            <div class="mb-16 max-w-4xl mx-auto">
+                <div
+                    class="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-emerald-100 transform hover:shadow-emerald-200 hover:-translate-y-2 transition-all duration-500">
+                    <div class="relative">
+                        <img src="./presentation_images/Qc_2.png" alt="QC Dashboard Screenshot" class="w-full h-auto">
+                        <!-- Hover Overlay -->
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-emerald-900/80 via-emerald-600/20 to-transparent opacity-0 hover:opacity-100 transition duration-500">
+                        </div>
+                    </div>
+                    <!-- Caption -->
+                    <div class="p-8 bg-gradient-to-br from-emerald-50 to-white">
+                        <div class="flex items-center mb-3">
+                            <i class="fa-solid fa-list-check text-emerald-600 text-2xl mr-4"></i>
+                            <h4 class="text-2xl font-bold text-slate-800">QC Order Tracking</h4>
+                        </div>
+                        <p class="text-base text-slate-600 leading-relaxed">หน้าจอแสดงรายการ Work Order
+                            ที่อยู่ในกระบวนการ QC พร้อมสถานะการตรวจสอบและผู้รับผิดชอบ</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feature Breakdown -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Feature 1 -->
+                <div class="bg-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Quality Inspection</h3>
+                    <p class="text-slate-600">ตรวจสอบคุณภาพตามมาตรฐาน พร้อมบันทึกผลการตรวจสอบและรูปภาพหลักฐาน</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Order Status Tracking</h3>
+                    <p class="text-slate-600">ติดตามสถานะ Order ใน QC แบบ Real-time รู้ว่างานไหนผ่าน ไม่ผ่าน หรือรอตรวจ
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition">
+                    <div
+                        class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold mb-4">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Defect Management</h3>
+                    <p class="text-slate-600">บันทึกและจัดการข้อบกพร่องที่พบ พร้อมระบบ Reject & Rework</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <h2 class="text-xl font-bold text-white mb-1">WorkStation System</h2>
+                <p class="text-sm text-slate-500">Internal Operation Platform</p>
+            </div>
+            <div class="text-sm text-slate-500">
+                &copy; 2026 Developer Team. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+</body>
+
+</html>

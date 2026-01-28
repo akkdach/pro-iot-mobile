@@ -130,9 +130,9 @@ export default function Dashboard_QC_CardTodo() {
         const inProgress = rows.filter(isInProgress).length;
         const pending = rows.filter(isPending).length;
 
-        const stations = ["0049", "0079", "0089"];
+        const stations = ["0049", "0079", "0080"];
         const stationKpis = stations.reduce((acc, station) => {
-            const stationRows = rows.filter((r) => r.current_operation === station);
+            const stationRows = rows.filter((r) => String(r.current_operation || "").padStart(4, "0") === station);
             acc[station] = {
                 total: stationRows.length,
                 completed: stationRows.filter(isCompleted).length,
@@ -150,7 +150,7 @@ export default function Dashboard_QC_CardTodo() {
 
         // station filter (ถ้ามี)
         if (stationFilter) {
-            base = base.filter((r) => r.current_operation === stationFilter);
+            base = base.filter((r) => String(r.current_operation || "").padStart(4, "0") === stationFilter);
         } else {
             // status filter (ถ้าไม่มี station)
             if (filterType === "completed") base = base.filter(isCompleted);
@@ -250,7 +250,7 @@ export default function Dashboard_QC_CardTodo() {
                 {[
                     { station: "0049", title: "QC สี" },
                     { station: "0079", title: "QC ทดสอบ" },
-                    { station: "0089", title: "QC final" },
+                    { station: "0080", title: "QC final" },
                 ].map((item, idx) => {
                     const colors = ["#e67e22", "#3498db", "#9b59b6"]; // โทนสีแต่ละการ์ด
                     const stationData =
@@ -261,7 +261,7 @@ export default function Dashboard_QC_CardTodo() {
                             key={item.station}
                             title={item.title}
                             value={stationData.total}
-                            sub={`${stationData.completed} เสร็จ | ${stationData.inProgress} กำลังทำ | ${stationData.pending} รอ`}
+                            //sub={`${stationData.completed} เสร็จ | ${stationData.inProgress} กำลังทำ | ${stationData.pending} รอ`}
                             icon={<AssignmentIcon />}
                             accent={colors[idx]}
                             onClick={() => {

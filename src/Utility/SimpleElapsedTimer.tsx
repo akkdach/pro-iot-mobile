@@ -27,10 +27,15 @@ const parseToMs = (v: StartAt): number | null => {
 
     const s = v.trim();
 
-    // ลอง parse แบบ ISO ก่อน (replace space เป็น T)
-    const isoTry = new Date(s.replace(" ", "T"));
+
+    let safeS = s.replace(" ", "T");
+    if (!safeS.endsWith("Z") && !safeS.includes("+")) {
+        safeS += "Z";
+    }
+    const isoTry = new Date(safeS);
     if (!Number.isNaN(isoTry.getTime())) return isoTry.getTime();
 
+    // Fallback regex parsing
     const m = s.match(
         /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?$/
     );
@@ -39,7 +44,8 @@ const parseToMs = (v: StartAt): number | null => {
     const [, Y, Mo, D, H, Mi, S2, frac = ""] = m;
     const ms = Number((frac + "000").slice(0, 3));
 
-    const dt = new Date(
+    // Use Date.UTC instead of new Date (Local)
+    return Date.UTC(
         Number(Y),
         Number(Mo) - 1,
         Number(D),
@@ -49,8 +55,7 @@ const parseToMs = (v: StartAt): number | null => {
         Number.isFinite(ms) ? ms : 0
     );
 
-    const t = dt.getTime();
-    return Number.isFinite(t) ? t : null;
+
 };
 
 type Props = {
