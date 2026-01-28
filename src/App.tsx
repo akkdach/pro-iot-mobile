@@ -84,8 +84,8 @@ function App() {
           <Route path="QrCode" element={<QrCode />}></Route>
         </Routes></Layout></UserProvider>) : (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
 
-      </div>
-    </div>
+      </div >
+    </div >
 
   );
 }
