@@ -475,7 +475,7 @@ export default function PrintQRCodes() {
                                                 mb: { print: 0.5 }
                                             }}
                                         >
-                                            {x.title}
+                                            {x.objectID}
                                         </Typography>
                                         <Typography
                                             variant="body2"
@@ -488,7 +488,7 @@ export default function PrintQRCodes() {
                                                 py: { print: 0 } // Reset py
                                             }}
                                         >
-                                            THAIMAPTHIP {/* Description */}
+                                            THAIMAPTHIP
                                         </Typography>
 
                                         {x.tradeName && (
@@ -503,6 +503,21 @@ export default function PrintQRCodes() {
                                                 }}
                                             >
                                                 {x.tradeName}
+                                            </Typography>
+                                        )}
+
+                                        {x.subtitle && (
+                                            <Typography
+                                                variant="caption"
+                                                fontWeight={700}
+                                                sx={{
+                                                    color: "text.secondary",
+                                                    lineHeight: 1,
+                                                    fontSize: { print: '9px', xs: '8px' },
+                                                    m: 0
+                                                }}
+                                            >
+                                                {x.subtitle}
                                             </Typography>
                                         )}
                                     </Box>
