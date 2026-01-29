@@ -287,7 +287,7 @@ export default function PrintQRCodes() {
                 <AppHeader title="พิมพ์ QR Code" />
             </Box>
 
-            <Stack direction={{ xs: "column", md: "row" }} sx={{ mt: 7 }} spacing={2} alignItems="stretch">
+            <Stack direction={{ xs: "column", md: "row" }} sx={{ mt: 7, mb: 5 }} spacing={2} alignItems="stretch">
                 <Card className="no-print" sx={{ flex: "0 0 420px" }}>
                     <CardContent>
                         <Stack spacing={2}>
@@ -399,7 +399,7 @@ export default function PrintQRCodes() {
                                         <Checkbox checked={!!selected[x.id]} onChange={() => toggleOne(x.id)} />
                                         <Box sx={{ flex: 1 }}>
                                             <Typography variant="body2" fontWeight={700}>
-                                                {x.title}{" "}
+                                                {x.objectID}{" "}
                                                 <Typography component="span" variant="caption" color="text.secondary">
                                                     ({x.id})
                                                 </Typography>
