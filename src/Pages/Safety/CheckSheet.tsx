@@ -26,6 +26,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
+import AppHeader from "../../Component/AppHeader";
 
 /**
  * Safety Check Sheet - Driver Health (React TSX)
@@ -420,7 +421,8 @@ export default function CheckSheet() {
             mx: "auto",
             pb: { xs: 3, md: 4 }
         }}>
-            <Stack spacing={{ xs: 2, md: 2.5 }}>
+            <AppHeader title="Safety Check Sheet" />
+            <Stack spacing={{ xs: 2, md: 2.5 }} sx={{ mt: 7 }}>
                 {/* Header Section - Mobile Optimized */}
                 <Stack
                     direction={{ xs: "column", sm: "row" }}
