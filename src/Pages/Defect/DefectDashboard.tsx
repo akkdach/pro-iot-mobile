@@ -46,10 +46,11 @@ export default function DefectDashboard() {
     const onLoad = async () => {
         setLoading(true);
         try {
-            const res = await callApi.get("/WorkOrderList/Qc_Check");
+            const res = await callApi.get("/WorkOrderList/Defect");
             // console.log("API Response:", res.data); // Debug: ดูโครงสร้าง response
             const data = res.data?.DataResult ?? res.data?.dataResult;
             // ป้องกัน error ถ้า data ไม่ใช่ array
+            console.log("Data:", data);
             setRows(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Error loading work orders:", error);

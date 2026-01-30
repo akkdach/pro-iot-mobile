@@ -67,7 +67,7 @@ type ChecklistForm = {
 
     overallNote: string;
     supervisorName: string;
-    categoryNotes: Record<string, string>; // [NEW] notes by category name
+    categoryNotes: Record<string, string>;
 };
 
 type RuleHit = { level: FinalDecision; message: string };

@@ -113,6 +113,7 @@ interface WorkContextType {
   checkListWork: () => void;
   completed: () => void;
   returnWork: () => void;
+  qcReturnWork: () => void;
 
   addPart: (name: String, qty: number) => void;
   deletePart: (itemId: any) => void;
@@ -567,7 +568,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     const injectedToBase: Record<string, string> = {
       "0049": "0040",
       "0079": "0070",
-      // "0059": "0050", // Add if needed based on previous discussion
+
     };
 
     const currentStation = work?.current_operation;
@@ -733,6 +734,184 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  //--------------------------------------------------------------
+
+  const qcReturnWork = async () => {
+    console.log("work is qc return");
+    const pad4 = (v: any) => String(v ?? "").trim().padStart(4, "0");
+
+    const injectedToBase: Record<string, string> = {
+      "0049": "0040",
+      "0079": "0070",
+
+    };
+
+    const currentStation = work?.current_operation;
+    const stationCode = pad4(currentStation);
+    // Use lookup code if it exists, otherwise use original code
+    const normalizedStation = injectedToBase[stationCode] ?? stationCode;
+
+    const payloadRe_Station = {
+      ORDERID: work?.orderid,
+      current_operation: normalizedStation,
+    };
+    const re_station = await callApi.get("/WorkOrderList/ReturnStation", {
+      params: payloadRe_Station,
+      headers: { "Content-Type": "application/json" },
+    });
+
+
+    const data_re_station = re_station.data;
+    console.log("Return Station : ", data_re_station);
+
+    const remarkOptions: Record<string, string> = {
+      delay: "Delay",
+      waiting_part: "Waiting Part",
+      rework: "Rework",
+    };
+
+    try {
+      if (!work?.orderid) return;
+
+      const visitedStations = data_re_station.isSuccess ? data_re_station.dataResult : [];
+      let stationOptions: Record<string, string> = {};
+
+      const currentStationCode = pad4(normalizedStation); // Use normalized current station
+      const currentStepIndex = steps.findIndex(s => s.station === currentStationCode);
+
+      if (Array.isArray(visitedStations)) {
+        visitedStations.forEach((item: any) => {
+          const code = item.activity;
+          if (!code) return;
+
+          const normalizedCode = pad4(code);
+          const stepIndex = steps.findIndex(s => s.station === normalizedCode);
+
+          // Filter: show only if station exists in steps AND is not ahead of current station
+          if (stepIndex !== -1 && stepIndex <= currentStepIndex) {
+            const step = steps[stepIndex];
+            // Use title from steps, fallback to code if missing
+            stationOptions[code] = step.title || `Station ${code}`;
+          }
+        });
+      } else if (typeof visitedStations === 'object' && visitedStations !== null) {
+
+        Object.entries(visitedStations).forEach(([key, value]) => {
+          const normalizedCode = pad4(key);
+          const stepIndex = steps.findIndex(s => s.station === normalizedCode);
+          if (stepIndex !== -1 && stepIndex <= currentStepIndex) {
+            stationOptions[key] = String(value);
+          }
+        });
+      }
+
+      console.log("Mapped & Filtered stationOptions:", stationOptions);
+
+      if (!stationOptions || Object.keys(stationOptions).length === 0) {
+        await Swal.fire({
+          title: "Cannot Return",
+          text: "This work order cannot be returned to any previous station.",
+          icon: "info",
+        });
+        return;
+      }
+
+      const confirm = await Swal.fire({
+        title: "Return Work Order",
+        text: "Select station to rollback:",
+        icon: "warning",
+        input: "select",
+        inputOptions: stationOptions,
+        inputPlaceholder: "Choose station...",
+        showCancelButton: true,
+        confirmButtonText: "Confirm",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#e67e22",
+        cancelButtonColor: "#95a5a6",
+      });
+
+      if (!confirm.isConfirmed) return;
+
+      const selectedStation = confirm.value as string;
+
+
+      const remarkConfirm = await Swal.fire({
+        title: "Return Remark",
+        text: "Select reason for return:",
+        icon: "question",
+        input: "select",
+        inputOptions: remarkOptions,
+        inputPlaceholder: "Choose reason...",
+        showCancelButton: true,
+        confirmButtonText: "Next",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "#1976d2",
+        cancelButtonColor: "#95a5a6",
+        inputValidator: (v) => (!v ? "Please choose a reason" : undefined),
+      });
+
+      if (!remarkConfirm.isConfirmed) return;
+
+      const selectedRemark = remarkConfirm.value as string;
+
+      const payloadReturn = {
+        ORDERID: work?.orderid,
+        current_operation: work?.current_operation,
+        TO_STATION: selectedStation,
+      };
+
+      const payloadRemark = {
+        ORDERID: work?.orderid,
+        return_remark: selectedRemark,
+      };
+
+      const [res_return, res_remark] = await Promise.all([
+        callApi.post("/WorkOrderList/QcReturn", payloadReturn, {
+          headers: { "Content-Type": "application/json" },
+        }),
+        callApi.post("/WorkOrderList/RemarkReturn", payloadRemark, {
+          headers: { "Content-Type": "application/json" },
+        }),
+      ]);
+
+      const data_return = res_return.data;
+      const data_remark = res_remark.data;
+
+      if (!data_return?.isSuccess || !data_remark?.isSuccess) {
+        await Swal.fire({
+          title: "Failed",
+          text:
+            data_return?.Message ??
+            data_return?.message ??
+            data_remark?.Message ??
+            data_remark?.message ??
+            "Cannot return / save remark",
+          icon: "error",
+        });
+        return;
+      }
+
+      setWork((prev) => (prev ? { ...prev, current_operation: selectedStation } : prev));
+
+      await Swal.fire({
+        title: "Finished!",
+        text: "Work order has been returned successfully.",
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (err: any) {
+      console.error("ReturnWork Error:", err);
+      await Swal.fire({
+        title: "Error",
+        text: err.response?.data?.Message || "Something went wrong.",
+        icon: "error",
+      });
+    }
+  };
+
+  //------------------------------------------------------------
+
   const addPart = async (name: String, qty: number) => {
     console.log(`add part is working`);
     try {
@@ -885,6 +1064,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         checkListWork,
         completed,
         returnWork,
+        qcReturnWork,
         addPart,
         deletePart,
         setScannedCode,

@@ -126,6 +126,7 @@ export default function WorkStation() {
     checkListWork,
     checkList,
     setCheckList,
+    qcReturnWork,
   } = useWork();
   const location = useLocation();
   const row = location.state;
@@ -1099,6 +1100,12 @@ export default function WorkStation() {
                   from: "purple",
                   to: "blue",
                   onClick: () => setOpenRemark(true),
+                },
+                {
+                  label: "Qc Return",
+                  from: "red",
+                  to: "blue",
+                  onClick: qcReturnWork,
                 },
               ]
                 .filter((btn) => !btn.hide)
