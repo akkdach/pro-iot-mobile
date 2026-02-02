@@ -137,12 +137,14 @@ const DashboardRefurbish = () => {
       navigate("/StockReport", { replace: true });
     } else {
       console.log("step : ", step.station);
+      console.log(work?.orderid);
       let res = await callApi.get(
         `/WorkOrderList/workOrderList/${step.station}`
       );
       console.log("Each order in fontend in dashboard : ", res.data.dataResult);
       setItems(res.data.dataResult);
       setWork(res.data.dataResult);
+      console.log(work);
       //setItemEach(data);
     }
   };
@@ -242,9 +244,10 @@ const DashboardRefurbish = () => {
 
   const paginationModel = { page: 0, pageSize: 5 };
 
-  const orderTypes = Array.from(new Set(items.map((row) => row.ordeR_TYPE)));
+  const safeItems = Array.isArray(items) ? items : [];
 
-  const filteredRows = items.filter((row) => {
+
+  const filteredRows = safeItems.filter((row) => {
     const matchWorkOrder = row.orderid
       ?.toString()
       .toLowerCase()
@@ -321,10 +324,29 @@ const DashboardRefurbish = () => {
 
             },
           }}
-          pageSizeOptions={[10, 20, 30]}
-          sx={{ border: 0, width: "100%" }}
-          onRowClick={(params) => {
-            navigate(`/WorkStation`, { state: params.row });
+          muiTableContainerProps={{
+            sx: {
+              flexGrow: 1,
+              minHeight: "calc(100vh - 280px)",
+
+            },
+          }}
+          muiTableBodyRowProps={({ row }) => ({
+            onClick: () => {
+              if (step.station == null) return;
+              console.log("row.original.worK_ORDER_OPERATION_ID : ", row.original.worK_ORDER_OPERATION_ID);
+              console.log("row.original.orderid : ", row.original.orderid);
+              navigate(`/WorkStation/${row.original.orderid}/${row.original.worK_ORDER_OPERATION_ID}`, {
+                state: { current_operation: row.original.current_operation },
+              });
+            },
+            sx: { cursor: step.station != null ? "pointer" : "default" },
+          })}
+          muiSearchTextFieldProps={{
+            placeholder: "ค้นหา Work Order...",
+            sx: { minWidth: 300 },
+            variant: "outlined",
+            size: "small",
           }}
         />
       </Box>

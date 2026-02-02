@@ -11,8 +11,7 @@ import fs from 'fs';
  * @returns {Promise<any>} - Response from the server.
  */
 export async function uploadFile(file: File[], url: string, fieldName = 'contents') {
-  const baseApi = process.env.REACT_APP_DOCU_URL || 'https://service.bevproasia.com/api';
-  var baseURL = `${baseApi}/${url}`;
+  var baseURL = `https://service.bevproasia.com/api/${url}`
   try {
     const form = new FormData();
     file.forEach((file, i) => {

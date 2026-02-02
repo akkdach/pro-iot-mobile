@@ -51,7 +51,6 @@ import { formatDate, formatTime } from "../../Utility/DatetimeService";
 import ImageUploadCard from "./ImageUploadCard";
 import { replaceImageBaseUrl } from "../../Services/imageUrl";
 
-<<<<<<< HEAD
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -64,8 +63,6 @@ import EmployeeMultiSelectModal, { Employee } from "../../Utility/EmployeeSelect
 import WorkerRows from "../../Utility/WorkerRows";
 import { CloseWorkMaster } from "../../Utility/CloseWorkMaster";
 
-=======
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -73,116 +70,12 @@ interface TabPanelProps {
   keepMounted?: boolean;
 }
 
-<<<<<<< HEAD
 type FileState = {
   file: File | null;
   isEditable: boolean;
 };
 
 type DbItem = { code: string; isActive: boolean | null };
-=======
-// const rows = [
-//   {
-//     id: 1,
-//     lastName: "Snow",
-//     firstName: "Jon",
-//     age: 35,
-//     item: "1",
-//     itemNo: "M01011",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-//   {
-//     id: 2,
-//     lastName: "Lannister",
-//     firstName: "Cersei",
-//     age: 42,
-//     item: "2",
-//     itemNo: "M01012",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-//   {
-//     id: 3,
-//     lastName: "Lannister",
-//     firstName: "Jaime",
-//     age: 45,
-//     item: "3",
-//     itemNo: "M01013",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-//   {
-//     id: 4,
-//     lastName: "Stark",
-//     firstName: "Arya",
-//     age: 16,
-//     item: "4",
-//     itemNo: "M01014",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-//   {
-//     id: 5,
-//     lastName: "Targaryen",
-//     firstName: "Daenerys",
-//     age: null,
-//     item: "5",
-//     itemNo: "M01015",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-//   {
-//     id: 6,
-//     lastName: "Melisandre",
-//     firstName: null,
-//     age: 150,
-//     item: "6",
-//     itemNo: "M01016",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-//   {
-//     id: 7,
-//     lastName: "Clifford",
-//     firstName: "Ferrara",
-//     age: 44,
-//     item: "7",
-//     itemNo: "M01017",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-//   {
-//     id: 8,
-//     lastName: "Frances",
-//     firstName: "Rossini",
-//     age: 36,
-//     item: "8",
-//     itemNo: "M01018",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-//   {
-//     id: 9,
-//     lastName: "Roxie",
-//     firstName: "Harvey",
-//     age: 65,
-//     item: "9",
-//     itemNo: "M01019",
-//     itemDes: "คอยน์เย็น",
-//     qtv: "11",
-//     qtvShip: "11",
-//   },
-// ];
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
 
 const paginationModel = { page: 0, pageSize: 5 };
 
@@ -233,14 +126,11 @@ export default function WorkStation() {
     checkListWork,
     checkList,
     setCheckList,
+    qcReturnWork,
   } = useWork();
   const location = useLocation();
   const row = location.state;
-<<<<<<< HEAD
   console.log("row naaaaaa : ", row);
-=======
-  // console.log(row.id);
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
   const [part, setPart] = useState("");
   const [openAdd, setOpenAdd] = React.useState(false);
   const [openDelete, setOpenDelete] = useState(false);
@@ -260,7 +150,6 @@ export default function WorkStation() {
 
   const [openQrScanner, setOpenQrScanner] = useState(false);
   const [countDel, setCountDel] = useState(0);
-  //const [station, setStation] = useState("0010");
   const [itemEach, setItemEach] = useState();
   const [deleteId, setDeleteId] = useState<any>(null);
   const [masterImages, setMasterImages] = useState<any[]>([]);
@@ -289,7 +178,6 @@ export default function WorkStation() {
   const selectedFilesRef = React.useRef<Record<string, FileState>>({});
 
 
-<<<<<<< HEAD
   const navigate = useNavigate();
 
   // Edit QTY State
@@ -382,8 +270,6 @@ export default function WorkStation() {
     console.log("checked codes:", checkedCodes);
   }, [checkedCodes]);
 
-=======
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
   useEffect(() => {
     onLoad();
     onLoad2();
@@ -425,15 +311,11 @@ export default function WorkStation() {
   };
 
   const onLoad2 = async () => {
-<<<<<<< HEAD
     console.log(`/WorkOrderList/workOrder/${orderId}/${operationId}`);
     console.log("row operation id : ", operationId);
     let res = await callApi.get(
       `/WorkOrderList/workOrder/${orderId}/${operationId}`
     );
-=======
-    let res = await callApi.get(`/WorkOrderList/workOrder/${row.orderid}`);
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
     const data = res.data.dataResult;
     console.log("Each order in frontend in workStation workOrder/{orderId}/{operationId} : ", data);
     if (!data) {
@@ -453,7 +335,6 @@ export default function WorkStation() {
       servicE_TIME: item.servicE_TIME ?? item.SERVICE_TIME,
       actuaL_START_TIME: item.actuaL_START_TIME ?? item.ACTUAL_START_TIME,
       actuaL_FINISH_TIME: item.actuaL_FINISH_TIME ?? item.ACTUAL_FINISH_TIME,
-<<<<<<< HEAD
       actuaL_START_DATE: item.actuaL_START_DATE ?? item.ACTUAL_START_DATE,
       current_operation: item.current_operation ?? item.CURRENT_OPERATION,
       worK_ACTUAL: item.worK_ACTUAL ?? item.WORK_ACTUAL,
@@ -676,41 +557,6 @@ export default function WorkStation() {
     );
   }
 
-=======
-      current_station: item.current_station ?? item.CURRENT_OPERATION,
-    }));
-  };
-
-  // useEffect(() => {
-  //   setWork({
-  //     orderid: row.orderid,
-  //     ordeR_TYPE: row.ordeR_TYPE,
-  //     shorT_TEXT: row.shorT_TEXT,
-  //     equipment: row.equipment,
-  //     weB_STATUS: row.weB_STATUS,
-  //     slA_FINISH_TIME: row.slA_FINISH_TIME,
-  //     actuaL_FINISH_DATE: row.actuaL_FINISH_DATE,
-  //     servicE_TIME: row.servicE_TIME,
-  //     actuaL_START_TIME: row.actuaL_START_TIME,
-  //     actuaL_FINISH_TIME: row.actuaL_FINISH_TIME,
-  //   });
-  // }, [row]);
-
-  useEffect(() => {
-    console.log("before useEffect : ", item_component);
-  }, [item_component]);
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
-
-  // useEffect(() => {
-  //   setItem_Component({
-  //     orderid: item_component?.orderid,
-  //     RESERV_NO: item_component?.RESERV_NO,
-  //     RES_ITEM: item_component?.RES_ITEM,
-  //     MATL_DESC: item_component?.MATL_DESC,
-  //     ACTUAL_QUANTITY: item_component?.ACTUAL_QUANTITY,
-  //     ACTUAL_QUANTITY_UNIT: item_component?.ACTUAL_QUANTITY_UNIT,
-  //   });
-  // }, [item_component]);
 
   const columns: GridColDef[] = [
     {
@@ -728,16 +574,11 @@ export default function WorkStation() {
             }}
           >
             <Button
-<<<<<<< HEAD
               sx={{ backgroundColor: "#1976D2" }} // Blue for edit
-=======
-              sx={{ backgroundColor: "green" }}
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
               variant="contained"
               size="small"
               onClick={(e) => {
                 e.stopPropagation();
-<<<<<<< HEAD
                 // Prepare edit item
                 setEditItem({
                   material: params.row.reS_ITEM ?? "", // Use displayed item no or material
@@ -750,12 +591,6 @@ export default function WorkStation() {
               }}
             >
               <EditIcon />
-=======
-                handleOpenAdd();
-              }}
-            >
-              <AddTaskIcon />
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
             </Button>
             <Button
               sx={{ backgroundColor: "red" }}
@@ -848,7 +683,6 @@ export default function WorkStation() {
     console.log("สแกนได้ : ", value);
   };
 
-<<<<<<< HEAD
   const handleFileSelect = (key: string, seq: number, file: File | null) => {
     const uniqueKey = `${key}-${seq}`;
 
@@ -969,9 +803,6 @@ export default function WorkStation() {
     );
 
   };
-=======
-  console.log("Item component : ", item_component);
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
 
   return (
     <div className="scrollable-div bigBox">
@@ -1020,6 +851,7 @@ export default function WorkStation() {
             />
           </Tabs>
         </Box>
+
         <CustomTabPanel value={value} index={0}>
           <div>
 
@@ -1149,7 +981,6 @@ export default function WorkStation() {
                 </Stack>
               </Paper>
 
-<<<<<<< HEAD
               <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
                 <List sx={{ flex: 1 }}>
                   <ListItem
@@ -1208,57 +1039,6 @@ export default function WorkStation() {
                   </ListItem>
                 </List>
               </Box>
-=======
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Start Date" />
-                  <Typography>{formatDate(work?.actuaL_START_DATE)}</Typography>
-                </ListItem>
-                <Divider component="li" />
-
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Finish Date" />
-                  <Typography>
-                    {formatDate(work?.actuaL_FINISH_DATE)}
-                  </Typography>
-                </ListItem>
-              </List>
-
-              {/* RIGHT LIST */}
-              <List sx={{ flex: 1 }}>
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Use Time" />
-                  <Typography>
-                    {formatTime(Number(work?.servicE_TIME))}
-                  </Typography>
-                </ListItem>
-                <Divider component="li" />
-
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Start Time" />
-                  <Typography>
-                    {formatTime(Number(work?.actuaL_START_TIME))}
-                  </Typography>
-                </ListItem>
-                <Divider component="li" />
-
-                <ListItem
-                  sx={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <ListItemText primary="Finish Time" />
-                  <Typography>
-                    {formatTime(Number(work?.actuaL_FINISH_TIME))}
-                  </Typography>
-                </ListItem>
-              </List>
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
             </Box>
           </div>
 
@@ -1307,10 +1087,7 @@ export default function WorkStation() {
                   from: "#2980b9",
                   to: "#2471a3",
                   onClick: completed,
-<<<<<<< HEAD
                   hide: normalizedOp !== "0090",
-=======
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
                 },
                 {
                   label: "Return",
@@ -1318,12 +1095,17 @@ export default function WorkStation() {
                   to: "#c0392b",
                   onClick: returnWork,
                 },
-<<<<<<< HEAD
                 {
                   label: "Remark",
                   from: "purple",
                   to: "blue",
                   onClick: () => setOpenRemark(true),
+                },
+                {
+                  label: "Qc Return",
+                  from: "red",
+                  to: "blue",
+                  onClick: qcReturnWork,
                 },
               ]
                 .filter((btn) => !btn.hide)
@@ -1342,52 +1124,35 @@ export default function WorkStation() {
                       fontWeight: 700,
                       color: "#fff",
                       textTransform: "none",
-=======
-              ].map((btn, index) => (
-                <Button
-                  key={index}
-                  onClick={btn.onClick}
-                  variant="contained"
-                  sx={{
-                    background: `linear-gradient(135deg, ${btn.from}, ${btn.to})`,
-                    borderRadius: "16px",
-                    width: 180,
-                    height: 70,
-                    padding: 0,
-                    fontSize: 20,
-                    fontWeight: 700,
-                    color: "#fff",
-                    textTransform: "none",
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
 
-                    boxShadow: `
+                      boxShadow: `
             0px 4px 15px rgba(0,0,0,0.25),
             inset 0px 1px 4px rgba(255,255,255,0.25),
             inset 0px -3px 6px rgba(0,0,0,0.2)
           `,
 
-                    transition: "0.25s ease",
-                    "&:hover": {
-                      transform: "translateY(-4px) scale(1.03)",
-                      boxShadow: `
+                      transition: "0.25s ease",
+                      "&:hover": {
+                        transform: "translateY(-4px) scale(1.03)",
+                        boxShadow: `
               0px 10px 25px rgba(0,0,0,0.35),
               inset 0px 1px 4px rgba(255,255,255,0.3),
               inset 0px -3px 6px rgba(0,0,0,0.25)
             `,
-                    },
+                      },
 
-                    "&:active": {
-                      transform: "scale(0.98)",
-                      boxShadow: `
+                      "&:active": {
+                        transform: "scale(0.98)",
+                        boxShadow: `
               0px 2px 10px rgba(0,0,0,0.25),
               inset 0px 3px 8px rgba(0,0,0,0.3)
             `,
-                    },
-                  }}
-                >
-                  {btn.label}
-                </Button>
-              ))}
+                      },
+                    }}
+                  >
+                    {btn.label}
+                  </Button>
+                ))}
             </Stack>
           </div>
         </CustomTabPanel>
@@ -1400,7 +1165,6 @@ export default function WorkStation() {
 
         <CustomTabPanel value={value} index={2}>
           <Paper sx={{ height: 740, width: "100%" }}>
-<<<<<<< HEAD
             <Box
               sx={{
                 display: "flex",
@@ -1423,8 +1187,6 @@ export default function WorkStation() {
                 แก้ไขรายการอะไหล่
               </Button>
             </Box>
-=======
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
             <DataGrid
               rows={item_component ?? []}
               columns={columns}
@@ -1516,58 +1278,7 @@ export default function WorkStation() {
       <AppHeader title="Work Order" icon={<BusinessCenterIcon />} />
 
       <div>
-<<<<<<< HEAD
 
-=======
-        <Dialog open={openAdd} onClose={handleCloseAdd} fullWidth maxWidth="xs">
-          <DialogTitle>เพิ่มรายการอะไหล่</DialogTitle>
-
-          <DialogContent>
-            <Typography sx={{ mb: 2 }}>Enter Spare Part</Typography>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 7,
-              }}
-            >
-              <TextField
-                sx={{ mb: 2 }}
-                type="text"
-                fullWidth
-                variant="outlined"
-                value={partName}
-                onChange={(e) => setPartName(e.target.value)}
-              />
-
-              {/* <QrCodeScannerIcon
-                sx={{ fontSize: 30 }}
-                onClick={handleQrScanner}
-              />
-              {openQrScanner && (
-                <QRScanner
-                  open={openQrScanner}
-                  onClose={handleCloseScanner}
-                  onScan={handleScanResult}
-                />
-              )} */}
-            </div>
-
-            <SparePart setCount={setCount} count={count} />
-          </DialogContent>
-
-          <DialogActions>
-            <Button onClick={handleCloseAdd} color="inherit">
-              ยกเลิก
-            </Button>
-            <Button variant="contained" onClick={handleAddSubmit}>
-              ยืนยันการเพิ่มอะไหล่
-            </Button>
-          </DialogActions>
-        </Dialog>
->>>>>>> 1c63db3634c7f92e3383df5689e1b46a3a3d439f
 
         <Dialog
           open={openDelete}

@@ -67,6 +67,7 @@ type ChecklistForm = {
 
     overallNote: string;
     supervisorName: string;
+    categoryNotes: Record<string, string>;
 };
 
 type RuleHit = { level: FinalDecision; message: string };
@@ -133,7 +134,8 @@ type Action =
     | { type: "ADD_PHOTOS"; itemKey: string; photos: Photo[] }
     | { type: "REMOVE_PHOTO"; itemKey: string; photoId: string }
     | { type: "RESET" }
-    | { type: "LOAD"; payload: State };
+    | { type: "LOAD"; payload: State }
+    | { type: "SET_CATEGORY_NOTE"; category: string; note: string };
 
 const initialState: State = {
     form: {
@@ -149,6 +151,7 @@ const initialState: State = {
         inspectorName: "",
         overallNote: "",
         supervisorName: "",
+        categoryNotes: {},
     },
     items: buildInitialItems(),
 };
@@ -200,6 +203,17 @@ function reducer(state: State, action: Action): State {
             };
         case "LOAD":
             return action.payload;
+        case "SET_CATEGORY_NOTE":
+            return {
+                ...state,
+                form: {
+                    ...state.form,
+                    categoryNotes: {
+                        ...state.form.categoryNotes,
+                        [action.category]: action.note,
+                    },
+                },
+            };
         default:
             return state;
     }
@@ -322,6 +336,7 @@ export default function CheckList() {
                 counts,
                 hits: auto.hits,
             },
+            categoryNotes: form.categoryNotes, // [NEW] include in payload
             items: items.map((i) => ({
                 key: i.key,
                 category: i.category,
@@ -372,6 +387,7 @@ export default function CheckList() {
             form: {
                 ...initialState.form,
                 ...parsed,
+                categoryNotes: parsed.categoryNotes || parsed.form?.categoryNotes || {}, // backward compat
             },
             items: (parsed.items ?? []).map((x: any) => ({
                 key: x.key,
@@ -551,6 +567,24 @@ export default function CheckList() {
                                             </AccordionSummary>
 
                                             <AccordionDetails>
+                                                <Box sx={{ mb: 2 }}>
+                                                    <TextField
+                                                        label={`หมายเหตุสำหรับ ${category}`}
+                                                        placeholder={`ระบุรายละเอียดเพิ่มเติมสำหรับ${category} (ถ้ามี)`}
+                                                        fullWidth
+                                                        size="small"
+                                                        multiline
+                                                        value={form.categoryNotes?.[category] || ""}
+                                                        onChange={(e) =>
+                                                            dispatch({
+                                                                type: "SET_CATEGORY_NOTE",
+                                                                category,
+                                                                note: e.target.value,
+                                                            })
+                                                        }
+                                                    />
+                                                </Box>
+
                                                 <Stack spacing={2}>
                                                     {list.map((it) => (
                                                         <Box

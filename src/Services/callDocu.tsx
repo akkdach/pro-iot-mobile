@@ -10,7 +10,7 @@ interface AxiosResponse<T = any> {
 }
 
 const callDocu = axios.create({
-  baseURL: process.env.REACT_APP_DOCU_URL || 'https://service.bevproasia.com/api',
+  baseURL: 'https://service.bevproasia.com/api', // เปลี่ยนเป็น URL จริงของคุณ
   timeout: 10000,
   headers: {
     'Content-Type': 'multipart/form-data',

@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Box,
     Card,
@@ -9,9 +8,16 @@ import {
     IconButton,
     Divider,
     Tooltip,
+    Button,
 } from "@mui/material";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import { SlaTimer } from "../../Utility/SlaTimer";
+
+// ... (existing imports and types managed by partial match if needed, but here replacing full file content logic for imports is safer if I replace the top block)
+// wait, I should do targeted replace.
+
 
 // ====== types ======
 export type WorkOrderRow = {
@@ -58,6 +64,9 @@ export type WorkOrderRow = {
 
     worK_ORDER_OPERATION_ID?: number;
     worK_ORDER_COMPONENT_ID?: number;
+
+    froM_STATION?: string;
+    tO_STATION?: string;
 };
 
 // ====== helpers ======
@@ -154,7 +163,7 @@ export function WorkOrderTodoCard(props: {
     onApprove?: (row: WorkOrderRow) => void;
     onRework?: (row: WorkOrderRow) => void;
 }) {
-    const { row, onOpen } = props;
+    const { row, onOpen, onApprove, onRework } = props;
     const status = getStatusMeta(row);
 
     const stationLabelMap: Record<string, string> = {
@@ -178,6 +187,9 @@ export function WorkOrderTodoCard(props: {
                 borderRadius: 3,
                 overflow: "hidden",
                 boxShadow: "0 10px 28px rgba(0,0,0,0.06)",
+                display: "flex",
+                flexDirection: "column",
+                height: "100%", // ensure height for flex spacing if needed
             }}
         >
             {/* accent bar */}
@@ -188,7 +200,7 @@ export function WorkOrderTodoCard(props: {
                 }}
             />
 
-            <CardContent sx={{ p: 2 }}>
+            <CardContent sx={{ p: 2, flex: 1 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
                     <Box sx={{ minWidth: 0 }}>
                         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
@@ -247,8 +259,54 @@ export function WorkOrderTodoCard(props: {
                             </Typography>
                         </Box>
                     </Stack>
+                    {(row.froM_STATION || row.tO_STATION) && (
+                        <Stack direction="row" spacing={2}>
+                            {row.froM_STATION && (
+                                <Chip size="small" label={`From: ${row.froM_STATION}`} variant="outlined" color="default" sx={{ height: 20, fontSize: '0.65rem' }} />
+                            )}
+                            {row.tO_STATION && (
+                                <Chip size="small" label={`To: ${row.tO_STATION}`} variant="outlined" color="default" sx={{ height: 20, fontSize: '0.65rem' }} />
+                            )}
+                        </Stack>
+                    )}
                 </Stack>
             </CardContent>
+
+            {/* Actions: Approve / Not Approve */}
+            {(onApprove || onRework) && (
+                <Box sx={{ px: 2, pb: 2, pt: 0 }}>
+                    <Stack direction="row" spacing={1}>
+                        {onApprove && (
+                            <Button
+                                variant="contained"
+                                color="success"
+                                size="small"
+                                disableElevation
+                                fullWidth
+                                startIcon={<CheckCircleIcon />}
+                                onClick={() => onApprove(row)}
+                                sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
+                            >
+                                Approve
+                            </Button>
+                        )}
+                        {onRework && (
+                            <Button
+                                variant="contained"
+                                color="error"
+                                size="small"
+                                disableElevation
+                                fullWidth
+                                startIcon={<CancelIcon />}
+                                onClick={() => onRework(row)}
+                                sx={{ borderRadius: 2, textTransform: "none", fontWeight: 700 }}
+                            >
+                                Not Approve
+                            </Button>
+                        )}
+                    </Stack>
+                </Box>
+            )}
         </Card>
     );
 }

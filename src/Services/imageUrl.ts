@@ -1,12 +1,10 @@
 // src/services/imageUrl.ts
 
-const KNOWN_LEGACY_ORIGINS = (
-    (process.env.REACT_APP_IMAGE_LEGACY && process.env.REACT_APP_IMAGE_LEGACY.split(',')) || [
-        "http://localhost:7887",
-        "http://10.50.9.50:7887"
-    ]
-) as string[];
-const DEFAULT_TO = process.env.REACT_APP_IMAGE_BASE_URL || "http://10.10.199.16:8080";
+const KNOWN_LEGACY_ORIGINS = [
+    "http://localhost:7887",
+    "http://10.50.9.50:7887"
+];
+const DEFAULT_TO = "http://10.10.199.16:8080";
 
 type ReplaceImageUrlOptions = {
     from?: string | string[]; // base เดิม เช่น http://localhost:7887 หรือ array

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -112,7 +111,7 @@ export default function TableSparePart() {
   };
 
   const onLoad = async () => {
-    //console.log("mn_wk_ctr : ", work?.mN_WK_CTR);
+    console.log("mn_wk_ctr : ", work?.mN_WK_CTR);
     console.log("orderid : ", work?.orderid);
     let res = await callApi.get("/Mobile/RemainingSparepart");
     const dataSparePartList = res.data.dataResult.sparepartList;
@@ -661,7 +660,7 @@ export default function TableSparePart() {
                         </Typography>
                       </Stack>
                       <Typography variant="caption" sx={{ color: "#B0BEC5" }}>
-                        <span>ID: {p.work_ORDER_COMPONENT_ID}</span>
+                        ID: {p.material}
                       </Typography>
                     </Stack>
                   </CardContent>

@@ -51,9 +51,8 @@ export default async function callUploadImage(params: UploadImageParams) {
     // 3) ยิง axios ตรงไป external upload server
     try {
         const token = localStorage.getItem("token");
-        const uploadBase = process.env.REACT_APP_UPLOAD_URL || 'http://10.10.199.16:8080';
         const response = await axios.post(
-            `${uploadBase}/upload`,
+            "http://10.10.199.16:8080/upload",
             formData,
             {
                 timeout: 5 * 60 * 1000,

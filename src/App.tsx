@@ -32,8 +32,6 @@ import WorkOrderDetail from './Pages/workStation/WorkOrderDetail';
 import ActionPage from './Pages/workStation/ActionPage';
 import WorkStation from './Pages/workStation/WorkStation';
 import SparePart from './Pages/workStation/SparePart';
-import MobileCheckList from './Pages/MobileCheckList/MobileCheckList';
-import CountingScreen from './Pages/Counting';
 import TestContextPage from './Pages/workStation/TestContextPage';
 import TableSparePart from './Pages/workStation/TableSparePart';
 import StockReport from './Pages/workStation/StockReport';
@@ -43,6 +41,9 @@ import DashboardMonitoring from './Pages/workStation/DashboardMonitoring';
 import DashboardQC from './Pages/Qc/DashboardQC';
 import CheckSheet from './Pages/Safety/CheckSheet';
 import CheckList from './Pages/Safety/CheckList';
+import QrCode from './Pages/QrCode/QrCode';
+import DefectDashboard from './Pages/Defect/DefectDashboard';
+import DetailEachOrder from './Pages/Defect/DetailEachOrder';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -52,7 +53,6 @@ function App() {
       <div>
         {token ? (<UserProvider><Layout ><Routes>
           <Route path="/" element={<Home />}></Route>
-          <Route path="MobileCheckList" element={<MobileCheckList />}></Route>
           <Route path="StandardTimeDashboard" element={<StandardTimeDashboard />}></Route>
           <Route path="checkin" element={<CheckIn />}></Route>
           <Route path="profile" element={<ProfileCard />}></Route>
@@ -60,8 +60,6 @@ function App() {
           <Route path="Action/:simEmi" element={<ActionPages />}></Route>
           <Route path="InventoryList" element={<InventoryList />}></Route>
           <Route path="NewInventoryCount" element={<NewInventoryCount />}></Route>
-          <Route path="Counting" element={<CountingScreen />}></Route>
-          <Route path="Counting/:vehicleId" element={<CountingScreen />}></Route>
           <Route path="MyDocument" element={<MyDocument />}></Route>
           <Route path="UploadFile" element={<Upload />}></Route>
           <Route path="EquipmentDashboard" element={<EquipmentDashboard />}></Route>
@@ -85,8 +83,10 @@ function App() {
           <Route path="DashboardQC" element={<DashboardQC />}></Route>
           <Route path="CheckSheet" element={<CheckSheet />}></Route>
           <Route path="CheckList" element={<CheckList />}></Route>
-        </Routes ></Layout ></UserProvider >) : (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)
-        }
+          <Route path="QrCode" element={<QrCode />}></Route>
+          <Route path="DefectDashboard" element={<DefectDashboard />}></Route>
+          <Route path="DetailEachOrder/:orderId/:operationId" element={<DetailEachOrder />}></Route>
+        </Routes></Layout></UserProvider>) : (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
 
       </div >
     </div >

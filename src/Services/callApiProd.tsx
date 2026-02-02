@@ -10,7 +10,7 @@ interface AxiosResponse<T = any> {
 }
 
 const callApiProd = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'https://prod-service.bevproasia.com/api/v1',
+  baseURL: 'https://prod-service.bevproasia.com/api/v1', // เปลี่ยนเป็น URL จริงของคุณ
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
