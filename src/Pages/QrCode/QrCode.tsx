@@ -92,7 +92,7 @@ export default function PrintQRCodes() {
         try {
             setLoading(true);
             const res = await callApiOneleke("GET", "qrcode", {
-                params: { page: 0, limit: 0 }
+                params: { page: 0, limit: 100000 }
             })
 
             // Validate response structure
