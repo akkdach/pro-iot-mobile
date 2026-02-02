@@ -224,18 +224,21 @@ export default function DefectDashboard() {
                                 key={r.orderid}
                                 row={r}
                                 onOpen={(row) => {
-                                    console.log("open:", row.orderid);
+                                    console.log("open orderId:", row.orderid);
+                                    console.log("open operationId:", row.worK_ORDER_OPERATION_ID);
                                     // Navigate to same path as QC for now, or maybe Defect has its own detail?
                                     // User didn't specify, but usually it works similarly.
-                                    navigate(`/WorkStation/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`, {
+                                    navigate(`/DetailEachOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`, {
                                         state: row
                                     });
                                 }}
                                 onApprove={(row) => {
                                     console.log("approve:", row.orderid);
+                                    callApi.post(`/WorkOrderList/approve/${row.orderid}`);
                                 }}
                                 onRework={(row) => {
                                     console.log("rework:", row.orderid);
+                                    callApi.post(`/WorkOrderList/notApprove/${row.orderid}`);
                                 }}
                             />
                         ))}

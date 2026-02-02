@@ -64,6 +64,9 @@ export type WorkOrderRow = {
 
     worK_ORDER_OPERATION_ID?: number;
     worK_ORDER_COMPONENT_ID?: number;
+
+    froM_STATION?: string;
+    tO_STATION?: string;
 };
 
 // ====== helpers ======
@@ -256,6 +259,16 @@ export function WorkOrderTodoCard(props: {
                             </Typography>
                         </Box>
                     </Stack>
+                    {(row.froM_STATION || row.tO_STATION) && (
+                        <Stack direction="row" spacing={2}>
+                            {row.froM_STATION && (
+                                <Chip size="small" label={`From: ${row.froM_STATION}`} variant="outlined" color="default" sx={{ height: 20, fontSize: '0.65rem' }} />
+                            )}
+                            {row.tO_STATION && (
+                                <Chip size="small" label={`To: ${row.tO_STATION}`} variant="outlined" color="default" sx={{ height: 20, fontSize: '0.65rem' }} />
+                            )}
+                        </Stack>
+                    )}
                 </Stack>
             </CardContent>
 

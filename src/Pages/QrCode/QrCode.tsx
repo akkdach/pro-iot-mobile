@@ -89,7 +89,7 @@ export default function PrintQRCodes() {
         try {
             setLoading(true);
             const res = await callApiOneleke("GET", "qrcode", {
-                params: { page: 0, limit: 100 }
+                params: { page: 0, limit: 5 }
             })
 
             // Validate response structure
@@ -296,7 +296,7 @@ export default function PrintQRCodes() {
                             {loading && (
                                 <Stack direction="row" spacing={1} alignItems="center">
                                     <CircularProgress size={18} />
-                                    <Typography variant="body2">กำลังโหลดข้อมูล (mock)...</Typography>
+                                    <Typography variant="body2">กำลังโหลดข้อมูล</Typography>
                                 </Stack>
                             )}
                             {error && <Alert severity="error">{error}</Alert>}
@@ -493,10 +493,10 @@ export default function PrintQRCodes() {
 
                                         {x.tradeName && (
                                             <Typography
-                                                variant="caption"
+                                                variant="body2"
                                                 fontWeight={700}
                                                 sx={{
-                                                    color: "text.secondary",
+                                                    color: "#000",
                                                     lineHeight: 1,
                                                     fontSize: { print: '9px', xs: '11px' },
                                                     m: 0
@@ -511,7 +511,7 @@ export default function PrintQRCodes() {
                                                 variant="caption"
                                                 fontWeight={700}
                                                 sx={{
-                                                    color: "text.secondary",
+                                                    color: "#000",
                                                     lineHeight: 1,
                                                     fontSize: { print: '9px', xs: '8px' },
                                                     m: 0
