@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คู่มือการใช้งานระบบพิมพ์ QR Code (QR Code Printing Manual)</title>
+    <style>
+        body {
+            font-family: 'Sarabun', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #1976d2;
+        }
+
+        h1 {
+            border-bottom: 2px solid #1976d2;
+            padding-bottom: 10px;
+        }
+
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .ui-element {
+            font-weight: bold;
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .step {
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            background-color: #1976d2;
+            color: white;
+            text-align: center;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .note {
+            background-color: #e3f2fd;
+            border-left: 5px solid #2196f3;
+            padding: 10px;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+
+        code {
+            background-color: #eee;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .placeholder {
+            display: block;
+            width: 100%;
+            max-width: 800px;
+            /* Increased max-width */
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .placeholder img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            border: 1px solid #ddd;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <h1>คู่มือการใช้งานระบบพิมพ์ QR Code</h1>
+    <p>ระบบสำหรับค้นหาและเลือกรายการ Work Order เพื่อนำมาพิมพ์เป็นสติ๊กเกอร์ QR Code สำหรับติดชิ้นงาน</p>
+
+    <div class="placeholder">
+        <img src="./PNG-Qr//overview.png" alt="">
+    </div>
+
+    <div class="section">
+        <h2>1. ส่วนประกอบของหน้าจอ (Interface Overview)</h2>
+        <p>หน้าจอแบ่งออกเป็น 2 ส่วนหลัก:</p>
+        <ul>
+            <li><b>แผงควบคุม (Control Panel):</b> อยู่ด้านซ้าย (หรือด้านบนในมือถือ) สำหรับค้นหาและเลือกรายการ</li>
+            <li><b>พื้นที่แสดงผล (Preview Area):</b> อยู่ด้านขวา (หรือด้านล่าง) สำหรับแสดงรายการสติ๊กเกอร์ที่จะพิมพ์
+            </li>
+        </ul>
+
+        <h3>คำอธิบายเครื่องมือ</h3>
+        <ul>
+            <li><span class="ui-element">ช่องค้นหา (Search Box)</span>: ใช้กรองรายการ โดยพิมพ์ Work Order ID, ชื่อ
+                Station, หรือรหัส Operation ระบบจะแสดงรายการที่เกี่ยวข้องทันที</li>
+            <li><span class="ui-element">ปุ่มล้างคำค้นหา (Clear Button)</span>: ไอคอนกากบาท (X) ในช่องค้นหา
+                เพื่อลบข้อความทั้งหมดในคลิกเดียว</li>
+            <li><span class="ui-element">Checkbox เลือกทั้งหมด</span>:
+                ใช้เลือกหรือยกเลิกการเลือกรายการทั้งหมดที่แสดงอยู่ (ตามผลการค้นหา)</li>
+            <li><span class="ui-element">ปุ่มสั่งพิมพ์ (Print Button)</span>: ปุ่มสีน้ำเงิน "สั่งพิมพ์ (Browser Print)"
+                สำหรับเปิดหน้าต่างพิมพ์ของเบราว์เซอร์</li>
+        </ul>
+
+        <div class="placeholder">
+            <img src="./PNG-Qr//control.png" alt="">
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>2. วิธีการใช้งาน (How to Use)</h2>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <b>ค้นหารายการที่ต้องการ</b>
+            <p>พิมพ์รหัสใบงาน (Work Order) หรือชื่อสถานีงานลงใน <span class="ui-element">ช่องค้นหา</span>
+                รายการที่ไม่เกี่ยวข้องจะถูกซ่อนไป</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <b>เลือกรายการพิมพ์</b>
+            <p>คลิก <span class="ui-element">Checkbox</span> หน้าชื่อรายการที่ต้องการพิมพ์ หรือคลิก "เลือกทั้งหมด"
+                ด้านบนเพื่อเลือกทุกรายการที่ค้นเจอ</p>
+            <div class="placeholder">
+                <img src="./PNG-Qr//check.png" alt="">
+            </div>
+            <div class="note">
+                <strong>Tip:</strong> รายการที่เลือกจะปรากฏขึ้นมาเป็นตัวอย่างสติ๊กเกอร์ด้านล่าง/ด้านขวา
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <b>ตรวจสอบความถูกต้อง</b>
+            <p>ดูที่หน้าจอ Preview ว่าจำนวนสติ๊กเกอร์และข้อมูลบนสติ๊กเกอร์ถูกต้องหรือไม่ (เช่น QR Code, รหัส Order, ชื่อ
+                Station)</p>
+        </div>
+
+        <div class="step">
+            <span class="step-number">4</span>
+            <b>สั่งพิมพ์</b>
+            <p>กดปุ่ม <span class="ui-element">สั่งพิมพ์ (Browser Print)</span> ระบบจะเปิดหน้าต่าง Print ของ Browser
+                ขึ้นมา</p>
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>
