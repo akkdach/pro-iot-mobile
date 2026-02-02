@@ -25,6 +25,7 @@ import {
     InputAdornment,
     IconButton,
 } from "@mui/material";
+import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
 import AppHeader from "../../Component/AppHeader";
 import callApi from "../../Services/callApi";
 import { callApiOneleke } from "../../Services/callApiOneleke";
@@ -84,45 +85,12 @@ const presetToCols = (preset: LayoutPreset) => {
 };
 
 export default function PrintQRCodes() {
-    useEffect(() => {
-        onLoad()
-    }, [])
+    // 1. State Declarations
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+    const [isSearchMode, setIsSearchMode] = useState(false);
 
-    const onLoad = async () => {
-        try {
-            setLoading(true);
-            const res = await callApiOneleke("GET", "qrcode", {
-                params: { page: 0, limit: 100000 }
-            })
-
-            // Validate response structure
-            const list = res.data?.data || [];
-
-            const newItems: QrItem[] = list.map((item: any) => ({
-                id: item.serviceorderid,
-                title: item.serviceorderid,
-                subtitle: item.description,
-                tradeName: item.bpc_tradename,
-                objectID: item.serviceobjectid,
-                payload: item.serviceobjectid, // QR Content
-                createdAt: new Date().toISOString()
-            }));
-
-            setItems(newItems);
-            // Default: No items selected
-            // const initSel: Record<string, boolean> = {};
-            // newItems.forEach((x) => (initSel[x.id] = true));
-            // setSelected(initSel);
-
-        } catch (err) {
-            console.error(err);
-            setError("Failed to load data from API");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const [items, setItems] = useState<QrItem[]>([]);
@@ -136,6 +104,108 @@ export default function PrintQRCodes() {
     const [pdfItems, setPdfItems] = useState<PdfItem[]>([]);
     const [isPdfReady, setIsPdfReady] = useState(false);
     const [generatingPdf, setGeneratingPdf] = useState(false);
+
+    // 2. Helper Functions
+    const resetToLazy = () => {
+        setIsSearchMode(false);
+        setPage(1);
+        setHasMore(true);
+        setItems([]);
+        loadMore(1);
+    };
+
+    const handleSearch = async (searchTerm: string) => {
+        setIsSearchMode(true);
+        setLoading(true);
+        setHasMore(false); // Disable infinite scroll in search mode
+
+        try {
+            const res = await callApiOneleke("GET", "qrcode", {
+                params: { page: 0, limit: 100000 }
+            });
+
+            const list = res.data?.data || [];
+
+            const newItems: QrItem[] = list.map((item: any) => ({
+                id: item.serviceorderid,
+                title: item.serviceorderid,
+                subtitle: item.description,
+                tradeName: item.bpc_tradename,
+                objectID: item.serviceobjectid,
+                payload: item.serviceobjectid,
+                createdAt: new Date().toISOString()
+            }));
+
+            setItems(newItems);
+
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load data for search");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const loadMore = async (pageNum: number) => {
+        if (loading && pageNum > 1) return;
+
+        try {
+            setLoading(true);
+            const res = await callApiOneleke("GET", "qrcode", {
+                params: { page: pageNum, limit: 30 }
+            });
+
+            const list = res.data?.data || [];
+            if (list.length < 30) {
+                setHasMore(false);
+            }
+
+            const newItems: QrItem[] = list.map((item: any) => ({
+                id: item.serviceorderid,
+                title: item.serviceorderid,
+                subtitle: item.description,
+                tradeName: item.bpc_tradename,
+                objectID: item.serviceobjectid,
+                payload: item.serviceobjectid,
+                createdAt: new Date().toISOString()
+            }));
+
+            if (pageNum === 1) {
+                setItems(newItems);
+            } else {
+                setItems(prev => [...prev, ...newItems]);
+            }
+
+            setPage(pageNum);
+
+        } catch (err) {
+            console.error(err);
+            setError("Failed to load data from API");
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    // 3. Effects
+    // Debounce search query
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (query.trim()) {
+                handleSearch(query);
+            } else {
+                if (isSearchMode) {
+                    resetToLazy();
+                }
+            }
+        }, 600);
+
+        return () => clearTimeout(timeoutId);
+    }, [query]);
+
+    // Initial Load
+    useEffect(() => {
+        if (!query) loadMore(1);
+    }, []);
 
     const handleGeneratePdf = async () => {
         try {
@@ -173,11 +243,16 @@ export default function PrintQRCodes() {
     // useEffect(() => { ... }, []);
 
     const filtered = useMemo(() => {
-        const q = query.trim().toLowerCase();
-        if (!q) return items;
+        const rawQ = query.toLowerCase();
+        if (!rawQ.trim()) return items;
+
+        const searchTerms = rawQ.split('|').map(s => s.trim()).filter(s => s.length > 0);
+
+        if (searchTerms.length === 0) return items;
+
         return items.filter((x) => {
             const hay = `${x.id} ${x.title} ${x.subtitle ?? ""} ${toQrValue(x.payload)}`.toLowerCase();
-            return hay.includes(q);
+            return searchTerms.some(term => hay.includes(term));
         });
     }, [items, query]);
 
@@ -203,6 +278,15 @@ export default function PrintQRCodes() {
     const toggleOne = (id: string) => setSelected((prev) => ({ ...prev, [id]: !prev[id] }));
 
     const handlePrint = () => window.print();
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+        if (scrollHeight - scrollTop <= clientHeight + 20) { // Threshold
+            if (!loading && hasMore && !isSearchMode) {
+                loadMore(page + 1);
+            }
+        }
+    };
 
     return (
         <Box sx={{ p: 2 }}>
@@ -295,16 +379,16 @@ export default function PrintQRCodes() {
                         <Stack spacing={2}>
                             <Typography variant="h6" fontWeight={700}>พิมพ์ QR Code</Typography>
 
-                            {loading && (
+                            {loading && page === 1 && (
                                 <Stack direction="row" spacing={1} alignItems="center">
                                     <CircularProgress size={18} />
-                                    <Typography variant="body2">กำลังโหลดข้อมูล</Typography>
+                                    <Typography variant="body2">กำลังโหลดข้อมูล...</Typography>
                                 </Stack>
                             )}
                             {error && <Alert severity="error">{error}</Alert>}
 
                             <TextField
-                                label="ค้นหา (WO / OP / station / payload)"
+                                label="ค้นหา (ใช้ | คั่นเพื่อค้นหาหลายคำ)"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 size="small"
@@ -341,6 +425,7 @@ export default function PrintQRCodes() {
                                     onClick={handlePrint}
                                     disabled={selectedItems.length === 0 || loading}
                                     fullWidth
+                                    startIcon={<LocalPrintshopIcon />}
                                 >
                                     สั่งพิมพ์ (Browser Print)
                                 </Button>
@@ -385,10 +470,14 @@ export default function PrintQRCodes() {
                         <CardContent>
                             <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
                                 <Typography variant="subtitle1" fontWeight={700}>รายการ</Typography>
-                                <Chip label={`ทั้งหมด ${filtered.length} • เลือก ${selectedItems.length}`} size="small" />
+                                <Chip label={`ทั้งหมด ${items.length} (โหลดแล้ว) • เลือก ${selectedItems.length}`} size="small" />
                             </Stack>
 
-                            <Stack spacing={1} sx={{ maxHeight: 320, overflow: "auto", pr: 1 }}>
+                            <Stack
+                                spacing={1}
+                                sx={{ maxHeight: 320, overflow: "auto", pr: 1 }}
+                                onScroll={handleScroll}
+                            >
                                 {filtered.map((x) => (
                                     <Box
                                         key={x.id}
@@ -418,6 +507,11 @@ export default function PrintQRCodes() {
                                         </Box>
                                     </Box>
                                 ))}
+                                {loading && (
+                                    <Stack alignItems="center" sx={{ py: 2 }}>
+                                        <CircularProgress size={24} />
+                                    </Stack>
+                                )}
                                 {!loading && filtered.length === 0 && <Alert severity="info">ไม่พบรายการตามคำค้น</Alert>}
                             </Stack>
                         </CardContent>
