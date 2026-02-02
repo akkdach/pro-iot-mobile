@@ -22,10 +22,13 @@ import {
     Chip,
     CircularProgress,
     Alert,
+    InputAdornment,
+    IconButton,
 } from "@mui/material";
 import AppHeader from "../../Component/AppHeader";
 import callApi from "../../Services/callApi";
 import { callApiOneleke } from "../../Services/callApiOneleke";
+import ClearIcon from "@mui/icons-material/Clear";
 
 type QrItem = {
     id: string;
@@ -89,7 +92,7 @@ export default function PrintQRCodes() {
         try {
             setLoading(true);
             const res = await callApiOneleke("GET", "qrcode", {
-                params: { page: 0, limit: 5 }
+                params: { page: 0, limit: 0 }
             })
 
             // Validate response structure
@@ -106,11 +109,10 @@ export default function PrintQRCodes() {
             }));
 
             setItems(newItems);
-
-            // Auto select all
-            const initSel: Record<string, boolean> = {};
-            newItems.forEach((x) => (initSel[x.id] = true));
-            setSelected(initSel);
+            // Default: No items selected
+            // const initSel: Record<string, boolean> = {};
+            // newItems.forEach((x) => (initSel[x.id] = true));
+            // setSelected(initSel);
 
         } catch (err) {
             console.error(err);
@@ -306,6 +308,15 @@ export default function PrintQRCodes() {
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 size="small"
+                                InputProps={{
+                                    endAdornment: query && (
+                                        <InputAdornment position="end">
+                                            <IconButton size="small" onClick={() => setQuery("")}>
+                                                <ClearIcon fontSize="small" />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
 
                             <Stack direction="row" spacing={2}>
@@ -317,12 +328,7 @@ export default function PrintQRCodes() {
 
                             <Divider />
 
-                            <Stack direction="row" spacing={1} alignItems="center">
-                                <Checkbox checked={allChecked} indeterminate={someChecked} onChange={toggleAllFiltered} />
-                                <Typography variant="body2">
-                                    เลือกทั้งหมด (ตามที่กรอง) • เลือกอยู่ {selectedItems.length}/{filtered.length}
-                                </Typography>
-                            </Stack>
+
 
                             {/* <FormControlLabel
                                 control={<Checkbox checked={showPayloadHint} onChange={(e) => setShowPayloadHint(e.target.checked)} />}
