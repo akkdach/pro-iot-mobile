@@ -9,8 +9,11 @@ interface AxiosResponse<T = any> {
   request?: any;
 }
 
+const DEFAULT_PROD_BASE = 'https://prod-service.bevproasia.com/api/v1';
+const PROD_BASE_URL = (process.env.REACT_APP_API_PROD_BASE_URL as string) || DEFAULT_PROD_BASE;
+
 const callApiProd = axios.create({
-  baseURL: 'https://prod-service.bevproasia.com/api/v1', // เปลี่ยนเป็น URL จริงของคุณ
+  baseURL: PROD_BASE_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

@@ -9,15 +9,11 @@ interface AxiosResponse<T = any> {
   request?: any;
 }
 
-// const callApi = axios.create({
-//   baseURL: 'https://prod-service.bevproasia.com/api/v1', // เปลี่ยนเป็น URL จริงของคุณ
-//   timeout: 10000,
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// });
+const DEFAULT_BASE = 'http://localhost:44496/api/v1';
+const BASE_URL = (process.env.REACT_APP_API_BASE_URL as string) || DEFAULT_BASE;
+
 const callApi = axios.create({
-  baseURL: 'http://localhost:44496/api/v1', // เปลี่ยนเป็น URL จริงของคุณ
+  baseURL: BASE_URL,
   timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
