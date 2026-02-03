@@ -86,14 +86,13 @@ const presetToCols = (preset: LayoutPreset) => {
 
 export default function PrintQRCodes() {
     // 1. State Declarations
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-    const [isSearchMode, setIsSearchMode] = useState(false);
-
+    // 1. State Declarations
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [items, setItems] = useState<QrItem[]>([]);
+    const [allItems, setAllItems] = useState<QrItem[]>([]); // Store ALL fetched items
+    const [displayLimit, setDisplayLimit] = useState(30);   // How many to render
+
     const [selected, setSelected] = useState<Record<string, boolean>>({});
 
     const [query, setQuery] = useState("");
@@ -106,20 +105,11 @@ export default function PrintQRCodes() {
     const [generatingPdf, setGeneratingPdf] = useState(false);
 
     // 2. Helper Functions
-    const resetToLazy = () => {
-        setIsSearchMode(false);
-        setPage(1);
-        setHasMore(true);
-        setItems([]);
-        loadMore(1);
-    };
-
-    const handleSearch = async (searchTerm: string) => {
-        setIsSearchMode(true);
+    const fetchAllData = async () => {
         setLoading(true);
-        setHasMore(false); // Disable infinite scroll in search mode
-
+        setError(null);
         try {
+            // Load ALL data at once
             const res = await callApiOneleke("GET", "qrcode", {
                 params: { page: 0, limit: 100000 }
             });
@@ -136,76 +126,25 @@ export default function PrintQRCodes() {
                 createdAt: new Date().toISOString()
             }));
 
-            setItems(newItems);
-
-        } catch (err) {
-            console.error(err);
-            setError("Failed to load data for search");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const loadMore = async (pageNum: number) => {
-        if (loading && pageNum > 1) return;
-
-        try {
-            setLoading(true);
-            const res = await callApiOneleke("GET", "qrcode", {
-                params: { page: pageNum, limit: 30 }
-            });
-
-            const list = res.data?.data || [];
-            if (list.length < 30) {
-                setHasMore(false);
-            }
-
-            const newItems: QrItem[] = list.map((item: any) => ({
-                id: item.serviceorderid,
-                title: item.serviceorderid,
-                subtitle: item.description,
-                tradeName: item.bpc_tradename,
-                objectID: item.serviceobjectid,
-                payload: item.serviceobjectid,
-                createdAt: new Date().toISOString()
-            }));
-
-            if (pageNum === 1) {
-                setItems(newItems);
-            } else {
-                setItems(prev => [...prev, ...newItems]);
-            }
-
-            setPage(pageNum);
-
+            setAllItems(newItems);
         } catch (err) {
             console.error(err);
             setError("Failed to load data from API");
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     // 3. Effects
-    // Debounce search query
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            if (query.trim()) {
-                handleSearch(query);
-            } else {
-                if (isSearchMode) {
-                    resetToLazy();
-                }
-            }
-        }, 600);
-
-        return () => clearTimeout(timeoutId);
-    }, [query]);
-
     // Initial Load
     useEffect(() => {
-        if (!query) loadMore(1);
+        fetchAllData();
     }, []);
+
+    // Reset display limit when query changes (to show top results of new search)
+    useEffect(() => {
+        setDisplayLimit(30);
+    }, [query]);
 
     const handleGeneratePdf = async () => {
         try {
@@ -239,39 +178,45 @@ export default function PrintQRCodes() {
         }
     };
 
-    // Removed Mock Data Loading Effect
-    // useEffect(() => { ... }, []);
-
-    const filtered = useMemo(() => {
+    // Filter Logic (Client Side)
+    const filteredFull = useMemo(() => {
         const rawQ = query.toLowerCase();
-        if (!rawQ.trim()) return items;
+        if (!rawQ.trim()) return allItems;
 
         const searchTerms = rawQ.split('|').map(s => s.trim()).filter(s => s.length > 0);
+        if (searchTerms.length === 0) return allItems;
 
-        if (searchTerms.length === 0) return items;
-
-        return items.filter((x) => {
+        return allItems.filter((x) => {
             const hay = `${x.id} ${x.title} ${x.subtitle ?? ""} ${toQrValue(x.payload)}`.toLowerCase();
             return searchTerms.some(term => hay.includes(term));
         });
-    }, [items, query]);
+    }, [allItems, query]);
 
-    // Use 'items' instead of 'filtered' to allow selecting from multiple searches (Queue style)
-    const selectedItems = useMemo(() => items.filter((x) => selected[x.id]), [items, selected]);
+    // Slice for Rendering
+    const filtered = useMemo(() => {
+        return filteredFull.slice(0, displayLimit);
+    }, [filteredFull, displayLimit]);
 
-    const allChecked = useMemo(() => filtered.length > 0 && filtered.every((x) => selected[x.id]), [filtered, selected]);
+    // Use 'allItems' for selection logic if needed, but usually we select from what we see or search
+    // But 'selectedItems' should probably come from allItems to ensure we don't lose selection if we filter?
+    // Actually, 'selected' is an ID map, so let's Map back to objects from allItems
+    const selectedItems = useMemo(() => allItems.filter((x) => selected[x.id]), [allItems, selected]);
+
+    const allChecked = useMemo(() => filteredFull.length > 0 && filteredFull.every((x) => selected[x.id]), [filteredFull, selected]);
     const someChecked = useMemo(() => {
-        if (filtered.length === 0) return false;
-        const any = filtered.some((x) => selected[x.id]);
+        if (filteredFull.length === 0) return false;
+        const any = filteredFull.some((x) => selected[x.id]);
         return any && !allChecked;
-    }, [filtered, selected, allChecked]);
+    }, [filteredFull, selected, allChecked]);
 
     const cols = presetToCols(preset);
 
     const toggleAllFiltered = () => {
         const next = { ...selected };
+        // Toggle all visible (or all matching search)
+        // Usually "Select All" means select all matching current filter
         const nextVal = !allChecked;
-        filtered.forEach((x) => (next[x.id] = nextVal));
+        filteredFull.forEach((x) => (next[x.id] = nextVal));
         setSelected(next);
     };
 
@@ -281,9 +226,11 @@ export default function PrintQRCodes() {
 
     const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
         const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
-        if (scrollHeight - scrollTop <= clientHeight + 20) { // Threshold
-            if (!loading && hasMore && !isSearchMode) {
-                loadMore(page + 1);
+        // Check if near bottom
+        if (scrollHeight - scrollTop <= clientHeight + 50) {
+            // If we have more items to show than currently displayed
+            if (displayLimit < filteredFull.length) {
+                setDisplayLimit(prev => prev + 30);
             }
         }
     };
@@ -379,7 +326,7 @@ export default function PrintQRCodes() {
                         <Stack spacing={2}>
                             <Typography variant="h6" fontWeight={700}>พิมพ์ QR Code</Typography>
 
-                            {loading && page === 1 && (
+                            {loading && allItems.length === 0 && (
                                 <Stack direction="row" spacing={1} alignItems="center">
                                     <CircularProgress size={18} />
                                     <Typography variant="body2">กำลังโหลดข้อมูล...</Typography>
@@ -470,7 +417,7 @@ export default function PrintQRCodes() {
                         <CardContent>
                             <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
                                 <Typography variant="subtitle1" fontWeight={700}>รายการ</Typography>
-                                <Chip label={`ทั้งหมด ${items.length} (โหลดแล้ว) • เลือก ${selectedItems.length}`} size="small" />
+                                <Chip label={`ทั้งหมด ${allItems.length} (โหลดแล้ว) • เลือก ${selectedItems.length}`} size="small" />
                             </Stack>
 
                             <Stack
