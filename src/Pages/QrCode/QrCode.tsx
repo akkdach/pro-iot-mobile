@@ -104,14 +104,17 @@ export default function PrintQRCodes() {
     const [isPdfReady, setIsPdfReady] = useState(false);
     const [generatingPdf, setGeneratingPdf] = useState(false);
 
+    const [selectType, setSelectType] = useState("INIT");
+
     // 2. Helper Functions
     const fetchAllData = async () => {
         setLoading(true);
+        setAllItems([]);
         setError(null);
         try {
             // Load ALL data at once
-            const res = await callApiOneleke("GET", "qrcode", {
-                params: { page: 0, limit: 100000 }
+            const res = await callApiOneleke("GET", "Barcode", {
+                params: { page: 0, limit: 100000, status: selectType }
             });
 
             const list = res.data?.data || [];
@@ -139,7 +142,7 @@ export default function PrintQRCodes() {
     // Initial Load
     useEffect(() => {
         fetchAllData();
-    }, []);
+    }, [selectType]);
 
     // Reset display limit when query changes (to show top results of new search)
     useEffect(() => {
@@ -334,6 +337,22 @@ export default function PrintQRCodes() {
                             )}
                             {error && <Alert severity="error">{error}</Alert>}
 
+
+                            <FormControl fullWidth size="small">
+                                <InputLabel>Status</InputLabel>
+                                <Select
+                                    value={selectType}
+                                    label="Status"
+                                    onChange={(e) => setSelectType(e.target.value)}
+                                >
+                                    <MenuItem value="INIT">INIT</MenuItem>
+                                    <MenuItem value="INPR">INPR</MenuItem>
+                                    <MenuItem value="FINS">FINS</MenuItem>
+                                    <MenuItem value="CANC">CANC</MenuItem>
+                                    <MenuItem value="POST">POST</MenuItem>
+                                </Select>
+                            </FormControl>
+
                             <TextField
                                 label="ค้นหา (ใช้ | คั่นเพื่อค้นหาหลายคำ)"
                                 value={query}
@@ -417,7 +436,11 @@ export default function PrintQRCodes() {
                         <CardContent>
                             <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
                                 <Typography variant="subtitle1" fontWeight={700}>รายการ</Typography>
-                                <Chip label={`ทั้งหมด ${allItems.length} (โหลดแล้ว) • เลือก ${selectedItems.length}`} size="small" />
+                                <Chip
+                                    label={loading && allItems.length === 0 ? "Loading..." : `ทั้งหมด ${allItems.length} (โหลดแล้ว) • เลือก ${selectedItems.length}`}
+                                    size="small"
+                                    color={loading ? "primary" : "default"}
+                                />
                             </Stack>
 
                             <Stack
@@ -455,8 +478,9 @@ export default function PrintQRCodes() {
                                     </Box>
                                 ))}
                                 {loading && (
-                                    <Stack alignItems="center" sx={{ py: 2 }}>
-                                        <CircularProgress size={24} />
+                                    <Stack alignItems="center" sx={{ py: 4 }} spacing={1}>
+                                        <CircularProgress size={32} />
+                                        <Typography variant="caption" color="text.secondary">กำลังโหลดข้อมูล...</Typography>
                                     </Stack>
                                 )}
                                 {!loading && filtered.length === 0 && <Alert severity="info">ไม่พบรายการตามคำค้น</Alert>}

@@ -232,13 +232,21 @@ export default function DefectDashboard() {
                                         state: row
                                     });
                                 }}
-                                onApprove={(row) => {
-                                    console.log("approve:", row.orderid);
-                                    callApi.post(`/WorkOrderList/approve/${row.orderid}`);
+                                onApprove={async (row) => {
+                                    try {
+                                        await callApi.post(`/WorkOrderList/approve/${row.orderid}`);
+                                        onLoad();
+                                    } catch (error) {
+                                        console.error("Approve error:", error);
+                                    }
                                 }}
-                                onRework={(row) => {
-                                    console.log("rework:", row.orderid);
-                                    callApi.post(`/WorkOrderList/notApprove/${row.orderid}`);
+                                onRework={async (row) => {
+                                    try {
+                                        await callApi.post(`/WorkOrderList/notApprove/${row.orderid}`);
+                                        onLoad();
+                                    } catch (error) {
+                                        console.error("Rework error:", error);
+                                    }
                                 }}
                             />
                         ))}
