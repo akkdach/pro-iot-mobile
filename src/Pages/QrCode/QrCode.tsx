@@ -109,7 +109,7 @@ export default function PrintQRCodes() {
     // 2. Helper Functions
     const fetchAllData = async () => {
         setLoading(true);
-        setAllItems([]); // Clear old items so loader shows clearly
+        setAllItems([]);
         setError(null);
         try {
             // Load ALL data at once
