@@ -1069,11 +1069,14 @@ export default function WorkStation() {
                   label: "Finish",
                   from: "#3498db",
                   to: "#2980b9",
-                  onClick: () => {
+                  onClick: async () => {
                     const mapped = checkedCodes.map((code) => ({ code }));
                     setCheckList(mapped);
                     setIsWorking(false);
-                    finishWork(mapped);
+                    const isSuccess = await finishWork(mapped);
+                    if (isSuccess) {
+                      navigate(-1);
+                    }
                   },
                 },
                 {

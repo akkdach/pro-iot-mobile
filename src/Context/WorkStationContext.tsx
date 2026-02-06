@@ -109,7 +109,7 @@ interface WorkContextType {
 
   startWork: () => void;
   pauseWork: () => void;
-  finishWork: (codes?: { code?: string }[]) => void;
+  finishWork: (codes?: { code?: string }[]) => Promise<boolean>;
   checkListWork: () => void;
   completed: () => void;
   returnWork: () => void;
@@ -216,11 +216,11 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     console.log("work is pause");
   };
 
-  const finishWork = async (codes?: { code?: string }[]) => {
+  const finishWork = async (codes?: { code?: string }[]): Promise<boolean> => {
     console.log("work is finish");
     console.log("checkList in context : ", codes);
     try {
-      if (!work?.orderid) return;
+      if (!work?.orderid) return false;
 
       const confirm = await Swal.fire({
         title: "Finish Work?",
@@ -233,7 +233,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         cancelButtonColor: "#e74c3c",
       });
 
-      if (!confirm.isConfirmed) return;
+      if (!confirm.isConfirmed) return false;
 
       const res = await callApi.post(
         "/WorkOrderList/Finish",
@@ -250,7 +250,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
           text: data.Message ?? data.message ?? "Cannot finish this work order",
           icon: "error",
         });
-        return;
+        return false;
       }
 
       setWork((prev) => ({
@@ -272,6 +272,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         timer: 2000,
         showConfirmButton: false,
       });
+      return true;
     } catch (err: any) {
       console.error("FinishWork Error:", err);
       await Swal.fire({
@@ -279,6 +280,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         text: err.response?.data?.Message || "Something went wrong.",
         icon: "error",
       });
+      return false;
     }
   };
 
