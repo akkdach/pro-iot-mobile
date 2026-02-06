@@ -40,6 +40,9 @@ interface Work {
   slA_FINISH_TIME?: string;
   slA_START_DATE?: Date;
   slA_START_TIME?: string;
+
+  productioN_START_DATE?: Date;
+  productioN_START_TIME?: string;
 }
 
 interface Item_Component {
