@@ -832,7 +832,7 @@ export default function WorkStation() {
               }}
             />
             <Tab
-              label="Work Order List"
+              label="Sparepart"
               {...a11yProps(2)}
               sx={{
                 fontSize: "1.1rem",
@@ -1275,7 +1275,7 @@ export default function WorkStation() {
 
       </Box>
 
-      <AppHeader title="Work Order" icon={<BusinessCenterIcon />} />
+      <AppHeader title={row?.title || "Work Order"} icon={<BusinessCenterIcon />} />
 
       <div>
 

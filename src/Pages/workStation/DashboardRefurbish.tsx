@@ -337,7 +337,10 @@ const DashboardRefurbish = () => {
               console.log("row.original.worK_ORDER_OPERATION_ID : ", row.original.worK_ORDER_OPERATION_ID);
               console.log("row.original.orderid : ", row.original.orderid);
               navigate(`/WorkStation/${row.original.orderid}/${row.original.worK_ORDER_OPERATION_ID}`, {
-                state: { current_operation: row.original.current_operation },
+                state: {
+                  current_operation: row.original.current_operation,
+                  title: step?.title
+                },
               });
             },
             sx: { cursor: step.station != null ? "pointer" : "default" },

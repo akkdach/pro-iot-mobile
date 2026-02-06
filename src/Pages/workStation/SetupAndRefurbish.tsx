@@ -27,7 +27,7 @@ import assembly from "./PNG/assembly.png";
 import test from "./PNG/test.png";
 import qc from "./PNG/qc.png";
 import DashboardRefurbish from "./DashboardRefurbish";
-import { Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from '@mui/material/Modal';
 import AppHeader from "../../Component/AppHeader"
 import HomeWorkIcon from '@mui/icons-material/HomeWork';
@@ -43,7 +43,7 @@ export const steps = [
   { id: 5, title: "Fix Cooling", icon: fix, station: "0050" },
   { id: 6, title: "Assembly Part", icon: assembly, station: "0060" },
   { id: 7, title: "Test", icon: test, station: "0070" },
-  { id: 8, title: "QC", icon: qc, station: "0080" },
+  { id: 8, title: "QC Packing", icon: qc, station: "0080" },
 ];
 
 export default function SetupAndRefurbish() {
@@ -57,16 +57,16 @@ export default function SetupAndRefurbish() {
   const bottomRow = steps.filter((_, i) => i % 2 === 1);
 
   const Hex = ({ step, index }: any) => (
-    
+
     <Box
       display="flex"
       flexWrap="wrap"
       flexDirection="column"
       alignItems="center"
       mx={5}
-      onClick={() => navigate("/DashboardRefurbish", {state:step})}
+      onClick={() => navigate("/DashboardRefurbish", { state: step })}
     >
-      
+
       <Box
         className="clip-hex"
         sx={{
@@ -118,10 +118,10 @@ export default function SetupAndRefurbish() {
       </Box>
 
       <Box mt={1} textAlign="center" width="8rem" fontSize="0.875rem">
-        {step.title} 
+        {step.title}
       </Box>
     </Box>
-    
+
   );
 
   const handleClickOpen = () => {
@@ -144,12 +144,12 @@ export default function SetupAndRefurbish() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
   };
 
   return (
     <>
-    <AppHeader title={"SETUP / REFURBISH"} icon={<HomeWorkIcon />}/>
+      <AppHeader title={"SETUP / REFURBISH"} icon={<HomeWorkIcon />} />
       <Box
         sx={{
           padding: 4,
@@ -203,9 +203,9 @@ export default function SetupAndRefurbish() {
         <DialogTitle>เข้าสู่ระบบ</DialogTitle>
 
         <DialogContent>
-         
+
           <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
-            
+
             <TextField
               autoFocus
               required
@@ -216,11 +216,11 @@ export default function SetupAndRefurbish() {
               type="text"
               variant="standard"
               fullWidth
-              sx={{ flex: 1 }} 
+              sx={{ flex: 1 }}
               inputProps={{ maxLength: 10 }}
             />
 
-          
+
             <FormControl variant="standard" sx={{ minWidth: 120 }}>
               <InputLabel id="work-label">Work</InputLabel>
               <Select
