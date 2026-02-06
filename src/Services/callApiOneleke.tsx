@@ -1,7 +1,8 @@
 // utils/api-client.ts
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+const baseURLOneleke = process.env.REACT_APP_API_ONELAKE_URL || "http://10.10.199.16:3005/api/";
 const apiClient = axios.create({
-    baseURL: "http://10.10.199.16:3005/api/",
+    baseURL: baseURLOneleke,
     timeout: 0,
     headers: {
         'Content-Type': 'application/json',
