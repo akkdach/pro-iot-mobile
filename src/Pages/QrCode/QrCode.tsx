@@ -461,7 +461,11 @@ export default function PrintQRCodes() {
                                             borderColor: "divider",
                                         }}
                                     >
-                                        <Checkbox checked={!!selected[x.id]} onChange={() => toggleOne(x.id)} />
+                                        <Checkbox
+                                            checked={!!selected[x.id]}
+                                            onChange={() => toggleOne(x.id)}
+                                            disabled={!x.objectID}
+                                        />
                                         <Box sx={{ flex: 1 }}>
                                             <Typography variant="body2" fontWeight={700}>
                                                 {x.objectID}{" "}
