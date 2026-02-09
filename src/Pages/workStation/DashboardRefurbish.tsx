@@ -100,6 +100,7 @@ const DashboardRefurbish = () => {
   type WorkOrderRow = {
     orderid: string;
     ordeR_TYPE?: string;
+    productioN_START_DATE?: any;
     shorT_TEXT?: string;
     equipment?: string;
     weB_STATUS?: string;
@@ -179,11 +180,21 @@ const DashboardRefurbish = () => {
         header: "Order Type",
       },
       {
-        accessorKey: "productioN_START_DATE",
         header: "Production Start Date",
-        Cell: ({ cell }) => formatDate(cell.getValue<string>()),
+        accessorFn: (row) => {
+          if (!row.productioN_START_DATE) return "ไม่มีข้อมูล";
+          const d = new Date(row.productioN_START_DATE);
+          return isNaN(d.getTime())
+            ? "ไม่มีข้อมูล"
+            : d.toLocaleDateString("th-TH", {
+              timeZone: "Asia/Bangkok",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            });
+        },
+        id: "productioN_START_DATE",
       },
-
       {
         accessorKey: "equipment",
         header: "Equipment",
@@ -229,10 +240,13 @@ const DashboardRefurbish = () => {
     enableGlobalFilter: true,
     enableColumnFilters: true,
     enablePagination: true,
+    enableGrouping: true,
     enableRowSelection: step?.type === "workOrderList",
     initialState: {
       showGlobalFilter: true,
       pagination: { pageSize: 30, pageIndex: 0 },
+      grouping: step?.type === "workOrderList" ? ["productioN_START_DATE"] : [],
+      expanded: true, // Expand all groups by default
     },
     muiTablePaperProps: {
       sx: {
@@ -312,6 +326,8 @@ const DashboardRefurbish = () => {
             <MenuItem value="red">🔴 เลย SLA</MenuItem>
           </Select>
         </FormControl>
+
+
 
         {step?.type === "workOrderList" && (
           <Button

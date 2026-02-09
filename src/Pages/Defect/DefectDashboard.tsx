@@ -226,8 +226,6 @@ export default function DefectDashboard() {
                                 onOpen={(row) => {
                                     console.log("open orderId:", row.orderid);
                                     console.log("open operationId:", row.worK_ORDER_OPERATION_ID);
-                                    // Navigate to same path as QC for now, or maybe Defect has its own detail?
-                                    // User didn't specify, but usually it works similarly.
                                     navigate(`/DetailEachOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`, {
                                         state: row
                                     });
