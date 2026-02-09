@@ -273,7 +273,7 @@ export function WorkOrderTodoCard(props: {
             </CardContent>
 
             {/* Actions: Approve / Not Approve */}
-            {(onApprove || onRework) && (
+            {(onApprove || onRework) && stationCode === "0000" && (
                 <Box sx={{ px: 2, pb: 2, pt: 0 }}>
                     <Stack direction="row" spacing={1}>
                         {onApprove && (

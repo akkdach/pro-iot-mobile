@@ -832,7 +832,7 @@ export default function WorkStation() {
               }}
             />
             <Tab
-              label="Work Order List"
+              label="Sparepart"
               {...a11yProps(2)}
               sx={{
                 fontSize: "1.1rem",
@@ -1069,11 +1069,14 @@ export default function WorkStation() {
                   label: "Finish",
                   from: "#3498db",
                   to: "#2980b9",
-                  onClick: () => {
+                  onClick: async () => {
                     const mapped = checkedCodes.map((code) => ({ code }));
                     setCheckList(mapped);
                     setIsWorking(false);
-                    finishWork(mapped);
+                    const isSuccess = await finishWork(mapped);
+                    if (isSuccess) {
+                      navigate(-1);
+                    }
                   },
                 },
                 {
@@ -1275,7 +1278,7 @@ export default function WorkStation() {
 
       </Box>
 
-      <AppHeader title="Work Order" icon={<BusinessCenterIcon />} />
+      <AppHeader title={row?.title || "Work Order"} icon={<BusinessCenterIcon />} />
 
       <div>
 

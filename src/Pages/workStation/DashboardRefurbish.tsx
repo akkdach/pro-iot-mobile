@@ -30,7 +30,11 @@ import { useWork } from "../../Context/WorkStationContext";
 import PlayCircleFilledWhiteIcon from "@mui/icons-material/PlayCircleFilledWhite";
 import Swal from "sweetalert2";
 import { SlaTimer } from "../../Utility/SlaTimer";
-import { MaterialReactTable, type MRT_ColumnDef } from "material-react-table";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+  type MRT_ColumnDef,
+} from "material-react-table";
 
 // Copy จาก SlaTimer.tsx
 function parseTimeToHms(time?: string | null) {
@@ -96,6 +100,7 @@ const DashboardRefurbish = () => {
   type WorkOrderRow = {
     orderid: string;
     ordeR_TYPE?: string;
+    productioN_START_DATE?: any;
     shorT_TEXT?: string;
     equipment?: string;
     weB_STATUS?: string;
@@ -175,6 +180,22 @@ const DashboardRefurbish = () => {
         header: "Order Type",
       },
       {
+        header: "Production Start Date",
+        accessorFn: (row) => {
+          if (!row.productioN_START_DATE) return "ไม่มีข้อมูล";
+          const d = new Date(row.productioN_START_DATE);
+          return isNaN(d.getTime())
+            ? "ไม่มีข้อมูล"
+            : d.toLocaleDateString("th-TH", {
+              timeZone: "Asia/Bangkok",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            });
+        },
+        id: "productioN_START_DATE",
+      },
+      {
         accessorKey: "equipment",
         header: "Equipment",
       },
@@ -196,68 +217,71 @@ const DashboardRefurbish = () => {
     []
   );
 
-  const startWork = (orderid: string) => {
-    Swal.fire({
-      title: "Start Work?",
-      text: "Are you sure you want to start this work order?",
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonText: "Yes, Start",
-      cancelButtonText: "Cancel",
-      confirmButtonColor: "#27ae60",
-      cancelButtonColor: "#e74c3c",
-    }).then(async (result) => {
-      if (!result.isConfirmed) return;
-      try {
-        const res = await callApi.post("/WorkOrderList/StartWorkOrder", {
-          ORDERID: orderid,
-        });
-        const data = res.data;
-        console.log("Start Work Order : ", data);
-
-        if (!data.isSuccess) {
-          await Swal.fire({
-            title: "Failed",
-            text: data.Message ?? "Cannot start this work order.",
-            icon: "error",
-          });
-          return;
-        }
-
-        Swal.fire({
-          title: "Started!",
-          text: "Work order has been started successfully.",
-          icon: "success",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      } catch (err: any) {
-        console.error("StartWorkOrder error:", err);
-        await Swal.fire({
-          title: "Error",
-          text: err.response?.data?.Message || "Something went wrong.",
-          icon: "error",
-        });
-      }
-    });
-  };
-
-  const paginationModel = { page: 0, pageSize: 5 };
-
   const safeItems = Array.isArray(items) ? items : [];
 
 
-  const filteredRows = safeItems.filter((row) => {
-    const matchWorkOrder = row.orderid
-      ?.toString()
-      .toLowerCase()
-      .includes(workOrderFilter.toLowerCase());
+  const filteredRows = useMemo(() => {
+    return safeItems.filter((row) => {
+      const matchWorkOrder = row.orderid
+        ?.toString()
+        .toLowerCase()
+        .includes(workOrderFilter.toLowerCase());
 
-    const matchSlaStatus = stationToFilter === "" ||
-      getSlaStatus(row) === stationToFilter;
-    return matchWorkOrder && matchSlaStatus;
+      const matchSlaStatus = stationToFilter === "" ||
+        getSlaStatus(row) === stationToFilter;
+      return matchWorkOrder && matchSlaStatus;
+    });
+  }, [safeItems, workOrderFilter, stationToFilter]);
+
+
+  const table = useMaterialReactTable({
+    columns,
+    data: filteredRows as WorkOrderRow[],
+    enableGlobalFilter: true,
+    enableColumnFilters: true,
+    enablePagination: true,
+    enableGrouping: true,
+    enableRowSelection: step?.type === "workOrderList",
+    initialState: {
+      showGlobalFilter: true,
+      pagination: { pageSize: 30, pageIndex: 0 },
+      grouping: step?.type === "workOrderList" ? ["productioN_START_DATE"] : [],
+      expanded: true, // Expand all groups by default
+    },
+    muiTablePaperProps: {
+      sx: {
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      },
+    },
+    muiTableContainerProps: {
+      sx: {
+        flexGrow: 1,
+        minHeight: "calc(100vh - 280px)",
+      },
+    },
+    muiTableBodyRowProps: ({ row }) => ({
+      onClick: () => {
+        if (step.station == null) return;
+        console.log("row.original.worK_ORDER_OPERATION_ID : ", row.original.worK_ORDER_OPERATION_ID);
+        console.log("row.original.orderid : ", row.original.orderid);
+        navigate(`/WorkStation/${row.original.orderid}/${row.original.worK_ORDER_OPERATION_ID}`, {
+          state: {
+            current_operation: row.original.current_operation,
+            title: step?.title
+          },
+        });
+      },
+      sx: { cursor: step.station != null ? "pointer" : "default" },
+    }),
+    muiSearchTextFieldProps: {
+      placeholder: "ค้นหา Work Order...",
+      sx: { minWidth: 300 },
+      variant: "outlined",
+      size: "small",
+    },
   });
-
 
   return (
     <div style={{ height: "100%" }}>
@@ -302,53 +326,81 @@ const DashboardRefurbish = () => {
             <MenuItem value="red">🔴 เลย SLA</MenuItem>
           </Select>
         </FormControl>
+
+
+
+        {step?.type === "workOrderList" && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={async () => {
+              const selectedRows = table.getSelectedRowModel().flatRows;
+
+              if (selectedRows.length === 0) {
+                await Swal.fire({
+                  icon: "warning",
+                  title: "ยังไม่ได้เลือกรายการ",
+                  text: "กรุณาเลือกรายการที่ต้องการจ่ายงานอย่างน้อย 1 รายการ",
+                });
+                return;
+              }
+
+              const confirm = await Swal.fire({
+                title: "ยืนยันการจ่ายงาน",
+                text: `คุณต้องการจ่ายงานจำนวน ${selectedRows.length} รายการใช่หรือไม่?`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "ยืนยัน",
+                cancelButtonText: "ยกเลิก",
+              });
+
+              if (!confirm.isConfirmed) return;
+
+              Swal.fire({
+                title: "กำลังดำเนินการ...",
+                html: "กรุณารอสักครู่",
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+              });
+
+              let successCount = 0;
+              let failCount = 0;
+
+              for (const row of selectedRows) {
+                try {
+                  const res = await callApi.post("/WorkOrderList/StartWorkOrder", {
+                    ORDERID: row.original.orderid,
+                  });
+                  if (res.data.isSuccess) {
+                    successCount++;
+                  } else {
+                    failCount++;
+                    console.error(`Failed to start order ${row.original.orderid}: ${res.data.Message}`);
+                  }
+                } catch (error) {
+                  failCount++;
+                  console.error(`Error starting order ${row.original.orderid}:`, error);
+                }
+              }
+
+              table.resetRowSelection();
+              await onLoad(); // Refresh data
+
+              await Swal.fire({
+                icon: failCount === 0 ? "success" : "warning",
+                title: "ดำเนินการเสร็จสิ้น",
+                text: `จ่ายงานสำเร็จ ${successCount} รายการ${failCount > 0 ? `, ล้มเหลว ${failCount} รายการ` : ""}`,
+              });
+            }}
+            sx={{ height: 40 }}
+          >
+            จ่ายงาน
+          </Button>
+        )}
       </Stack>
 
       <Box sx={{ width: "100%", height: "calc(100vh - 180px)", mt: 2, mb: 8 }}>
-        <MaterialReactTable
-          enableGlobalFilter={true}
-          columns={columns}
-          data={filteredRows as WorkOrderRow[]}
-          enableColumnFilters={true}
-          enablePagination={true}
-          enableRowSelection={false}
-          initialState={{
-            showGlobalFilter: true,
-            pagination: { pageSize: 30, pageIndex: 0 },
-          }}
-          muiTablePaperProps={{
-            sx: {
-              display: "flex",
-              flexDirection: "column",
-              height: "100%",
-
-            },
-          }}
-          muiTableContainerProps={{
-            sx: {
-              flexGrow: 1,
-              minHeight: "calc(100vh - 280px)",
-
-            },
-          }}
-          muiTableBodyRowProps={({ row }) => ({
-            onClick: () => {
-              if (step.station == null) return;
-              console.log("row.original.worK_ORDER_OPERATION_ID : ", row.original.worK_ORDER_OPERATION_ID);
-              console.log("row.original.orderid : ", row.original.orderid);
-              navigate(`/WorkStation/${row.original.orderid}/${row.original.worK_ORDER_OPERATION_ID}`, {
-                state: { current_operation: row.original.current_operation },
-              });
-            },
-            sx: { cursor: step.station != null ? "pointer" : "default" },
-          })}
-          muiSearchTextFieldProps={{
-            placeholder: "ค้นหา Work Order...",
-            sx: { minWidth: 300 },
-            variant: "outlined",
-            size: "small",
-          }}
-        />
+        <MaterialReactTable table={table} />
       </Box>
     </div>
   );
