@@ -41,6 +41,40 @@ export default function Home() {
                             <span style={{ marginLeft: '12px', color: '#333' }}>Dashboard</span>
                         </Box>
                     </Link>
+                    <Link to={'/SetupAndRefurbish'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <HomeWorkIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Refurbish</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/DashboardQC'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <FactCheckIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>QC</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/CheckSheet'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <SafetyCheckIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Safety</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/QrCode'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <QrCodeIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Qr Code</span>
+                        </Box>
+                    </Link>
+
+                    <Link to={'/DefectDashboard'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <SmsFailedIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Defect</span>
+                        </Box>
+                    </Link>
                     <Link to={'/checkin'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <Map sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
@@ -83,40 +117,7 @@ export default function Home() {
                         </Box>
                     </Link>
 
-                    <Link to={'/SetupAndRefurbish'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
-                            <HomeWorkIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>Refurbish</span>
-                        </Box>
-                    </Link>
 
-                    <Link to={'/DashboardQC'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
-                            <FactCheckIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>QC</span>
-                        </Box>
-                    </Link>
-
-                    <Link to={'/CheckSheet'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
-                            <SafetyCheckIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>Safety</span>
-                        </Box>
-                    </Link>
-
-                    <Link to={'/QrCode'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
-                            <QrCodeIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>Qr Code</span>
-                        </Box>
-                    </Link>
-
-                    <Link to={'/DefectDashboard'}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
-                            <SmsFailedIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>Defect</span>
-                        </Box>
-                    </Link>
                 </Grid>
             </Grid>
         </Box>

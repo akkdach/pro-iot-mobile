@@ -179,6 +179,12 @@ const DashboardRefurbish = () => {
         header: "Order Type",
       },
       {
+        accessorKey: "productioN_START_DATE",
+        header: "Production Start Date",
+        Cell: ({ cell }) => formatDate(cell.getValue<string>()),
+      },
+
+      {
         accessorKey: "equipment",
         header: "Equipment",
       },
