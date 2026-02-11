@@ -1,18 +1,38 @@
-import React, { useState } from 'react';
-import { Box, Card, CardContent, Typography, Button, Stack, Container, Chip } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Card, CardContent, Typography, Button, Stack, Container, Chip, Grid, Dialog, DialogContent, IconButton } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import CloseIcon from '@mui/icons-material/Close';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import { useLocation, useNavigate } from 'react-router-dom';
 import questionData from './question_1.json';
 
+interface Option {
+    id: number;
+    text: string;
+}
+
+interface Question {
+    id: number;
+    text: string;
+    image?: string;
+    options: Option[];
+    correctId: number;
+}
 
 export default function QuizQuest() {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { examData, title, startTime } = location.state || {};
+
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [score, setScore] = useState(0);
     const [showScore, setShowScore] = useState(false);
+    const [openImageDialog, setOpenImageDialog] = useState(false);
 
-    const questions = questionData;
-    const currentQuestion = questions[currentQuestionIndex];
+    const questions: Question[] = examData || questionData;
+    const currentQuestion: Question = questions[currentQuestionIndex];
 
     // Handle Option Click
     const handleOptionClick = (optionId: number) => {
@@ -43,6 +63,11 @@ export default function QuizQuest() {
         setShowScore(false);
     };
 
+    // Go back to Dashboard
+    const handleBackToDashboard = () => {
+        navigate('/DashboardQuiz');
+    };
+
     if (showScore) {
         return (
             <Container maxWidth="sm" sx={{ mt: 8, textAlign: 'center' }}>
@@ -60,9 +85,17 @@ export default function QuizQuest() {
                             variant="contained"
                             size="large"
                             onClick={handleRestart}
-                            sx={{ borderRadius: 3, px: 4 }}
+                            sx={{ borderRadius: 3, px: 4, mr: 2 }}
                         >
                             ทำแบบทดสอบอีกครั้ง
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            size="large"
+                            onClick={handleBackToDashboard}
+                            sx={{ borderRadius: 3, px: 4 }}
+                        >
+                            กลับหน้าหลัก
                         </Button>
                     </CardContent>
                 </Card>
@@ -71,9 +104,9 @@ export default function QuizQuest() {
     }
 
     return (
-        <Container maxWidth="sm" sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 4, pb: 15 }}>
+        <Container maxWidth="lg" sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 4, pb: 15 }}>
             <Box sx={{ width: '100%', mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h5" fontWeight="bold">Workstation Quiz</Typography>
+                <Typography variant="h5" fontWeight="bold">{title || "Workstation Quiz"}</Typography>
                 <Chip
                     icon={<HelpOutlineIcon />}
                     label={`Question ${currentQuestionIndex + 1}/${questions.length}`}
@@ -84,78 +117,159 @@ export default function QuizQuest() {
 
             <Card sx={{ width: '100%', borderRadius: 4, boxShadow: 3 }}>
                 <CardContent sx={{ p: 4 }}>
-                    <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
-                        คำถามที่ {currentQuestionIndex + 1}
-                    </Typography>
-                    <Typography variant="h5" component="div" sx={{ mb: 4, fontWeight: 'bold' }}>
-                        {currentQuestion.text}
-                    </Typography>
+                    <Grid container spacing={4}>
+                        <Grid size={{ xs: 12, md: currentQuestion.image ? 5 : 12 }}>
+                            <Typography variant="h6" gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
+                                คำถามที่ {currentQuestionIndex + 1}
+                            </Typography>
+                            <Typography variant="h5" component="div" sx={{ mb: 4, fontWeight: 'bold' }}>
+                                {currentQuestion.text}
+                            </Typography>
 
-                    {currentQuestion.image && (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-                            <Box
-                                component="img"
-                                src={currentQuestion.image}
-                                alt="Question Image"
-                                sx={{
-                                    maxWidth: '100%',
-                                    maxHeight: 250,
-                                    borderRadius: 3,
-                                    boxShadow: 2,
-                                    objectFit: 'contain'
-                                }}
-                            />
-                        </Box>
-                    )}
+                            <Stack spacing={2}>
+                                {currentQuestion.options.map((option: Option) => (
+                                    <Button
+                                        key={option.id}
+                                        variant={selectedOption === option.id ? "contained" : "outlined"}
+                                        color="primary"
+                                        fullWidth
+                                        onClick={() => handleOptionClick(option.id)}
+                                        sx={{
+                                            justifyContent: 'flex-start',
+                                            textAlign: 'left',
+                                            py: 1.5,
+                                            px: 2,
+                                            borderRadius: 2,
+                                            fontSize: '1rem',
+                                            textTransform: 'none',
+                                            transition: 'all 0.3s ease',
+                                            borderWidth: selectedOption === option.id ? 0 : 1,
+                                            bgcolor: selectedOption === option.id ? 'primary.main' : 'background.paper',
+                                            color: selectedOption === option.id ? 'primary.contrastText' : 'text.primary',
+                                            '&:hover': {
+                                                bgcolor: selectedOption === option.id ? 'primary.dark' : 'action.hover',
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: 1
+                                            }
+                                        }}
+                                    >
+                                        <Box component="span" sx={{
+                                            width: 24,
+                                            height: 24,
+                                            borderRadius: '50%',
+                                            border: '2px solid',
+                                            borderColor: selectedOption === option.id ? 'white' : 'divider',
+                                            mr: 2,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: 12,
+                                            fontWeight: 'bold'
+                                        }}>
+                                            {String.fromCharCode(64 + option.id)}
+                                        </Box>
+                                        {option.text}
+                                    </Button>
+                                ))}
+                            </Stack>
+                        </Grid>
 
-                    <Stack spacing={2}>
-                        {currentQuestion.options.map((option) => (
-                            <Button
-                                key={option.id}
-                                variant={selectedOption === option.id ? "contained" : "outlined"}
-                                color="primary"
-                                fullWidth
-                                onClick={() => handleOptionClick(option.id)}
-                                sx={{
-                                    justifyContent: 'flex-start',
-                                    textAlign: 'left',
-                                    py: 1.5,
-                                    px: 2,
-                                    borderRadius: 2,
-                                    fontSize: '1rem',
-                                    textTransform: 'none',
-                                    transition: 'all 0.3s ease',
-                                    borderWidth: selectedOption === option.id ? 0 : 1,
-                                    bgcolor: selectedOption === option.id ? 'primary.main' : 'background.paper',
-                                    color: selectedOption === option.id ? 'primary.contrastText' : 'text.primary',
-                                    '&:hover': {
-                                        bgcolor: selectedOption === option.id ? 'primary.dark' : 'action.hover',
-                                        transform: 'translateY(-2px)',
-                                        boxShadow: 1
-                                    }
-                                }}
-                            >
-                                <Box component="span" sx={{
-                                    width: 24,
-                                    height: 24,
-                                    borderRadius: '50%',
-                                    border: '2px solid',
-                                    borderColor: selectedOption === option.id ? 'white' : 'divider',
-                                    mr: 2,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: 12,
-                                    fontWeight: 'bold'
-                                }}>
-                                    {String.fromCharCode(64 + option.id)}
+                        {currentQuestion.image && (
+                            <Grid size={{ xs: 12, md: 7 }} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Box
+                                    sx={{
+                                        position: 'relative',
+                                        cursor: 'pointer',
+                                        width: '100%',
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        '&:hover .zoom-icon': { opacity: 1 },
+                                        '&:hover img': { filter: 'brightness(0.9)' }
+                                    }}
+                                    onClick={() => setOpenImageDialog(true)}
+                                >
+                                    <Box
+                                        component="img"
+                                        src={currentQuestion.image}
+                                        alt="Question Image"
+                                        sx={{
+                                            width: '100%',
+                                            height: 'auto',
+                                            maxHeight: '80vh',
+                                            borderRadius: 3,
+                                            boxShadow: 2,
+                                            objectFit: 'contain',
+                                            transition: 'filter 0.3s ease'
+                                        }}
+                                    />
+                                    <Box
+                                        className="zoom-icon"
+                                        sx={{
+                                            position: 'absolute',
+                                            top: '50%',
+                                            left: '50%',
+                                            transform: 'translate(-50%, -50%)',
+                                            bgcolor: 'rgba(0,0,0,0.6)',
+                                            color: 'white',
+                                            borderRadius: '50%',
+                                            p: 2,
+                                            opacity: 0,
+                                            transition: 'opacity 0.3s ease',
+                                            display: 'flex'
+                                        }}
+                                    >
+                                        <ZoomInIcon fontSize="large" />
+                                    </Box>
                                 </Box>
-                                {option.text}
-                            </Button>
-                        ))}
-                    </Stack>
+                            </Grid>
+                        )}
+                    </Grid>
                 </CardContent>
             </Card>
+
+            <Dialog
+                open={openImageDialog}
+                onClose={() => setOpenImageDialog(false)}
+                maxWidth="xl"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        bgcolor: 'transparent',
+                        boxShadow: 'none',
+                        overflow: 'hidden'
+                    }
+                }}
+            >
+                <Box sx={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', p: 2 }} onClick={() => setOpenImageDialog(false)}>
+                    <IconButton
+                        onClick={() => setOpenImageDialog(false)}
+                        sx={{
+                            position: 'absolute',
+                            top: 20,
+                            right: 20,
+                            color: 'white',
+                            bgcolor: 'rgba(0,0,0,0.5)',
+                            '&:hover': { bgcolor: 'rgba(0,0,0,0.8)' },
+                            zIndex: 1
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
+                    <Box
+                        component="img"
+                        src={currentQuestion.image}
+                        alt="Zoomed Question Image"
+                        sx={{
+                            maxWidth: '100%',
+                            maxHeight: '100%',
+                            objectFit: 'contain',
+                            borderRadius: 2,
+                            boxShadow: 5
+                        }}
+                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking image
+                    />
+                </Box>
+            </Dialog>
 
             <Button
                 variant="contained"

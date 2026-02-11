@@ -45,6 +45,7 @@ import QrCode from './Pages/QrCode/QrCode';
 import DefectDashboard from './Pages/Defect/DefectDashboard';
 import DetailEachOrder from './Pages/Defect/DetailEachOrder';
 import QuizQuest from './Pages/Quiz/QuizQuest';
+import DashboardQuiz from './Pages/Quiz/DashboardQuiz';
 
 const token = localStorage.getItem('token');
 function App() {
@@ -88,6 +89,8 @@ function App() {
           <Route path="DefectDashboard" element={<DefectDashboard />}></Route>
           <Route path="DetailEachOrder/:orderId/:operationId" element={<DetailEachOrder />}></Route>
           <Route path="QuizQuest" element={<QuizQuest />}></Route>
+          <Route path="DashboardQuiz" element={<DashboardQuiz />}></Route>
+
         </Routes></Layout></UserProvider>) : (<Routes><Route path='*' element={<LoginPage />}></Route></Routes>)}
 
       </div >
