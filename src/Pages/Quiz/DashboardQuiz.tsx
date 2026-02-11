@@ -1,14 +1,56 @@
+import React, { useState } from 'react';
 import moment from 'moment';
-import { Box, Card, CardContent, Typography, Button, Container, Grid } from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, Container, Grid, Dialog, DialogContent, IconButton, List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import AppHearder from '../../Component/AppHeader';
 import questionData1 from './question_1.json';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import CertificateDocument from './Certificate';
+import CloseIcon from '@mui/icons-material/Close';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import HistoryIcon from '@mui/icons-material/History';
 
+import { useUser } from '../../Context/userContext';
+import callApi from '../../Services/callApi';
 import Swal from 'sweetalert2';
 
 export default function DashboardQuiz() {
     const navigate = useNavigate();
+    const { user } = useUser();
+    const [openHistory, setOpenHistory] = useState(false);
+    const [historyData, setHistoryData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    const fetchHistory = async () => {
+        try {
+            setLoading(true);
+            const response = await callApi.get(`/WorkOrderList/QuizHistory`);
+            console.log("History API Response:", response.data);
+            if (response.data && response.data.dataResult && Array.isArray(response.data.dataResult)) {
+                setHistoryData(response.data.dataResult);
+            } else {
+                console.warn("API response format error or empty:", response.data);
+                setHistoryData([]);
+            }
+        } catch (error) {
+            console.error("Error fetching history:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'ไม่สามารถโหลดประวัติการสอบได้'
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch history when dialog opens
+    React.useEffect(() => {
+        if (openHistory && user?.id) {
+            fetchHistory();
+        }
+    }, [openHistory, user]);
 
     // Mock data for quizzes
     const quizzes = [
@@ -56,13 +98,23 @@ export default function DashboardQuiz() {
     return (
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <AppHearder title="Dashboard Quiz" />
-            <Box sx={{ mb: 4, mt: 9 }}>
-                <Typography variant="h4" fontWeight="bold" gutterBottom>
-                    Quiz Dashboard
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                    เลือกทำแบบทดสอบที่คุณต้องการ
-                </Typography>
+            <Box sx={{ mb: 4, mt: 9, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box>
+                    <Typography variant="h4" fontWeight="bold" gutterBottom>
+                        Quiz Dashboard
+                    </Typography>
+                    <Typography variant="body1" color="text.secondary">
+                        เลือกทำแบบทดสอบที่คุณต้องการ
+                    </Typography>
+                </Box>
+                <Button
+                    variant="outlined"
+                    startIcon={<HistoryIcon />}
+                    onClick={() => setOpenHistory(true)}
+                    sx={{ borderRadius: 2 }}
+                >
+                    ประวัติการสอบ
+                </Button>
             </Box>
 
             <Grid container spacing={3}>
@@ -112,6 +164,74 @@ export default function DashboardQuiz() {
                     </Grid>
                 ))}
             </Grid>
+            <Dialog
+                open={openHistory}
+                onClose={() => setOpenHistory(false)}
+                maxWidth="sm"
+                fullWidth
+                PaperProps={{
+                    sx: { borderRadius: 3 }
+                }}
+            >
+                <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee' }}>
+                    <Typography variant="h6" fontWeight="bold">ประวัติการสอบของฉัน</Typography>
+                    <IconButton onClick={() => setOpenHistory(false)} size="small">
+                        <CloseIcon />
+                    </IconButton>
+                </Box>
+                <DialogContent>
+                    <List>
+                        {loading ? (
+                            <Typography sx={{ p: 2, textAlign: 'center' }}>Loading...</Typography>
+                        ) : historyData.length === 0 ? (
+                            <Typography sx={{ p: 2, textAlign: 'center' }}>ไม่พบประวัติการสอบ</Typography>
+                        ) : (
+                            historyData.map((item: any) => (
+                                <ListItem key={item.submissionId} sx={{ bgcolor: 'background.paper', mb: 2, borderRadius: 2, boxShadow: 1 }}>
+                                    <ListItemText
+                                        primary={item.quizTitle}
+                                        secondary={`Score: ${item.score}/${item.totalScore} • Date: ${moment(item.examDate).format('DD/MM/YYYY HH:mm')} • Status: ${item.status}`}
+                                        primaryTypographyProps={{ fontWeight: 'bold' }}
+                                        secondaryTypographyProps={{
+                                            component: 'span',
+                                            style: { color: item.status === 'passed' ? 'green' : 'red' }
+                                        }}
+                                    />
+                                    <ListItemSecondaryAction>
+                                        {item.status === 'passed' && (
+                                            <PDFDownloadLink
+                                                document={
+                                                    <CertificateDocument
+                                                        userName={user?.fullname || user?.username || "User"}
+                                                        courseName={item.quizTitle}
+                                                        score={item.score}
+                                                        totalScore={item.totalScore}
+                                                        date={item.examDate}
+                                                    />
+                                                }
+                                                fileName={`certificate_${item.submissionId}.pdf`}
+                                            >
+                                                {({ blob, url, loading, error }) => (
+                                                    <Button
+                                                        variant="contained"
+                                                        size="small"
+                                                        color="success"
+                                                        startIcon={<GetAppIcon />}
+                                                        disabled={loading}
+                                                        sx={{ borderRadius: 2, textTransform: 'none' }}
+                                                    >
+                                                        {loading ? 'Generating...' : 'Certificate'}
+                                                    </Button>
+                                                )}
+                                            </PDFDownloadLink>
+                                        )}
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            ))
+                        )}
+                    </List>
+                </DialogContent>
+            </Dialog>
         </Container>
     );
 }
