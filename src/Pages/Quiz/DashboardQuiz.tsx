@@ -1,4 +1,4 @@
-import React from 'react';
+import moment from 'moment';
 import { Box, Card, CardContent, Typography, Button, Container, Grid } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -22,6 +22,8 @@ export default function DashboardQuiz() {
         // Add more quizzes here in the future
     ];
 
+
+
     const handleStartQuiz = (quiz: any) => {
         Swal.fire({
             title: 'ยืนยันการเริ่มทำแบบทดสอบ',
@@ -34,11 +36,17 @@ export default function DashboardQuiz() {
             cancelButtonText: 'ยกเลิก'
         }).then((result) => {
             if (result.isConfirmed) {
+                // Generate Thai Time (UTC+7) manually or use a library if preferable, 
+                // but since user specifically asked for "Thai Time Zone", 
+                // typically backend expects ISO string with offset or shifted time.
+                // Using moment to explicit format.
+                const thaiTime = moment().format('YYYY-MM-DDTHH:mm:ss'); // Local time format
+
                 navigate(quiz.route, {
                     state: {
                         examData: quiz.examData,
                         title: quiz.title,
-                        startTime: new Date().toISOString()
+                        startTime: thaiTime // Send local time string
                     }
                 });
             }

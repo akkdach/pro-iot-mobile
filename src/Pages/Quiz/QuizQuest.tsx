@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import moment from 'moment';
 import { Box, Card, CardContent, Typography, Button, Stack, Container, Chip, Grid, Dialog, DialogContent, IconButton } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -6,6 +7,9 @@ import CloseIcon from '@mui/icons-material/Close';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { useLocation, useNavigate } from 'react-router-dom';
 import questionData from './question_1.json';
+import { useUser } from '../../Context/userContext';
+import callApi from '../../Services/callApi';
+import Swal from 'sweetalert2';
 
 interface Option {
     id: number;
@@ -23,16 +27,70 @@ interface Question {
 export default function QuizQuest() {
     const location = useLocation();
     const navigate = useNavigate();
+    const { user } = useUser();
     const { examData, title, startTime } = location.state || {};
+
+    useEffect(() => {
+        console.log("Current User:", user);
+        console.log("User ID:", user?.id);
+    }, [user]);
 
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState<number | null>(null);
     const [score, setScore] = useState(0);
     const [showScore, setShowScore] = useState(false);
     const [openImageDialog, setOpenImageDialog] = useState(false);
+    const [answers, setAnswers] = useState<any[]>([]);
 
     const questions: Question[] = examData || questionData;
     const currentQuestion: Question = questions[currentQuestionIndex];
+
+
+
+    // ...
+
+    // Submit Quiz Result
+    const submitQuizResult = async (finalScore: number, finalAnswers: any[]) => {
+        const endTime = moment().format('YYYY-MM-DDTHH:mm:ss');
+        const start = moment(startTime); // Parse the passed startTime
+        const end = moment(endTime);
+        const durationSeconds = end.diff(start, 'seconds');
+
+        const payload = {
+            user_id: user?.id,
+            employee_id: user?.employee_id,
+            quiz_title: title || "Unknown Quiz",
+            score: finalScore,
+            total_score: questions.length,
+            start_time: startTime,
+            end_time: endTime,
+            time_taken_seconds: durationSeconds,
+            status: finalScore >= (questions.length * 0.7) ? "passed" : "failed",
+            details: finalAnswers
+        };
+
+        console.log("SENDING TO BACKEND:", payload);
+
+        try {
+            const response = await callApi.post('/WorkOrderList/Quiz', payload);
+            if (response.status === 200) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'บันทึกคะแนนสำเร็จ',
+                    text: `คุณทำได้ ${finalScore} / ${questions.length} คะแนน`,
+                    confirmButtonText: 'ตกลง'
+                });
+            }
+        } catch (error) {
+            console.error("Error submitting quiz:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: 'ไม่สามารถบันทึกคะแนนได้ กรุณาลองใหม่อีกครั้ง',
+                confirmButtonText: 'ตกลง'
+            });
+        }
+    };
 
     // Handle Option Click
     const handleOptionClick = (optionId: number) => {
@@ -41,9 +99,22 @@ export default function QuizQuest() {
 
     // Handle Submit / Next
     const handleNext = () => {
-        // Check answer
-        if (selectedOption === currentQuestion.correctId) {
-            setScore(prev => prev + 1);
+        const isCorrect = selectedOption === currentQuestion.correctId;
+        const currentScore = isCorrect ? score + 1 : score;
+
+        // Record answer detail
+        const answerDetail = {
+            question_id: currentQuestion.id,
+            question_text: currentQuestion.text,
+            selected_option_id: selectedOption,
+            is_correct: isCorrect
+        };
+        const updatedAnswers = [...answers, answerDetail];
+        setAnswers(updatedAnswers);
+
+        // Update score state
+        if (isCorrect) {
+            setScore((prev: number) => prev + 1);
         }
 
         const nextIndex = currentQuestionIndex + 1;
@@ -52,6 +123,7 @@ export default function QuizQuest() {
             setSelectedOption(null);
         } else {
             setShowScore(true);
+            submitQuizResult(currentScore, updatedAnswers);
         }
     };
 
@@ -61,6 +133,7 @@ export default function QuizQuest() {
         setSelectedOption(null);
         setScore(0);
         setShowScore(false);
+        setAnswers([]);
     };
 
     // Go back to Dashboard
@@ -106,7 +179,7 @@ export default function QuizQuest() {
     return (
         <Container maxWidth="lg" sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 4, pb: 15 }}>
             <Box sx={{ width: '100%', mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h5" fontWeight="bold">{title || "Workstation Quiz"}</Typography>
+                <Typography variant="h5" fontWeight="bold">{title || "Quiz"}</Typography>
                 <Chip
                     icon={<HelpOutlineIcon />}
                     label={`Question ${currentQuestionIndex + 1}/${questions.length}`}
@@ -266,7 +339,7 @@ export default function QuizQuest() {
                             borderRadius: 2,
                             boxShadow: 5
                         }}
-                        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking image
+                        onClick={(e) => e.stopPropagation()}
                     />
                 </Box>
             </Dialog>
