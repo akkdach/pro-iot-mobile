@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
         zIndex: -1
     },
     border: {
-        border: '3px solid #002766', // Dark Blue Border (Navy)
+        border: '3px solid #002766',
         width: '100%',
         height: '95%',
         padding: 20,
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
         fontSize: 30,
         marginBottom: 10,
         fontWeight: 'bold',
-        color: '#0050b3', // Strong Blue
+        color: '#0050b3',
         textTransform: 'uppercase'
     },
     subHeader: {
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginTop: 10,
         fontWeight: 'bold',
-        color: '#1890ff' // Light Blue Accent
+        color: '#1890ff'
     },
     date: {
         fontSize: 12,
