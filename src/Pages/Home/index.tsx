@@ -12,6 +12,7 @@ import FactCheckIcon from '@mui/icons-material/FactCheck';
 import SafetyCheckIcon from '@mui/icons-material/SafetyCheck';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import SmsFailedIcon from '@mui/icons-material/SmsFailed';
+import QuizIcon from '@mui/icons-material/Quiz';
 
 export default function Home() {
 
@@ -116,6 +117,16 @@ export default function Home() {
                             <span style={{ marginLeft: '12px', color: '#333' }}>Chat</span>
                         </Box>
                     </Link>
+
+
+                    <Link to={'/DashboardQuiz'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <QuizIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Dashboard Quiz</span>
+                        </Box>
+                    </Link>
+
+
 
 
                 </Grid>
