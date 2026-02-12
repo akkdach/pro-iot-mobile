@@ -1,6 +1,7 @@
 import React from 'react';
-import { Page, Text, View, Document, StyleSheet, Font, Svg, Path, Circle, Defs, LinearGradient, Stop, G } from '@react-pdf/renderer';
+import { Page, Text, View, Document, StyleSheet, Font, Svg, Path, Circle, Defs, LinearGradient, Stop, G, Image } from '@react-pdf/renderer';
 import moment from 'moment';
+import logo from './PNG/bevproAsiaLogo.gif';
 
 // Register Sarabun font for Thai support (Local file in public/fonts)
 Font.register({
@@ -11,7 +12,7 @@ Font.register({
     ]
 });
 
-// Create styles - DARK CRIMSON THEME
+// Create styles - BLUE TECH THEME
 const styles = StyleSheet.create({
     page: {
         flexDirection: 'column',
@@ -20,6 +21,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         fontFamily: 'Sarabun'
+    },
+    logo: {
+        width: 250,
+        height: 150,
+        marginBottom: 20,
+        objectFit: 'contain'
     },
     background: {
         position: 'absolute',
@@ -30,7 +37,7 @@ const styles = StyleSheet.create({
         zIndex: -1
     },
     border: {
-        border: '3px solid #800000', // Dark Maroon Border
+        border: '3px solid #002766', // Dark Blue Border (Navy)
         width: '100%',
         height: '95%',
         padding: 20,
@@ -43,7 +50,7 @@ const styles = StyleSheet.create({
         fontSize: 30,
         marginBottom: 10,
         fontWeight: 'bold',
-        color: '#8B0000', // Dark Red
+        color: '#0050b3', // Strong Blue
         textTransform: 'uppercase'
     },
     subHeader: {
@@ -69,7 +76,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginTop: 10,
         fontWeight: 'bold',
-        color: '#B22222' // FireBrick
+        color: '#1890ff' // Light Blue Accent
     },
     date: {
         fontSize: 12,
@@ -103,21 +110,21 @@ const CertificateDocument: React.FC<CertificateProps> = ({ userName, courseName,
     return (
         <Document>
             <Page size="A4" orientation="landscape" style={styles.page}>
-                {/* Tech/Innovation Background - CRIMSON THEME */}
+                {/* Tech/Innovation Background - BLUE THEME */}
                 <View style={styles.background}>
                     <Svg width="100%" height="100%" viewBox="0 0 842 595">
                         <Defs>
                             <LinearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <Stop offset="0%" stopColor="#FFF0F5" />
-                                <Stop offset="100%" stopColor="#FFE4E1" />
+                                <Stop offset="0%" stopColor="#f0f5ff" />
+                                <Stop offset="100%" stopColor="#e6f7ff" />
                             </LinearGradient>
                         </Defs>
 
                         {/* Background Base Fill */}
                         <Path d="M0 0 H842 V595 H0 Z" fill="url(#grad1)" />
 
-                        {/* --- 1. HEXAGON MESH OVERLAY (Dark Red) --- */}
-                        <G stroke="#8B0000" strokeWidth="1" fill="none" opacity="0.4">
+                        {/* --- 1. HEXAGON MESH OVERLAY (Dark Blue) --- */}
+                        <G stroke="#003a8c" strokeWidth="1" fill="none" opacity="0.4">
                             <Path d="M50 50 L60 50 L65 58.6 L60 67.3 L50 67.3 L45 58.6 Z" />
                             <Path d="M65 58.6 L75 58.6 L80 67.3 L75 75.9 L65 75.9 L60 67.3 Z" />
                             <Path d="M80 67.3 L90 67.3 L95 75.9 L90 84.6 L80 84.6 L75 75.9 Z" />
@@ -129,49 +136,49 @@ const CertificateDocument: React.FC<CertificateProps> = ({ userName, courseName,
                             <Path d="M715 508.6 L725 508.6 L730 517.3 L725 525.9 L715 525.9 L710 517.3 Z" />
                         </G>
 
-                        {/* --- 2. CENTRAL HUD ELEMENT (Brown/Red Ring) --- */}
-                        <G stroke="#A52A2A" strokeWidth="2" opacity="0.3" fill="none">
+                        {/* --- 2. CENTRAL HUD ELEMENT (Cyber Blue Ring) --- */}
+                        <G stroke="#1890ff" strokeWidth="2" opacity="0.3" fill="none">
                             <Circle cx="421" cy="297.5" r="220" strokeWidth="1" />
                             <Circle cx="421" cy="297.5" r="200" strokeDasharray="15, 10" />
                             <Circle cx="421" cy="297.5" r="180" strokeWidth="3" />
                             <Path d="M421 117.5 V90 M421 477.5 V505 M221 297.5 H190 M601 297.5 H630" strokeWidth="4" opacity="0.8" />
                         </G>
 
-                        {/* --- 3. MAIN CIRCUIT TRACES (Dark Maroon - High Contrast) --- */}
-                        <G stroke="#800000" strokeWidth="2.5" fill="none" opacity="1.0">
+                        {/* --- 3. MAIN CIRCUIT TRACES (Deep Navy - High Contrast) --- */}
+                        <G stroke="#002766" strokeWidth="2.5" fill="none" opacity="1.0">
                             {/* Top Left Complex */}
                             <Path d="M0 60 H40 L60 80 H120 L140 100 H200" />
-                            <Circle cx="200" cy="100" r="5" fill="#800000" stroke="none" />
-                            <Circle cx="40" cy="60" r="4" fill="#800000" stroke="none" />
+                            <Circle cx="200" cy="100" r="5" fill="#002766" stroke="none" />
+                            <Circle cx="40" cy="60" r="4" fill="#002766" stroke="none" />
 
                             <Path d="M60 0 V30 L90 60 V100 L110 120 V150" />
-                            <Circle cx="110" cy="150" r="5" fill="#800000" stroke="none" />
+                            <Circle cx="110" cy="150" r="5" fill="#002766" stroke="none" />
 
                             {/* Bottom Right Complex */}
                             <Path d="M842 535 H800 L780 515 H720 L700 495 H640" />
-                            <Circle cx="640" cy="495" r="5" fill="#800000" stroke="none" />
+                            <Circle cx="640" cy="495" r="5" fill="#002766" stroke="none" />
 
                             <Path d="M782 595 V565 L752 535 V495 L732 475 V445" />
-                            <Circle cx="732" cy="445" r="5" fill="#800000" stroke="none" />
+                            <Circle cx="732" cy="445" r="5" fill="#002766" stroke="none" />
 
                             {/* Side Connectors */}
                             <Path d="M0 300 H50 L80 330" />
-                            <Circle cx="80" cy="330" r="5" fill="#800000" stroke="none" />
+                            <Circle cx="80" cy="330" r="5" fill="#002766" stroke="none" />
 
                             <Path d="M842 295 H792 L762 265" />
-                            <Circle cx="762" cy="265" r="5" fill="#800000" stroke="none" />
+                            <Circle cx="762" cy="265" r="5" fill="#002766" stroke="none" />
                         </G>
 
-                        {/* --- 4. DATA LINES & ACCENTS (Crimson Red) --- */}
-                        <G stroke="#DC143C" strokeWidth="2" strokeDasharray="6,4" opacity="0.9">
+                        {/* --- 4. DATA LINES & ACCENTS (Electric Blue) --- */}
+                        <G stroke="#40a9ff" strokeWidth="2" strokeDasharray="6,4" opacity="0.9">
                             <Path d="M200 100 L250 100 L270 120" />
                             <Path d="M640 495 L590 495 L570 475" />
                             <Path d="M110 150 V180" />
                             <Path d="M732 445 V415" />
                         </G>
 
-                        {/* --- 5. TECH CORNER FRAME (Darkest Red) --- */}
-                        <G stroke="#600000" strokeWidth="5" fill="none" strokeLinecap="square">
+                        {/* --- 5. TECH CORNER FRAME (Midnight Blue) --- */}
+                        <G stroke="#001529" strokeWidth="5" fill="none" strokeLinecap="square">
                             {/* Top Left */}
                             <Path d="M30 100 V30 H100" />
                             {/* Top Right */}
@@ -182,8 +189,8 @@ const CertificateDocument: React.FC<CertificateProps> = ({ userName, courseName,
                             <Path d="M100 565 H30 V495" />
                         </G>
 
-                        {/* --- 6. GLOWING NODES (Red Accent) --- */}
-                        <G fill="#FF0000">
+                        {/* --- 6. GLOWING NODES (Cyan Accent) --- */}
+                        <G fill="#bae7ff">
                             <Circle cx="30" cy="30" r="6" />
                             <Circle cx="812" cy="30" r="6" />
                             <Circle cx="812" cy="565" r="6" />
@@ -194,6 +201,7 @@ const CertificateDocument: React.FC<CertificateProps> = ({ userName, courseName,
 
                 {/* Content Layer */}
                 <View style={styles.border}>
+                    <Image style={styles.logo} src={logo} />
                     <Text style={styles.header}>Certificate of Completion</Text>
                     <Text style={styles.subHeader}>This is to certify that</Text>
 
