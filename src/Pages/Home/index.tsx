@@ -52,7 +52,7 @@ export default function Home() {
                     <Link to={'/DashboardQC'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <FactCheckIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>QC</span>
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Refurbish QC</span>
                         </Box>
                     </Link>
 
@@ -66,22 +66,28 @@ export default function Home() {
                     <Link to={'/QrCode'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <QrCodeIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>Qr Code</span>
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Refurbish Qr Code</span>
                         </Box>
                     </Link>
 
                     <Link to={'/DefectDashboard'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <SmsFailedIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
-                            <span style={{ marginLeft: '12px', color: '#333' }}>Defect</span>
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Refurbish Defect</span>
                         </Box>
                     </Link>
-                    <Link to={'/checkin'}>
+                    <Link to={'/NespressReceiveMachine'}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
+                            <SmsFailedIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <span style={{ marginLeft: '12px', color: '#333' }}>Nesspresso Machine Receive</span>
+                        </Box>
+                    </Link>
+                    {/* <Link to={'/checkin'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <Map sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Check in-out</span>
                         </Box>
-                    </Link>
+                    </Link> */}
 
                     <Link to={'/List'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
@@ -90,19 +96,19 @@ export default function Home() {
                         </Box>
                     </Link>
 
-                    <Link to={'/InventoryList'}>
+                    {/* <Link to={'/InventoryList'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <Inventory sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Inventory Counting</span>
                         </Box>
-                    </Link>
-
+                    </Link> */}
+{/* 
                     <Link to={'/MyDocument'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <UploadFileIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>My Document</span>
                         </Box>
-                    </Link>
+                    </Link> */}
 
                     <Link to={'/EquipmentDashboard'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
@@ -111,12 +117,12 @@ export default function Home() {
                         </Box>
                     </Link>
 
-                    <Link to={'/Chat'}>
+                    {/* <Link to={'/Chat'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <QuestionAnswerRoundedIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Chat</span>
                         </Box>
-                    </Link>
+                    </Link> */}
 
 
                     <Link to={'/DashboardQuiz'}>

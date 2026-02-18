@@ -1,8 +1,13 @@
-"use client";
-
-import React, { useEffect, useRef, useId } from "react";
-import { Box, Dialog, DialogContent, Typography } from "@mui/material";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import React, { useCallback } from "react";
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import { Close } from "@mui/icons-material";
+import { Scanner, IDetectedBarcode } from "@yudiel/react-qr-scanner";
 
 interface QRScannerProps {
   open: boolean;
@@ -11,88 +16,88 @@ interface QRScannerProps {
 }
 
 const QRScanner: React.FC<QRScannerProps> = ({ open, onClose, onScan }) => {
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
-  const readerId = useId();
-
-  useEffect(() => {
-    if (!open) {
-      if (scannerRef.current) {
-        scannerRef.current
-          .clear()
-          .catch((err) => console.error("Failed to clear scanner", err))
-          .finally(() => {
-            scannerRef.current = null;
-          });
+  const handleScan = useCallback(
+    (detectedCodes: IDetectedBarcode[]) => {
+      if (detectedCodes.length > 0) {
+        const value = detectedCodes[0].rawValue;
+        onScan(value);
       }
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      const element = document.getElementById(readerId);
-      if (!element) {
-        console.error("DIV reader ยังไม่ถูก render");
-        return;
-      }
-
-      const scanner = new Html5QrcodeScanner(
-        readerId,
-        { fps: 10, qrbox: 250 },
-        false
-      );
-      scannerRef.current = scanner;
-
-      scanner.render(
-        (decodedText) => {
-          onScan(decodedText);
-          scanner
-            .clear()
-            .then(() => {
-              scannerRef.current = null;
-              onClose();
-            })
-            .catch((err) => console.error("Failed to clear scanner", err));
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
-    }, 10); // 👈 Delay 10ms พอ (สำคัญมาก!)
-
-    return () => {
-      clearTimeout(timeout);
-      if (scannerRef.current) {
-        scannerRef.current
-          .clear()
-          .catch((err) =>
-            console.error("Failed to clear scanner on unmount", err)
-          )
-          .finally(() => {
-            scannerRef.current = null;
-          });
-      }
-    };
-  }, [open, onClose, onScan, readerId]);
+    },
+    [onScan]
+  );
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
-      <DialogContent>
-        <Box sx={{ borderRadius: "30px", height: "100%", width: "100%" }}>
-          <Typography
-            variant="h6"
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{
+        sx: {
+          borderRadius: "16px",
+          overflow: "hidden",
+        },
+      }}
+    >
+      <DialogContent sx={{ p: 0, position: "relative" }}>
+        {/* Header */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            px: 2,
+            py: 1.5,
+            backgroundColor: "#003264",
+            color: "#fff",
+          }}
+        >
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            สแกน QR Code
+          </Typography>
+          <IconButton size="small" onClick={onClose} sx={{ color: "#fff" }}>
+            <Close />
+          </IconButton>
+        </Box>
+
+        {/* Scanner */}
+        {open && (
+          <Box
             sx={{
-              mb: 2,
-              backgroundColor: "#ff4848ff",
-              color: "white",
-              p: 1,
-              borderRadius: "10px",
-              textAlign: "center",
+              width: "100%",
+              aspectRatio: "1 / 1",
+              overflow: "hidden",
+              "& video": {
+                objectFit: "cover",
+              },
             }}
           >
-            SCAN
-          </Typography>
+            <Scanner
+              onScan={handleScan}
+              onError={(error) => console.error("Scanner error:", error)}
+              constraints={{ facingMode: "environment" }}
+              components={{ finder: true, torch: true }}
+              styles={{
+                container: {
+                  width: "100%",
+                  height: "100%",
+                },
+                video: {
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                },
+              }}
+              sound={true}
+            />
+          </Box>
+        )}
 
-         
-          <div id={readerId} style={{ width: "100%" }} />
+        {/* Footer hint */}
+        <Box sx={{ textAlign: "center", py: 1.5, backgroundColor: "#f5f5f5" }}>
+          <Typography variant="caption" sx={{ color: "#888" }}>
+            วาง QR Code ให้อยู่ในกรอบ
+          </Typography>
         </Box>
       </DialogContent>
     </Dialog>
