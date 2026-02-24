@@ -107,6 +107,7 @@ export default function NespressReceiveMachine() {
   const [showScanner, setShowScanner] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<string | false>(false);
+  const [scanBuffer, setScanBuffer] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleAccordion = (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
@@ -114,15 +115,21 @@ export default function NespressReceiveMachine() {
   };
 
   const handleScan = useCallback((value: string) => {
+    console.log('--- handleScan TRIGGERED ---');
+    console.log('Raw value length:', value.length);
+    console.log('Raw value (first 50 chars):', value.substring(0, 50));
     try {
 
       const cleaned = value.replace(/[\r\n]+/g, '').trim();
+      console.log('Cleaned value length:', cleaned.length);
 
       // Parse to object first
       let rawParsed: any;
       try {
         rawParsed = JSON.parse(cleaned);
+        console.log('JSON Parse Success! Keys:', Object.keys(rawParsed));
       } catch (err) {
+        console.error('JSON Parse Failed. Cleaned string:', cleaned);
         throw new Error('Invalid JSON format');
       }
 
@@ -138,10 +145,13 @@ export default function NespressReceiveMachine() {
       };
 
       const parsed: NpsData = lowercaseKeys(rawParsed);
-      console.log('Parsed Payload:', parsed);
+      console.log('Lowercase Parsed Payload:', parsed);
 
       if (!parsed.id && rawParsed.ID) {
         parsed.id = rawParsed.ID;
+        console.log('Assigned id from ID:', parsed.id);
+      } else if (!parsed.id) {
+        console.log('WARNING: Parsed object does not have an id field!');
       }
 
       // ตรวจสอบซ้ำ
@@ -297,26 +307,71 @@ export default function NespressReceiveMachine() {
             autoFocus
             variant="outlined"
             placeholder="แตะที่นี่แล้วสแกนด้วย Handheld"
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val.trim().endsWith('}')) {
+            onPaste={(e) => {
+              // Catch paste events from Android scanners like DaiShin
+              e.preventDefault();
+              const pastedText = e.clipboardData.getData('text');
+              if (pastedText && inputRef.current) {
+                inputRef.current.value = pastedText;
                 try {
-                  JSON.parse(val.replace(/[\r\n]+/g, '').trim());
-                  // If JSON parse succeeds, it's a complete payload
-                  handleScan(val);
-                  e.target.value = '';
-                } catch {
-                  // Not complete or invalid JSON yet, do nothing
+                  const cleaned = pastedText.replace(/[\r\n]+/g, '').trim();
+                  if (cleaned.startsWith('{') && cleaned.endsWith('}')) {
+                    JSON.parse(cleaned); // Test valid JSON
+                    handleScan(cleaned);
+                    inputRef.current.value = ''; // Success
+                  }
+                } catch (err) {
+                  console.error("Paste Parse Error", err);
                 }
               }
             }}
+            onChange={(e) => {
+              const val = e.target.value;
+
+              // Clear previous timeouts if the scanner is still typing
+              if ((window as any).scanTimeout) {
+                clearTimeout((window as any).scanTimeout);
+              }
+
+              // DaiShin might type very fast or paste. Wait 300ms.
+              (window as any).scanTimeout = setTimeout(() => {
+                const finalVal = inputRef.current?.value || '';
+                if (finalVal.trim().length > 10) {
+                  try {
+                    const cleaned = finalVal.replace(/[\r\n]+/g, '').trim();
+                    if (cleaned.startsWith('{') && cleaned.endsWith('}')) {
+                      JSON.parse(cleaned);
+                      handleScan(cleaned);
+                      if (inputRef.current) inputRef.current.value = '';
+                    }
+                  } catch (err) {
+                    // Do nothing, maybe it's still typing.
+                  }
+                }
+              }, 300);
+            }}
             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
               if (e.key === 'Enter' || e.keyCode === 13) {
+                e.preventDefault();
+                if ((window as any).scanTimeout) {
+                  clearTimeout((window as any).scanTimeout);
+                }
                 const val = inputRef.current?.value || '';
                 if (val.trim()) {
-                  handleScan(val);
-                  if (inputRef.current) {
-                    inputRef.current.value = '';
+                  try {
+                    const cleaned = val.replace(/[\r\n]+/g, '').trim();
+                    JSON.parse(cleaned);
+                    handleScan(cleaned);
+                    if (inputRef.current) inputRef.current.value = '';
+                  } catch (err) {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'DaiShin Scanner วาง JSON ผิดรูปแบบ',
+                      html: `<div style="text-align:left; font-size:12px; max-height: 200px; overflow-y: auto;">
+                               <b>Raw:</b><br/>${val.replace(/</g, '&lt;').replace(/>/g, '&gt;')}
+                             </div>`,
+                    });
+                    if (inputRef.current) inputRef.current.value = '';
                   }
                 }
               }
