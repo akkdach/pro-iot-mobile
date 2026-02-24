@@ -1,9 +1,6 @@
 // Login.tsx
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { PublicClientApplication } from "@azure/msal-browser";
-import { MsalProvider, useMsal, useIsAuthenticated } from "@azure/msal-react";
-import { msalConfig, loginRequest } from "../../authConfig";
 import {
     Box,
     TextField,
@@ -29,7 +26,7 @@ interface LoginResponse {
     token: string;
 }
 
-const msalInstance = new PublicClientApplication(msalConfig);
+
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);

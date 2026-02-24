@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Accordion,
   AccordionDetails,
@@ -13,6 +13,7 @@ import {
   Grid,
   IconButton,
   Typography,
+  TextField,
 } from '@mui/material';
 import {
   QrCode2,
@@ -35,40 +36,32 @@ import Swal from 'sweetalert2';
 import callApi from '../../Services/callApi';
 
 export interface NpsData {
-  ID: string | null;
-  ServiceObject: string | null;
-  Model: string | null;
-  ModelDescription: string | null;
-  CustomerCode: string | null;
-  Customer: string | null;
-  Ticket: string | null;
-  BKK: string | null;
-  PostCode: string | null;
-  RemoveDate: string | null;
-  RemoveTechnician: string | null;
-  CreateServiceOrderDate: string | null;
-  CreateServiceOrderBy: string | null;
-  TradeCode: string | null;
-  TradeName: string | null;
+  id: string | null;
+  serviceObject: string | null;
+  model: string | null;
+  modelDescription: string | null;
+  customerCode: string | null;
+  customer: string | null;
+  ticket: string | null;
+  bkk: string | null;
+  postCode: string | null;
+  province: string | null;
+  removeDate: string | null;
+  removeTechnician: string | null;
+  createServiceOrderStatus: string | null;
+  createServiceOrderDate: string | null;
+  createServiceOrderBy: string | null;
+  bpc_maintenanceactivitytypecode: string | null;
+  bpc_notifdate: string | null;
+  bpc_notiftime: string | null;
+  bpc_serviceordertypecode: string | null;
+  custaccount: string | null;
+  stageid: string | null;
+  bpc_serviceobjectgroup: string | null;
+  start_schedule: string | null;
+  finish_schedule: string | null;
+  receive: string | null;
 }
-
-const emptyForm: NpsData = {
-  ID: null,
-  ServiceObject: null,
-  Model: null,
-  ModelDescription: null,
-  CustomerCode: null,
-  Customer: null,
-  Ticket: null,
-  BKK: null,
-  PostCode: null,
-  RemoveDate: null,
-  RemoveTechnician: null,
-  CreateServiceOrderDate: null,
-  CreateServiceOrderBy: null,
-  TradeCode: null,
-  TradeName: null,
-};
 
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '-';
@@ -114,38 +107,73 @@ export default function NespressReceiveMachine() {
   const [showScanner, setShowScanner] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [expanded, setExpanded] = useState<string | false>(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleAccordion = (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  const handleScan = (value: string) => {
+  const handleScan = useCallback((value: string) => {
     try {
+
       const cleaned = value.replace(/[\r\n]+/g, '').trim();
-      const parsed: NpsData = JSON.parse(cleaned);
-      console.log(parsed);
+
+      // Parse to object first
+      let rawParsed: any;
+      try {
+        rawParsed = JSON.parse(cleaned);
+      } catch (err) {
+        throw new Error('Invalid JSON format');
+      }
+
+      // Helper function to lowercase all keys in an object
+      const lowercaseKeys = (obj: any): any => {
+        if (typeof obj !== 'object' || obj === null) return obj;
+        if (Array.isArray(obj)) return obj.map(lowercaseKeys);
+        return Object.keys(obj).reduce((acc, key) => {
+          const lowerKey = key.toLowerCase();
+          acc[lowerKey] = obj[key];
+          return acc;
+        }, {} as any);
+      };
+
+      const parsed: NpsData = lowercaseKeys(rawParsed);
+      console.log('Parsed Payload:', parsed);
+
+      if (!parsed.id && rawParsed.ID) {
+        parsed.id = rawParsed.ID;
+      }
 
       // ตรวจสอบซ้ำ
-      const isDuplicate = items.some((item) => item.ID === parsed.ID);
+      const isDuplicate = items.some((item) => item.id === parsed.id);
       if (isDuplicate) {
-        Swal.fire({ icon: 'warning', title: 'ข้อมูลซ้ำ', text: `ID: ${parsed.ID} ถูกสแกนไปแล้ว` });
+        Swal.fire({ icon: 'warning', title: 'ข้อมูลซ้ำ', text: `ID: ${parsed.id} ถูกสแกนไปแล้ว` });
         return;
       }
 
       setItems((prev) => [...prev, parsed]);
-      setExpanded(`panel-${parsed.ID}`);
+      setExpanded(`panel-${parsed.id}`);
+
+      // Refocus the input after successful scan
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     } catch (err) {
       console.error('QR Parse Error:', err);
       Swal.fire({
         icon: 'error',
         title: 'QR Code ไม่ถูกต้อง',
-        text: 'ไม่สามารถอ่านข้อมูลจาก QR Code ได้ กรุณาลองใหม่อีกครั้ง',
+        text: 'ไม่สามารถอ่านข้อมูลจาก QR Code ได้ หรือไม่ได้เป็นรูปแบบที่รองรับ',
+      }).then(() => {
+        inputRef.current?.focus();
       });
     }
-  };
+  }, [items]);
+
+  // We no longer need the global useEffect keydown listner since we use a dedicated input fields
 
   const handleRemoveItem = (id: string | null) => {
-    setItems((prev) => prev.filter((item) => item.ID !== id));
+    setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleReset = () => {
@@ -186,13 +214,13 @@ export default function NespressReceiveMachine() {
             successCount++;
           } else {
             failCount++;
-            failedIds.push(item.ID || 'N/A');
-            failMessages.push(`${item.ID || 'N/A'}: ${res.data.message || 'ไม่ทราบสาเหตุ'}`);
+            failedIds.push(item.id || 'N/A');
+            failMessages.push(`${item.id || 'N/A'}: ${res.data.message || 'ไม่ทราบสาเหตุ'}`);
           }
         } catch (err: any) {
           failCount++;
-          failedIds.push(item.ID || 'N/A');
-          failMessages.push(`${item.ID || 'N/A'}: ${err?.response?.data?.message || err?.message || 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'}`);
+          failedIds.push(item.id || 'N/A');
+          failMessages.push(`${item.id || 'N/A'}: ${err?.response?.data?.message || err?.message || 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'}`);
         }
       }
 
@@ -206,7 +234,7 @@ export default function NespressReceiveMachine() {
           html: `สำเร็จ ${successCount} รายการ<br/>ไม่สำเร็จ ${failCount} รายการ<br/><br/>${failMessages.map((m) => `<div style="text-align:left;font-size:13px;margin-bottom:4px;">• ${m}</div>`).join('')}`,
         });
         // เก็บเฉพาะ item ที่ fail ไว้
-        setItems((prev) => prev.filter((item) => failedIds.includes(item.ID || 'N/A')));
+        setItems((prev) => prev.filter((item) => failedIds.includes(item.id || 'N/A')));
       }
     } catch (error: any) {
       console.error('Error Save NPS:', error);
@@ -261,6 +289,51 @@ export default function NespressReceiveMachine() {
           </Box>
         </Box>
 
+        {/* Handheld Scanner Input */}
+        <Box sx={{ width: '100%', maxWidth: 420, mb: 2 }}>
+          <TextField
+            inputRef={inputRef}
+            fullWidth
+            autoFocus
+            variant="outlined"
+            placeholder="แตะที่นี่แล้วสแกนด้วย Handheld"
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val.trim().endsWith('}')) {
+                try {
+                  JSON.parse(val.replace(/[\r\n]+/g, '').trim());
+                  // If JSON parse succeeds, it's a complete payload
+                  handleScan(val);
+                  e.target.value = '';
+                } catch {
+                  // Not complete or invalid JSON yet, do nothing
+                }
+              }
+            }}
+            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+              if (e.key === 'Enter' || e.keyCode === 13) {
+                const val = inputRef.current?.value || '';
+                if (val.trim()) {
+                  handleScan(val);
+                  if (inputRef.current) {
+                    inputRef.current.value = '';
+                  }
+                }
+              }
+            }}
+            sx={{
+              backgroundColor: '#fff',
+              borderRadius: 2,
+              '& input': {
+                textAlign: 'center',
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#003264'
+              }
+            }}
+          />
+        </Box>
+
         {/* Empty State */}
         {items.length === 0 && (
           <Card
@@ -280,7 +353,7 @@ export default function NespressReceiveMachine() {
                 เริ่มสแกน QR Code
               </Typography>
               <Typography variant="body2" sx={{ color: '#aaa' }}>
-                กดปุ่ม "สแกนเพิ่ม" เพื่อสแกนบาร์โค้ดรับเครื่อง
+                ใช้เครื่องสแกนบาร์โค้ด (Handheld Scanner) ยิงได้ทันที หรือกดปุ่ม "สแกนเพิ่ม" เพื่อใช้กล้อง
               </Typography>
             </CardContent>
           </Card>
@@ -291,9 +364,9 @@ export default function NespressReceiveMachine() {
           <Box sx={{ width: '100%', maxWidth: 420 }}>
             {items.map((item, index) => (
               <Accordion
-                key={item.ID || index}
-                expanded={expanded === `panel-${item.ID}`}
-                onChange={handleAccordion(`panel-${item.ID}`)}
+                key={item.id || index}
+                expanded={expanded === `panel-${item.id}`}
+                onChange={handleAccordion(`panel-${item.id}`)}
                 sx={{
                   mb: 1.5,
                   borderRadius: '12px !important',
@@ -313,7 +386,7 @@ export default function NespressReceiveMachine() {
                     {/* Ticket - เด่น */}
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                       <Chip
-                        label={`#${item.Ticket || '-'}`}
+                        label={`#${item.ticket || '-'}`}
                         size="small"
                         sx={{
                           backgroundColor: '#003264',
@@ -323,7 +396,7 @@ export default function NespressReceiveMachine() {
                         }}
                       />
                       <Chip
-                        label={item.TradeName || 'N/A'}
+                        label={item.createServiceOrderStatus || 'N/A'}
                         size="small"
                         variant="outlined"
                         sx={{ fontWeight: 600, fontSize: 11, borderColor: '#003264', color: '#003264' }}
@@ -331,10 +404,10 @@ export default function NespressReceiveMachine() {
                     </Box>
                     {/* ServiceObject - เด่น */}
                     <Typography variant="body1" sx={{ fontWeight: 700, color: '#003264', lineHeight: 1.3 }}>
-                      {item.ServiceObject || item.ID || '-'}
+                      {item.serviceObject || item.id || '-'}
                     </Typography>
                     <Typography variant="caption" sx={{ color: '#888' }}>
-                      {item.ModelDescription || item.Model || '-'}
+                      {item.modelDescription || item.model || '-'}
                     </Typography>
                   </Box>
                   {/* Delete button */}
@@ -342,7 +415,7 @@ export default function NespressReceiveMachine() {
                     size="small"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleRemoveItem(item.ID);
+                      handleRemoveItem(item.id);
                     }}
                     sx={{ color: '#e53935', ml: 1 }}
                   >
@@ -357,14 +430,14 @@ export default function NespressReceiveMachine() {
                   <Typography variant="caption" sx={{ color: '#003264', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                     ข้อมูลลูกค้า
                   </Typography>
-                  <InfoRow icon={<Person fontSize="small" />} label="Customer" value={item.Customer} />
-                  <InfoRow icon={<ConfirmationNumber fontSize="small" />} label="Customer Code" value={item.CustomerCode} />
+                  <InfoRow icon={<Person fontSize="small" />} label="Customer" value={item.customer} />
+                  <InfoRow icon={<ConfirmationNumber fontSize="small" />} label="Customer Code" value={item.customerCode} />
                   <Grid container spacing={1}>
                     <Grid size={6}>
-                      <InfoRow icon={<LocationOn fontSize="small" />} label="BKK" value={item.BKK} />
+                      <InfoRow icon={<LocationOn fontSize="small" />} label="BKK" value={item.bkk} />
                     </Grid>
                     <Grid size={6}>
-                      <InfoRow icon={<LocationOn fontSize="small" />} label="Post Code" value={item.PostCode} />
+                      <InfoRow icon={<LocationOn fontSize="small" />} label="Post Code" value={item.postCode} />
                     </Grid>
                   </Grid>
 
@@ -374,8 +447,8 @@ export default function NespressReceiveMachine() {
                   <Typography variant="caption" sx={{ color: '#003264', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                     ข้อมูลการถอด
                   </Typography>
-                  <InfoRow icon={<CalendarMonth fontSize="small" />} label="Remove Date" value={formatDate(item.RemoveDate)} />
-                  <InfoRow icon={<Build fontSize="small" />} label="Remove Technician" value={item.RemoveTechnician} />
+                  <InfoRow icon={<CalendarMonth fontSize="small" />} label="Remove Date" value={formatDate(item.removeDate)} />
+                  <InfoRow icon={<Build fontSize="small" />} label="Remove Technician" value={item.removeTechnician} />
 
                   <Divider sx={{ my: 1 }} />
 
@@ -383,18 +456,18 @@ export default function NespressReceiveMachine() {
                   <Typography variant="caption" sx={{ color: '#003264', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                     Service Order
                   </Typography>
-                  <InfoRow icon={<CalendarMonth fontSize="small" />} label="Created Date" value={formatDate(item.CreateServiceOrderDate)} />
-                  <InfoRow icon={<Person fontSize="small" />} label="Created By" value={item.CreateServiceOrderBy} />
+                  <InfoRow icon={<CalendarMonth fontSize="small" />} label="Created Date" value={formatDate(item.createServiceOrderDate)} />
+                  <InfoRow icon={<Person fontSize="small" />} label="Created By" value={item.createServiceOrderBy} />
 
                   <Divider sx={{ my: 1 }} />
 
-                  {/* Trade */}
+                  {/* Additional Info */}
                   <Grid container spacing={1}>
                     <Grid size={6}>
-                      <InfoRow icon={<Store fontSize="small" />} label="Trade Code" value={item.TradeCode} />
+                      <InfoRow icon={<Store fontSize="small" />} label="Activity" value={item.bpc_maintenanceactivitytypecode} />
                     </Grid>
                     <Grid size={6}>
-                      <InfoRow icon={<Store fontSize="small" />} label="Trade Name" value={item.TradeName} />
+                      <InfoRow icon={<Store fontSize="small" />} label="Status" value={item.createServiceOrderStatus} />
                     </Grid>
                   </Grid>
                 </AccordionDetails>
