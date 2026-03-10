@@ -1079,11 +1079,18 @@ export default function WorkStation() {
                     }
                   },
                 },
+
+                {
+                  label: "Check List",
+                  from: "#5981b6ff",
+                  to: "#5981b6ff",
+                  onClick: checkListWork,
+                },
                 {
                   label: "Completed",
                   from: "#9b59b6",
                   to: "#8e44ad",
-                  onClick: checkListWork,
+                  onClick: completed,
                 },
                 {
                   label: "Completed.",

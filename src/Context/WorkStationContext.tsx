@@ -287,8 +287,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const checkListWork = async () => {
-    console.log("work is check list");
+  const completed = async () => {
+    console.log("work is completed");
     if (!work?.orderid) return;
 
     const pick = await Swal.fire({
@@ -497,8 +497,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const completed = async () => {
-    console.log("work is completed");
+  const checkListWork = async () => {
+    console.log("work is Check List");
 
     const CompletedOptions: Record<string, string> = {
       completed: "Completed",
