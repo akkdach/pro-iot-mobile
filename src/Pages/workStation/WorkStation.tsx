@@ -62,6 +62,7 @@ import { RemarkField } from "../../Utility/RemarkField";
 import EmployeeMultiSelectModal, { Employee } from "../../Utility/EmployeeSelect";
 import WorkerRows from "../../Utility/WorkerRows";
 import { CloseWorkMaster } from "../../Utility/CloseWorkMaster";
+import StationChecklist from "./StationChecklist";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -127,6 +128,7 @@ export default function WorkStation() {
     checkList,
     setCheckList,
     qcReturnWork,
+    submitChecklist,
   } = useWork();
   const location = useLocation();
   const row = location.state;
@@ -161,6 +163,7 @@ export default function WorkStation() {
 
   const [openEmpModal, setOpenEmpModal] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
+  const [openChecklist, setOpenChecklist] = useState(false);
 
   const [getWorker, setGetWorker] = useState<any>([]);
 
@@ -1084,7 +1087,7 @@ export default function WorkStation() {
                   label: "Check List",
                   from: "#5981b6ff",
                   to: "#5981b6ff",
-                  onClick: checkListWork,
+                  onClick: () => setOpenChecklist(true),
                 },
                 {
                   label: "Completed",
@@ -1475,6 +1478,48 @@ export default function WorkStation() {
           }}
         />
 
+
+        {/* Station Checklist Dialog */}
+        <Dialog
+          open={openChecklist}
+          onClose={() => setOpenChecklist(false)}
+          fullWidth
+          maxWidth="sm"
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              maxHeight: "90vh",
+            },
+          }}
+        >
+          <DialogTitle
+            sx={{
+              fontWeight: 800,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              borderBottom: "1px solid #E2E8F0",
+            }}
+          >
+            Checklist
+            <Button onClick={() => setOpenChecklist(false)} color="inherit">
+              ✕
+            </Button>
+          </DialogTitle>
+          <DialogContent sx={{ p: 0 }}>
+            <Box sx={{ p: 2 }}>
+              <StationChecklist
+                stationCode={String(row?.current_operation ?? "")}
+                orderId={orderId}
+                onSave={async (values) => {
+                  setOpenChecklist(false);
+                  const stationCode = String(row?.current_operation ?? "");
+                  await submitChecklist(stationCode, values);
+                }}
+              />
+            </Box>
+          </DialogContent>
+        </Dialog>
 
         <EmployeeMultiSelectModal
           open={openEmpModal}
