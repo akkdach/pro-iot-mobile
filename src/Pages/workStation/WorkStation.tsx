@@ -529,6 +529,7 @@ export default function WorkStation() {
       await callApi.post(`/WorkOrderList/Employee/${work?.orderid}/${work?.current_operation}`, payload);
 
       await startWork();
+      await onLoad4();
     } catch (err) {
       console.log(err);
       setIsWorking(false);
@@ -1100,6 +1101,12 @@ export default function WorkStation() {
                         body: JSON.stringify({
                           station: String(row?.current_operation ?? ""),
                           orderId: orderId ?? "",
+                          updatedBy: (() => {
+                            try {
+                              const p = localStorage.getItem("profile");
+                              return p ? JSON.parse(p).employee_id ?? "unknown" : "unknown";
+                            } catch { return "unknown"; }
+                          })(),
                         }),
                       });
                       const data = await res.json();
