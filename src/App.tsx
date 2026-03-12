@@ -46,9 +46,25 @@ import DefectDashboard from './Pages/Defect/DefectDashboard';
 import DetailEachOrder from './Pages/Defect/DetailEachOrder';
 import QuizQuest from './Pages/Quiz/QuizQuest';
 import DashboardQuiz from './Pages/Quiz/DashboardQuiz';
+import ChecklistEmbed from './Pages/workStation/ChecklistEmbed';
 
 const token = localStorage.getItem('token');
+
+// ── ตรวจว่ากำลังอยู่ใน embed mode หรือเปล่า ──
+const isEmbedRoute = window.location.pathname.startsWith('/checklist/embed');
+
 function App() {
+  // ── Embed mode: render เฉพาะ ChecklistEmbed โดยไม่มี Layout / auth ──
+  if (isEmbedRoute) {
+    return (
+      <div className="App">
+        <Routes>
+          <Route path="/checklist/embed" element={<ChecklistEmbed />} />
+        </Routes>
+      </div>
+    );
+  }
+
   return (
     <div className="App">
 

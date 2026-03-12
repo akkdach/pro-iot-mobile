@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Box,
     Typography,
@@ -13,18 +13,42 @@ import {
     Chip,
     Radio,
     RadioGroup,
+    CircularProgress,
 } from "@mui/material";
 import SaveIcon from "@mui/icons-material/Save";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import axios from "axios";
+import Swal from "sweetalert2";
+// ── (เก่า) import config hardcode ── ยังเก็บไว้เป็น fallback ──
 import stationChecklistConfig, {
     ChecklistItem,
+    StationChecklistGroup,
 } from "./stationChecklistConfig";
+
+// ── Checklist API (backend แยก) ──
+const checklistApi = axios.create({
+    baseURL: "http://localhost:5174/api/v1/checklist",
+    headers: { "Content-Type": "application/json" },
+    timeout: 0,
+});
 
 interface StationChecklistProps {
     stationCode: string;
     orderId?: string;
     onSave?: (payload: Record<string, string | boolean>) => void;
 }
+
+// ── Map ชื่อ Station สำหรับ header ──
+const stationTitleMap: Record<string, string> = {
+    "0010": "Inspector",
+    "0020": "Remove Part",
+    "0030": "Clean",
+    "0040": "Color",
+    "0050": "Fix Cooling",
+    "0060": "Assembly Part",
+    "0070": "Test",
+    "0080": "QC Packing",
+};
 
 export default function StationChecklist({
     stationCode,
@@ -34,14 +58,77 @@ export default function StationChecklist({
     // normalize station code → 4 digits
     const normalized = stationCode?.toString().padStart(4, "0") ?? "";
 
-    // find config for this station
-    const config = useMemo(
-        () => stationChecklistConfig.find((c) => c.station === normalized),
-        [normalized]
-    );
+    // ── (เก่า) ดึง config จาก hardcode file ──
+    // const config = useMemo(
+    //     () => stationChecklistConfig.find((c) => c.station === normalized),
+    //     [normalized]
+    // );
+
+    // ── (ใหม่) ดึง config จาก API ── fallback เป็น hardcode ──
+    const [config, setConfig] = useState<StationChecklistGroup | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        const fetchConfig = async () => {
+            setLoading(true);
+            try {
+                // ── เรียก API: GET /master/grouped/:station ──
+                const res = await checklistApi.get(`/master/grouped/${normalized}`);
+                const apiData = res.data;
+
+                if (!cancelled && apiData?.categories) {
+                    // map field names: API (itemId, inputType) → frontend (id, type)
+                    const mapped: StationChecklistGroup = {
+                        station: apiData.station ?? normalized,
+                        title: apiData.title ?? stationTitleMap[normalized] ?? normalized,
+                        categories: apiData.categories.map((cat: any) => ({
+                            name: cat.name,
+                            items: cat.items.map((item: any) => ({
+                                id: item.itemId ?? item.id,
+                                label: item.label,
+                                type: item.inputType ?? item.type,
+                                unit: item.unit ?? undefined,
+                                options: item.options
+                                    ? (typeof item.options === "string"
+                                        ? JSON.parse(item.options)
+                                        : item.options)
+                                    : undefined,
+                            })),
+                        })),
+                    };
+                    setConfig(mapped);
+                }
+            } catch (err) {
+                console.warn("⚠️ Checklist API ไม่พร้อม — ใช้ local config แทน", err);
+                // ── Fallback: ใช้ hardcode config เดิม ──
+                if (!cancelled) {
+                    const fallback = stationChecklistConfig.find(
+                        (c) => c.station === normalized
+                    );
+                    setConfig(fallback ?? null);
+                }
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        };
+        fetchConfig();
+        return () => { cancelled = true; };
+    }, [normalized]);
 
     // local state: { "INS-01": true, "FIX-02": "150", ... }
     const [values, setValues] = useState<Record<string, string | boolean>>({});
+
+    if (loading) {
+        return (
+            <Box sx={{ p: 4, textAlign: "center" }}>
+                <CircularProgress size={32} />
+                <Typography sx={{ mt: 1 }} color="text.secondary">
+                    กำลังโหลด Checklist...
+                </Typography>
+            </Box>
+        );
+    }
 
     if (!config) {
         return (
@@ -80,17 +167,32 @@ export default function StationChecklist({
         );
     }, 0);
 
-    const handleSave = () => {
-        const payload = {
-            station: normalized,
-            orderId: orderId ?? "",
-            items: values,
-            timestamp: new Date().toISOString(),
-        };
-        console.log("📋 Checklist Payload:", payload);
+    const handleSave = async () => {
+        // ── แปลง values → items[] ตาม API format ──
+        const items = Object.entries(values).map(([itemId, value]) => ({
+            itemId,
+            value: String(value),
+        }));
 
-        if (onSave) {
-            onSave(values);
+        if (items.length === 0) return;
+
+        try {
+            const res = await checklistApi.post("/data/bulk", {
+                orderId: orderId ?? "",
+                station: normalized,
+                items,
+                updatedBy: localStorage.getItem("profile")
+                    ? JSON.parse(localStorage.getItem("profile")!).employee_id ?? "unknown"
+                    : "unknown",
+            });
+
+            console.log("📋 Checklist saved:", res.data);
+
+            if (onSave) {
+                onSave(values);
+            }
+        } catch (err: any) {
+            console.error("❌ Checklist save error:", err);
         }
     };
 
@@ -380,7 +482,7 @@ export default function StationChecklist({
                         },
                     }}
                 >
-                    บันทึก Checklist
+                    บันทึก Checklist ttt
                 </Button>
             </Box>
         </Box>

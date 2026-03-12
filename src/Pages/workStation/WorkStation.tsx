@@ -19,6 +19,7 @@ import {
   Tab,
   Tabs,
   Chip,
+  CircularProgress,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import List from "@mui/material/List";
@@ -164,6 +165,8 @@ export default function WorkStation() {
   const [openEmpModal, setOpenEmpModal] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
   const [openChecklist, setOpenChecklist] = useState(false);
+  const [checklistToken, setChecklistToken] = useState<string | null>(null);
+  const [checklistLoading, setChecklistLoading] = useState(false);
 
   const [getWorker, setGetWorker] = useState<any>([]);
 
@@ -1087,7 +1090,26 @@ export default function WorkStation() {
                   label: "Check List",
                   from: "#5981b6ff",
                   to: "#5981b6ff",
-                  onClick: () => setOpenChecklist(true),
+                  onClick: async () => {
+                    setChecklistLoading(true);
+                    try {
+                      const res = await fetch("http://localhost:5174/api/v1/checklist/token", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          station: String(row?.current_operation ?? ""),
+                          orderId: orderId ?? "",
+                        }),
+                      });
+                      const data = await res.json();
+                      setChecklistToken(data.token);
+                      setOpenChecklist(true);
+                    } catch (err) {
+                      console.error("❌ Failed to get checklist token:", err);
+                    } finally {
+                      setChecklistLoading(false);
+                    }
+                  },
                 },
                 {
                   label: "Completed",
@@ -1479,12 +1501,12 @@ export default function WorkStation() {
         />
 
 
-        {/* Station Checklist Dialog */}
+        {/* Station Checklist Dialog (iframe embed) */}
         <Dialog
           open={openChecklist}
           onClose={() => setOpenChecklist(false)}
           fullWidth
-          maxWidth="sm"
+          maxWidth={normalizedOp === "0010" ? "sm" : "lg"}
           PaperProps={{
             sx: {
               borderRadius: 3,
@@ -1492,32 +1514,62 @@ export default function WorkStation() {
             },
           }}
         >
-          <DialogTitle
+          <Button
+            onClick={() => setOpenChecklist(false)}
+            color="inherit"
             sx={{
-              fontWeight: 800,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              borderBottom: "1px solid #E2E8F0",
+              position: "absolute",
+              right: 8,
+              top: 8,
+              minWidth: 36,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              fontSize: "1.2rem",
+              zIndex: 1,
+              color: "#64748B",
+              "&:hover": { backgroundColor: "rgba(0,0,0,0.08)" },
             }}
           >
-            Checklist
-            <Button onClick={() => setOpenChecklist(false)} color="inherit">
-              ✕
-            </Button>
-          </DialogTitle>
+            ✕
+          </Button>
           <DialogContent sx={{ p: 0 }}>
-            <Box sx={{ p: 2 }}>
-              <StationChecklist
-                stationCode={String(row?.current_operation ?? "")}
-                orderId={orderId}
-                onSave={async (values) => {
-                  setOpenChecklist(false);
-                  const stationCode = String(row?.current_operation ?? "");
-                  await submitChecklist(stationCode, values);
-                }}
-              />
-            </Box>
+            {checklistToken ? (
+              normalizedOp === "0010" ? (
+                /* Inspector — แสดงแค่ iframe checklist อย่างเดียว */
+                <iframe
+                  src={`http://localhost:5174/checklist/embed?token=${encodeURIComponent(checklistToken)}`}
+                  width="100%"
+                  height="600px"
+                  style={{ border: "none" }}
+                  title="Station Checklist"
+                />
+              ) : (
+                /* Station อื่น — แสดง 2 iframe คู่กัน */
+                <Box sx={{ display: "flex", width: "100%", height: "600px" }}>
+                  {/* งานจาก Inspector (read-only) */}
+                  <iframe
+                    src={`http://localhost:5174/checklist/embed-work?token=${encodeURIComponent(checklistToken)}`}
+                    width="50%"
+                    height="100%"
+                    style={{ border: "none", borderRight: "1px solid #E2E8F0" }}
+                    title="Inspector Work"
+                  />
+                  {/* Checklist กรอกงาน */}
+                  <iframe
+                    src={`http://localhost:5174/checklist/embed?token=${encodeURIComponent(checklistToken)}`}
+                    width="50%"
+                    height="100%"
+                    style={{ border: "none" }}
+                    title="Station Checklist"
+                  />
+                </Box>
+              )
+            ) : (
+              <Box sx={{ p: 4, textAlign: "center" }}>
+                <CircularProgress size={32} />
+              </Box>
+            )}
           </DialogContent>
         </Dialog>
 

@@ -17,6 +17,17 @@ export interface StationChecklistGroup {
         items: ChecklistItem[];
     }[];
 }
+// ─── ข้อมูล config ย้ายไปอยู่ใน Database (Prisma) แล้ว ───
+// ─── ดึงผ่าน API: GET /Checklist/master/grouped/:station ───
+// ─── เก็บ hardcode ไว้เป็น reference ด้านล่าง (comment) ───
+
+const stationChecklistConfig: StationChecklistGroup[] = [];
+
+export default stationChecklistConfig;
+
+/*  ════════════════════════════════════════════════════════════
+    HARDCODE CONFIG (เก็บไว้เป็น reference — อย่าลบ)
+    ════════════════════════════════════════════════════════════
 
 const stationChecklistConfig: StationChecklistGroup[] = [
     // ─── Station 1: Inspector (0010) ───
@@ -252,4 +263,4 @@ const stationChecklistConfig: StationChecklistGroup[] = [
     },
 ];
 
-export default stationChecklistConfig;
+════════════════════════════════════════════════════════════ */
