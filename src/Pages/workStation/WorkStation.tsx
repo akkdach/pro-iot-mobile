@@ -1090,6 +1090,7 @@ export default function WorkStation() {
                   label: "Check List",
                   from: "#5981b6ff",
                   to: "#5981b6ff",
+                  hide: !["0010", "0030", "0070"].includes(normalizedOp ?? ""),
                   onClick: async () => {
                     setChecklistLoading(true);
                     try {
