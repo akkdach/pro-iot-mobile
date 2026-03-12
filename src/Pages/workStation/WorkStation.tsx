@@ -1536,9 +1536,9 @@ export default function WorkStation() {
           <DialogContent sx={{ p: 0 }}>
             {checklistToken ? (
               normalizedOp === "0010" ? (
-                /* Inspector — แสดงแค่ iframe checklist อย่างเดียว */
+                /* Inspector — ติ๊กเปลี่ยน/ล้าง */
                 <iframe
-                  src={`http://localhost:5174/checklist/embed?token=${encodeURIComponent(checklistToken)}`}
+                  src={`http://localhost:5174/checklist/embed-inspector?token=${encodeURIComponent(checklistToken)}`}
                   width="100%"
                   height="600px"
                   style={{ border: "none" }}

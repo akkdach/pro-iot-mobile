@@ -175,7 +175,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       const data = res.data;
-      // console.log("Start Work : ", res);
+      console.log("🔍 StartWork dataResult:", JSON.stringify(data.dataResult));
       if (!data.isSuccess) {
         await Swal.fire({
           title: "Failed",
