@@ -93,7 +93,7 @@ function App() {
           <Route path="ActionPage" element={<ActionPage />}></Route>
           <Route path="SparePart" element={<SparePart />}></Route>
           <Route path="TestContextPage" element={<TestContextPage />}></Route>
-          <Route path="TableSparePart" element={<TableSparePart />}></Route>
+          <Route path="TableSparePart/:orderId" element={<TableSparePart />}></Route>
           <Route path="StockReport" element={<StockReport />}></Route>
           <Route path="StockReportItem/:resId" element={<StockReportItem />}></Route>
           <Route path="AddSpareFromStock" element={<AddSpareFromStock />}></Route>
