@@ -13,6 +13,7 @@ import SafetyCheckIcon from '@mui/icons-material/SafetyCheck';
 import QrCodeIcon from '@mui/icons-material/QrCode';
 import SmsFailedIcon from '@mui/icons-material/SmsFailed';
 import QuizIcon from '@mui/icons-material/Quiz';
+import CoffeeMakerIcon from '@mui/icons-material/CoffeeMaker';
 
 export default function Home() {
 
@@ -78,7 +79,7 @@ export default function Home() {
                     </Link>
                     <Link to={'/NespressReceiveMachine'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
-                            <SmsFailedIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
+                            <CoffeeMakerIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />
                             <span style={{ marginLeft: '12px', color: '#333' }}>Nesspresso Machine Receive</span>
                         </Box>
                     </Link>
@@ -102,7 +103,7 @@ export default function Home() {
                             <span style={{ marginLeft: '12px', color: '#333' }}>Inventory Counting</span>
                         </Box>
                     </Link> */}
-{/* 
+                    {/* 
                     <Link to={'/MyDocument'}>
                         <Box sx={{ display: 'flex', alignItems: 'center', borderRadius: 2, justifyContent: 'left', width: '95%', padding: '10px 0px 10px 0px', margin: 'auto', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', marginBottom: '10px' }}>
                             <UploadFileIcon sx={{ marginLeft: '10px', fontSize: 32, color: '#003264' }} />

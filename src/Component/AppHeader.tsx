@@ -14,7 +14,11 @@ export default function AppHearder({ title, icon, onBack }: IotHeaderProps) {
   const navigate = useNavigate();
 
   return (
-    <AppBar position="fixed" elevation={1} sx={{ backgroundColor: '#003264' }}>
+    <AppBar position="fixed" elevation={0} sx={{
+      background: 'linear-gradient(135deg, #003264 0%, #004a93 100%)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+      boxShadow: '0 2px 16px rgba(0, 50, 100, 0.25)',
+    }}>
       <Toolbar>
         <IconButton
           edge="start"

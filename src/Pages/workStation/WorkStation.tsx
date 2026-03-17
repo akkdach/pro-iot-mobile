@@ -1137,7 +1137,7 @@ export default function WorkStation() {
                   onClick={async () => {
                     setChecklistLoading(true);
                     try {
-                      const res = await fetch("http://localhost:5174/api/v1/checklist/token", {
+                      const res = await fetch(`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/api/v1/checklist/token`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -1631,7 +1631,7 @@ export default function WorkStation() {
               normalizedOp === "0010" ? (
                 /* Inspector — ติ๊กเปลี่ยน/ล้าง */
                 <iframe
-                  src={`http://localhost:5174/checklist/embed-inspector?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(normalizedOp ?? "")}`}
+                  src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-inspector?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(normalizedOp ?? "")}`}
                   width="100%"
                   height="600px"
                   style={{ border: "none" }}
@@ -1642,7 +1642,7 @@ export default function WorkStation() {
                 <Box sx={{ display: "flex", width: "100%", height: "600px" }}>
                   {/* งานจาก Inspector (read-only) */}
                   <iframe
-                    src={`http://localhost:5174/checklist/embed-work?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}`}
+                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-work?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}`}
                     width="50%"
                     height="100%"
                     style={{ border: "none", borderRight: "1px solid #E2E8F0" }}
@@ -1650,7 +1650,7 @@ export default function WorkStation() {
                   />
                   {/* Checklist กรอกงาน */}
                   <iframe
-                    src={`http://localhost:5174/checklist/embed?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}`}
+                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}`}
                     width="50%"
                     height="100%"
                     style={{ border: "none" }}
