@@ -29,9 +29,7 @@ const parseToMs = (v: StartAt): number | null => {
 
 
     let safeS = s.replace(" ", "T");
-    if (!safeS.endsWith("Z") && !safeS.includes("+")) {
-        safeS += "Z";
-    }
+    // ไม่เติม Z — API ส่ง local time มา ให้ parse เป็น local time
     const isoTry = new Date(safeS);
     if (!Number.isNaN(isoTry.getTime())) return isoTry.getTime();
 
@@ -44,8 +42,8 @@ const parseToMs = (v: StartAt): number | null => {
     const [, Y, Mo, D, H, Mi, S2, frac = ""] = m;
     const ms = Number((frac + "000").slice(0, 3));
 
-    // Use Date.UTC instead of new Date (Local)
-    return Date.UTC(
+    // ใช้ new Date (Local time) แทน Date.UTC
+    return new Date(
         Number(Y),
         Number(Mo) - 1,
         Number(D),
@@ -53,7 +51,7 @@ const parseToMs = (v: StartAt): number | null => {
         Number(Mi),
         Number(S2),
         Number.isFinite(ms) ? ms : 0
-    );
+    ).getTime();
 
 
 };

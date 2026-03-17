@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>WorkStation - Sequence Diagram</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f6fa; padding: 20px; }
+    h1 { text-align: center; color: #1D3557; }
+    h2 { color: #2563EB; margin-top: 40px; border-bottom: 2px solid #DBEAFE; padding-bottom: 8px; }
+    .mermaid { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 30px; }
+  </style>
+</head>
+<body>
+
+<h1>📋 WorkStation — Sequence Diagram</h1>
+
+<!-- ===== 1. Page Load ===== -->
+<h2>1. โหลดหน้า WorkStation (Page Load)</h2>
+<div class="mermaid">
+sequenceDiagram
+    actor User
+    participant WS as WorkStation (UI)
+    participant API as Backend API
+
+    User->>WS: เข้าหน้า WorkStation<br/>(จาก DashboardRefurbish)
+    WS->>WS: อ่าน orderId, operationId<br/>จาก useParams()
+
+    par โหลดข้อมูลพร้อมกัน
+        WS->>API: GET /WorkOrderList/items_component/{orderId}
+        API-->>WS: item_component (อะไหล่)
+    and
+        WS->>API: GET /WorkOrderList/workOrder/{orderId}/{operationId}
+        API-->>WS: work (ข้อมูล Work Order)
+    and
+        WS->>API: GET /Mobile/GetMasterWorkorderImage?order_id={orderId}
+        API-->>WS: masterImages (template รูป)
+        WS->>API: GET /WorkOrderList/ImgBox/{orderId}
+        API-->>WS: boxData (รูปที่อัปโหลดแล้ว)
+    and
+        WS->>API: GET /WorkOrderList/GetEmployee/{orderId}/{station}
+        API-->>WS: getWorker (พนักงาน)
+    and
+        WS->>API: GET /WorkOrderList/Checked/{orderId}
+        API-->>WS: checkedCodes (checkbox items)
+    end
+
+    WS->>WS: ตรวจ acT_START_DATE / acT_END_DATE<br/>→ set isWorking
+    WS-->>User: แสดงหน้า WorkStation (4 Tabs)
+</div>
+
+<!-- ===== 2. Start Work ===== -->
+<h2>2. เริ่มงาน (Start Work)</h2>
+<div class="mermaid">
+sequenceDiagram
+    actor User
+    participant WS as WorkStation (UI)
+    participant API as Backend API
+
+    User->>WS: กดปุ่ม Start
+    WS->>WS: เปิด Employee Modal
+    User->>WS: เลือกพนักงาน + ยืนยัน
+    WS->>WS: setIsWorking(true)
+
+    WS->>API: POST /WorkOrderList/Employee/{orderId}/{station}<br/>(payload: [{ORDERID, PERSONNEL_NUMBER, NAME}])
+    API-->>WS: สำเร็จ
+
+    WS->>API: startWork() (จาก useWork Context)
+    API-->>WS: สำเร็จ
+
+    WS->>API: GET /WorkOrderList/GetEmployee/{orderId}/{station}
+    API-->>WS: reload พนักงาน
+
+    WS-->>User: แสดง Timer เริ่มนับ
+</div>
+
+<!-- ===== 3. Finish Work ===== -->
+<h2>3. จบงาน (Finish Work)</h2>
+<div class="mermaid">
+sequenceDiagram
+    actor User
+    participant WS as WorkStation (UI)
+    participant API as Backend API
+
+    User->>WS: กดปุ่ม Finish
+    WS->>WS: Swal ถามยืนยัน
+    User->>WS: ยืนยัน
+
+    WS->>API: submitChecklist(checkedCodes)<br/>(ส่ง checkbox items)
+    API-->>WS: สำเร็จ
+
+    WS->>API: finishWork()<br/>(จาก useWork Context)
+    API-->>WS: สำเร็จ
+
+    WS->>WS: Swal แสดง "สำเร็จ"
+    WS->>WS: navigate(-1) กลับหน้าเดิม
+    WS-->>User: กลับไปหน้า Dashboard
+</div>
+
+<!-- ===== 4. Checklist ===== -->
+<h2>4. เปิด Checklist (iframe)</h2>
+<div class="mermaid">
+sequenceDiagram
+    actor User
+    participant WS as WorkStation (UI)
+    participant API as Backend API
+    participant IFrame as Checklist iframe
+
+    User->>WS: กดปุ่ม Check List
+    WS->>WS: setChecklistLoading(true)
+
+    WS->>API: POST /checklist/token<br/>(payload: {orderId, station})
+    API-->>WS: JWT token
+
+    WS->>WS: setChecklistToken(token)
+    WS->>WS: เปิด Dialog Checklist
+    WS->>IFrame: โหลด iframe<br/>checklist URL + token
+    IFrame-->>User: แสดง Checklist
+
+    User->>IFrame: ทำ Checklist
+    User->>WS: ปิด Dialog
+</div>
+
+<!-- ===== 5. Upload Images ===== -->
+<h2>5. อัปโหลดรูปภาพ (Upload Images - Tab 4)</h2>
+<div class="mermaid">
+sequenceDiagram
+    actor User
+    participant WS as WorkStation (UI)
+    participant Service as callUploadImage
+    participant Rename as renameImageFile
+    participant Upload as Upload Server<br/>(10.10.199.16:8080)
+    participant API as Backend API
+
+    User->>WS: เลือกรูป (handleFileSelect)<br/>เก็บใน selectedFiles state
+
+    User->>WS: กดบันทึกรูปทั้งหมด<br/>(handleUploadAll)
+    WS->>WS: Swal แสดง "กำลังอัปโหลด..."
+
+    loop แต่ละรูปที่เลือก
+        WS->>Service: callUploadImage(orderId, key, file, seq)
+        Service->>API: GET /WorkOrderList/workOrder/{orderId}/{operationId}
+        API-->>Service: work data
+
+        Service->>Rename: renameImageFile(file, orderId, imageKey)
+        Rename-->>Service: File ชื่อใหม่<br/>{orderId}_{key}_{timestamp}.{ext}
+
+        Service->>Service: สร้าง FormData<br/>(file renamed)
+
+        Service->>Upload: POST /upload (FormData)
+        Upload-->>Service: imageUrl (URL รูปบน server)
+
+        Service->>API: PUT /Mobile/update_workorderImage<br/>(orderId, imageKey, imageUrl)
+        API-->>Service: สำเร็จ
+    end
+
+    Service-->>WS: อัปโหลดเสร็จ
+    WS->>WS: reload images (onLoad3)
+    WS-->>User: Swal แสดง "สำเร็จ"
+</div>
+
+<!-- ===== 6. Remark / Return / QC Return ===== -->
+<h2>6. Remark / Return / QC Return</h2>
+<div class="mermaid">
+sequenceDiagram
+    actor User
+    participant WS as WorkStation (UI)
+    participant API as Backend API
+
+    alt กด Remark
+        User->>WS: กดปุ่ม Remark
+        WS->>WS: เปิด Dialog Remark
+        User->>WS: พิมพ์ remark + ยืนยัน
+        WS->>API: POST RemarkStop<br/>(orderId, remark)
+        API-->>WS: สำเร็จ
+    else กด Return
+        User->>WS: กดปุ่ม Return
+        WS->>API: returnWork()<br/>(จาก useWork Context)
+        API-->>WS: สำเร็จ
+    else กด QC Return
+        User->>WS: กดปุ่ม QC Return
+        WS->>API: qcReturnWork()<br/>(จาก useWork Context)
+        API-->>WS: สำเร็จ
+    end
+
+    WS->>WS: navigate(-1) / reload
+    WS-->>User: กลับหน้าเดิม
+</div>
+
+<!-- ===== 7. Edit/Delete Spare Part ===== -->
+<h2>7. แก้ไข / ลบ อะไหล่ (Tab 3)</h2>
+<div class="mermaid">
+sequenceDiagram
+    actor User
+    participant WS as WorkStation (UI)
+    participant API as Backend API
+
+    alt แก้ไขจำนวน
+        User->>WS: กดปุ่ม Edit (แก้ qty)
+        WS->>WS: เปิด Dialog Edit QTY
+        User->>WS: ใส่จำนวนใหม่ + ยืนยัน
+
+        WS->>API: POST /Mobile/SetWorkOrderSparePart<br/>?OrderId={orderId}<br/>(payload: items ทั้งหมด + qty ใหม่)
+        API-->>WS: สำเร็จ
+
+        WS->>API: GET /WorkOrderList/items_component/{orderId}
+        API-->>WS: reload อะไหล่
+    else ลบอะไหล่
+        User->>WS: กดปุ่ม Delete
+        WS->>API: deletePart(componentId)<br/>(จาก useWork Context)
+        API-->>WS: สำเร็จ
+
+        WS->>API: GET /WorkOrderList/items_component/{orderId}
+        API-->>WS: reload อะไหล่
+    end
+
+    WS-->>User: แสดงรายการอะไหล่ใหม่
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', sequence: { mirrorActors: false, actorMargin: 50, messageMargin: 40 } });
+</script>
+
+</body>
+</html>

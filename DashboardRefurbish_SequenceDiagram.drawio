@@ -1,0 +1,310 @@
+<mxfile host="app.diagrams.net" agent="1.0" version="24.0.0">
+
+  <!-- ===== PAGE 1: Page Load ===== -->
+  <diagram name="1. Page Load" id="seq-page-load">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="750" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="t" value="&lt;b&gt;Sequence Diagram: DashboardRefurbish — Page Load&lt;/b&gt;" style="text;html=1;align=center;fontSize=14;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="250" y="10" width="400" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1" value="&lt;b&gt;User&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="100" height="650" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="&lt;b&gt;DashboardRefurbish&lt;/b&gt;&lt;br&gt;(UI)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="130" height="650" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="&lt;b&gt;Backend API&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="100" height="650" as="geometry" />
+        </mxCell>
+
+        <!-- เข้าหน้า -->
+        <mxCell id="m1" value="เข้าหน้า DashboardRefurbish&#xa;(จาก SetupAndRefurbish พร้อม step state)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="120" as="sourcePoint" />
+            <mxPoint x="415" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- อ่าน step -->
+        <mxCell id="m2" value="อ่าน step จาก location.state&#xa;(title, station, type)" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="160" as="sourcePoint" />
+            <mxPoint x="415" y="180" as="targetPoint" />
+            <Array as="points"><mxPoint x="470" y="170" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT Frame -->
+        <mxCell id="alt" value="alt [step.type]" style="shape=umlFrame;whiteSpace=wrap;html=1;width=100;height=20;boundedLbl=1;verticalAlign=bottom;align=left;spacingLeft=5;fillColor=#FFF8F0;fillOpacity=30;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="200" width="450" height="310" as="geometry" />
+        </mxCell>
+
+        <!-- workOrderList -->
+        <mxCell id="alt1" value="[type = workOrderList]" style="text;html=1;fontSize=10;fontStyle=3;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="330" y="220" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m3" value="GET /WorkOrderList/workOrderList" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="255" as="sourcePoint" />
+            <mxPoint x="700" y="255" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3r" value="Work Order ทั้งหมด" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="285" as="sourcePoint" />
+            <mxPoint x="415" y="285" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Divider -->
+        <mxCell id="div1" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="310" as="sourcePoint" />
+            <mxPoint x="760" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- stockReport → redirect -->
+        <mxCell id="alt2" value="[type = stockReport]" style="text;html=1;fontSize=10;fontStyle=3;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="330" y="315" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m4" value="navigate → /StockReport (redirect ทันที)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="350" as="sourcePoint" />
+            <mxPoint x="150" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Divider 2 -->
+        <mxCell id="div2" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="330" y="380" as="sourcePoint" />
+            <mxPoint x="760" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- station (0010-0080) -->
+        <mxCell id="alt3" value="[station = 0010-0080]" style="text;html=1;fontSize=10;fontStyle=3;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="330" y="385" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m5" value="GET /WorkOrderList/workOrderList/{station}" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="420" as="sourcePoint" />
+            <mxPoint x="700" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5r" value="Work Order ตาม Station" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="450" as="sourcePoint" />
+            <mxPoint x="415" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Filter + คำนวณ SLA -->
+        <mxCell id="m6" value="Filter ข้อมูล + คำนวณ SLA Status&#xa;(🟢 green / 🟡 yellow / 🔴 red)" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="540" as="sourcePoint" />
+            <mxPoint x="415" y="560" as="targetPoint" />
+            <Array as="points"><mxPoint x="470" y="550" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- แสดงตาราง -->
+        <mxCell id="m7" value="แสดง MaterialReactTable&#xa;+ SLA Timer + Filters" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="610" as="sourcePoint" />
+            <mxPoint x="150" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ===== PAGE 2: Row Click (Navigate to WorkStation) ===== -->
+  <diagram name="2. Row Click" id="seq-row-click">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="550" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="t" value="&lt;b&gt;Sequence Diagram: กดเลือก Row → ไปหน้า WorkStation&lt;/b&gt;" style="text;html=1;align=center;fontSize=14;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="220" y="10" width="400" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1" value="&lt;b&gt;User&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="100" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="&lt;b&gt;DashboardRefurbish&lt;/b&gt;&lt;br&gt;(UI)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="130" height="440" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="&lt;b&gt;WorkStation&lt;/b&gt;&lt;br&gt;(หน้าถัดไป)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="620" y="50" width="110" height="440" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m1" value="คลิกที่ Row ในตาราง" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="130" as="sourcePoint" />
+            <mxPoint x="415" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ตรวจ station != null -->
+        <mxCell id="m2" value="ตรวจ step.station != null" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="170" as="sourcePoint" />
+            <mxPoint x="415" y="190" as="targetPoint" />
+            <Array as="points"><mxPoint x="470" y="180" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m3" value="navigate → /WorkStation/{orderId}/{operationId}&#xa;พร้อม state: { current_operation, title, station }" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="230" as="sourcePoint" />
+            <mxPoint x="675" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m4" value="เปิดหน้า WorkStation" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="675" y="280" as="sourcePoint" />
+            <mxPoint x="150" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Note -->
+        <mxCell id="note" value="หมายเหตุ: ถ้า step.station == null&#xa;(Work Order List mode) จะไม่ navigate&#xa;เพราะไม่มี station ให้เลือก" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fontSize=9;fillColor=#FFF3CD;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="350" y="340" width="220" height="70" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ===== PAGE 3: จ่ายงาน (Dispatch) ===== -->
+  <diagram name="3. Dispatch Work Orders" id="seq-dispatch">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="t" value="&lt;b&gt;Sequence Diagram: จ่ายงาน (เฉพาะ Work Order List mode)&lt;/b&gt;" style="text;html=1;align=center;fontSize=14;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="10" width="450" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1" value="&lt;b&gt;User&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="100" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="&lt;b&gt;DashboardRefurbish&lt;/b&gt;&lt;br&gt;(UI)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="130" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="&lt;b&gt;Backend API&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="100" height="600" as="geometry" />
+        </mxCell>
+
+        <!-- เลือก rows -->
+        <mxCell id="m1" value="เลือก Row (checkbox) หลายรายการ" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="120" as="sourcePoint" />
+            <mxPoint x="415" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- กดจ่ายงาน -->
+        <mxCell id="m2" value="กดปุ่ม &quot;จ่ายงาน&quot;" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="170" as="sourcePoint" />
+            <mxPoint x="415" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ตรวจ selected -->
+        <mxCell id="m3" value="ตรวจ selectedRows.length > 0?" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="210" as="sourcePoint" />
+            <mxPoint x="415" y="230" as="targetPoint" />
+            <Array as="points"><mxPoint x="470" y="220" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Swal ยืนยัน -->
+        <mxCell id="m4" value="Swal ถามยืนยัน&#xa;จ่ายงาน N รายการ" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="260" as="sourcePoint" />
+            <mxPoint x="150" y="260" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m5" value="ยืนยัน" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="300" as="sourcePoint" />
+            <mxPoint x="415" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Loading -->
+        <mxCell id="m6" value="Swal &quot;กำลังดำเนินการ...&quot;" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="330" as="sourcePoint" />
+            <mxPoint x="415" y="350" as="targetPoint" />
+            <Array as="points"><mxPoint x="470" y="340" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Loop -->
+        <mxCell id="loop" value="loop [แต่ละ selectedRow]" style="shape=umlFrame;whiteSpace=wrap;html=1;width=160;height=20;boundedLbl=1;verticalAlign=bottom;align=left;spacingLeft=5;fillColor=#F0FFF0;fillOpacity=30;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="330" y="370" width="400" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m7" value="POST /WorkOrderList/StartWorkOrder&#xa;{ ORDERID: orderId }" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="410" as="sourcePoint" />
+            <mxPoint x="700" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7r" value="isSuccess / fail" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="440" as="sourcePoint" />
+            <mxPoint x="415" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Reset + Reload -->
+        <mxCell id="m8" value="resetRowSelection()" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="510" as="sourcePoint" />
+            <mxPoint x="415" y="530" as="targetPoint" />
+            <Array as="points"><mxPoint x="470" y="520" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m9" value="onLoad() → reload ข้อมูลใหม่" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="550" as="sourcePoint" />
+            <mxPoint x="700" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9r" value="ข้อมูลใหม่" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="575" as="sourcePoint" />
+            <mxPoint x="415" y="575" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Swal result -->
+        <mxCell id="m10" value="Swal แสดง &quot;สำเร็จ N รายการ / ล้มเหลว M&quot;" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="415" y="610" as="sourcePoint" />
+            <mxPoint x="150" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+</mxfile>

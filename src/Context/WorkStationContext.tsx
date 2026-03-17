@@ -123,6 +123,7 @@ interface WorkContextType {
   setScannedCode: (code: String) => void;
   setUploadImage: (file: File[]) => void;
   submitWork: () => void;
+  submitChecklist: (stationCode: string, items: Record<string, string | boolean>) => Promise<boolean>;
 }
 
 const WorkContext = createContext<WorkContextType | null>(null);
@@ -174,7 +175,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       const data = res.data;
-      // console.log("Start Work : ", res);
+      console.log("🔍 StartWork dataResult:", JSON.stringify(data.dataResult));
       if (!data.isSuccess) {
         await Swal.fire({
           title: "Failed",
@@ -287,8 +288,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const checkListWork = async () => {
-    console.log("work is check list");
+  const completed = async () => {
+    console.log("work is completed");
     if (!work?.orderid) return;
 
     const pick = await Swal.fire({
@@ -497,8 +498,63 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const completed = async () => {
-    console.log("work is completed");
+  // ── Submit Checklist (ยังไม่มี API — แสดง Swal อย่างเดียว) ──
+  const submitChecklist = async (
+    stationCode: string,
+    items: Record<string, string | boolean>
+  ): Promise<boolean> => {
+    try {
+      if (!work?.orderid) return false;
+
+      const filledCount = Object.values(items).filter(
+        (v) => v !== undefined && v !== "" && v !== false
+      ).length;
+
+      const confirm = await Swal.fire({
+        title: "บันทึก Checklist?",
+        html: `<b>Work Order:</b> ${work.orderid}<br/><b>Station:</b> ${stationCode}<br/><b>กรอกแล้ว:</b> ${filledCount} รายการ`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "บันทึก",
+        cancelButtonText: "ยกเลิก",
+        confirmButtonColor: "#2563EB",
+        cancelButtonColor: "#e74c3c",
+      });
+
+      if (!confirm.isConfirmed) return false;
+
+      const payload = {
+        ORDERID: work.orderid,
+        station: stationCode,
+        items,
+        timestamp: new Date().toISOString(),
+      };
+      console.log("📋 submitChecklist payload:", payload);
+
+      // TODO: เปลี่ยนเป็น API call จริง
+      // const res = await callApi.post("/WorkOrderList/Checklist", payload);
+
+      await Swal.fire({
+        title: "บันทึกสำเร็จ!",
+        text: `Checklist Station ${stationCode} บันทึกเรียบร้อยแล้ว`,
+        icon: "success",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      return true;
+    } catch (err: any) {
+      console.error("submitChecklist Error:", err);
+      await Swal.fire({
+        title: "Error",
+        text: err?.message || "เกิดข้อผิดพลาด",
+        icon: "error",
+      });
+      return false;
+    }
+  };
+
+  const checkListWork = async () => {
+    console.log("work is Check List");
 
     const CompletedOptions: Record<string, string> = {
       completed: "Completed",
@@ -1087,6 +1143,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         setCheckOutCloseType,
         checkList,
         setCheckList,
+        submitChecklist,
       }}
     >
       {children}

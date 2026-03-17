@@ -1,0 +1,339 @@
+<mxfile host="app.diagrams.net" agent="1.0" version="24.0.0">
+
+  <!-- ===== PAGE 1: Page Load ===== -->
+  <diagram name="1. Page Load" id="seq-page-load">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="750" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="t" value="&lt;b&gt;Sequence Diagram: TableSparePart — Page Load&lt;/b&gt;" style="text;html=1;align=center;fontSize=14;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="270" y="10" width="380" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1" value="&lt;b&gt;User&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="100" height="620" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="&lt;b&gt;TableSparePart&lt;/b&gt;&lt;br&gt;(UI)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="120" height="620" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="&lt;b&gt;Backend API&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="100" height="620" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m1" value="เข้าหน้า TableSparePart&#xa;(รับ orderId จาก URL)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="120" as="sourcePoint" />
+            <mxPoint x="410" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m2" value="onInit()" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="160" as="sourcePoint" />
+            <mxPoint x="410" y="180" as="targetPoint" />
+            <Array as="points"><mxPoint x="460" y="170" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Step 1: GET RemainingSparepart -->
+        <mxCell id="m3" value="① GET /Mobile/RemainingSparepart" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="210" as="sourcePoint" />
+            <mxPoint x="700" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3r" value="sparepartList (อะไหล่ทั้งหมดในคลัง)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="240" as="sourcePoint" />
+            <mxPoint x="410" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Step 2: GET items_component -->
+        <mxCell id="m4" value="② GET /WorkOrderList/items_component/{orderId}" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="290" as="sourcePoint" />
+            <mxPoint x="700" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4r" value="dataOldPart (อะไหล่เดิมใน Work Order)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="320" as="sourcePoint" />
+            <mxPoint x="410" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Merge data -->
+        <mxCell id="m5" value="Merge: สร้าง cart จาก oldPart&#xa;+ lookup description จาก spareList&#xa;→ setCart(), setItem_Component()" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="370" as="sourcePoint" />
+            <mxPoint x="410" y="420" as="targetPoint" />
+            <Array as="points"><mxPoint x="470" y="395" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- แสดง -->
+        <mxCell id="m6" value="แสดงรายการอะไหล่ปัจจุบัน&#xa;(ตาราง + ปุ่ม Edit / Delete)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="470" as="sourcePoint" />
+            <mxPoint x="150" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ===== PAGE 2: เพิ่มอะไหล่ ===== -->
+  <diagram name="2. Add Spare Part" id="seq-add">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="t" value="&lt;b&gt;Sequence Diagram: เพิ่มอะไหล่ (Add Spare Part)&lt;/b&gt;" style="text;html=1;align=center;fontSize=14;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="270" y="10" width="380" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1" value="&lt;b&gt;User&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="100" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="&lt;b&gt;TableSparePart&lt;/b&gt;&lt;br&gt;(UI)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="120" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="&lt;b&gt;Backend API&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="100" height="700" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m1" value="กดปุ่ม &quot;เพิ่มอะไหล่&quot;" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="120" as="sourcePoint" />
+            <mxPoint x="410" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" value="เปิด Dialog เลือกอะไหล่จากคลัง&#xa;(แสดง dataSparePart + Cart)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="160" as="sourcePoint" />
+            <mxPoint x="150" y="160" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- เลือก + qty -->
+        <mxCell id="m3" value="เลือกอะไหล่ + กำหนด qty&#xa;(addOne / removeOne / setQty)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="220" as="sourcePoint" />
+            <mxPoint x="410" y="220" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3b" value="อัปเดต Cart state" style="html=1;verticalAlign=bottom;endArrow=block;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="260" as="sourcePoint" />
+            <mxPoint x="410" y="280" as="targetPoint" />
+            <Array as="points"><mxPoint x="460" y="270" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- กดบันทึก -->
+        <mxCell id="m4" value="กดบันทึก (handleSave)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="320" as="sourcePoint" />
+            <mxPoint x="410" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Swal ยืนยัน -->
+        <mxCell id="m5" value="Swal ถามยืนยัน" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="355" as="sourcePoint" />
+            <mxPoint x="150" y="355" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" value="ยืนยัน" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="390" as="sourcePoint" />
+            <mxPoint x="410" y="390" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- POST -->
+        <mxCell id="m7" value="POST /Mobile/SetWorkOrderSparePart&#xa;?OrderId={orderId}&#xa;payload: [{ material, qty, desc, ... }]" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="430" as="sourcePoint" />
+            <mxPoint x="700" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7r" value="isSuccess" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="470" as="sourcePoint" />
+            <mxPoint x="410" y="470" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Reload -->
+        <mxCell id="m8" value="① GET /Mobile/RemainingSparepart (reload)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="520" as="sourcePoint" />
+            <mxPoint x="700" y="520" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8r" value="spareList" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="545" as="sourcePoint" />
+            <mxPoint x="410" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m9" value="② GET /WorkOrderList/items_component (reload)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="575" as="sourcePoint" />
+            <mxPoint x="700" y="575" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9r" value="อะไหล่ใหม่" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="600" as="sourcePoint" />
+            <mxPoint x="410" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m10" value="Swal &quot;สำเร็จ&quot; + แสดงรายการใหม่" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="650" as="sourcePoint" />
+            <mxPoint x="150" y="650" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+  <!-- ===== PAGE 3: แก้ไข / ลบ ===== -->
+  <diagram name="3. Edit - Delete" id="seq-edit-delete">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="750" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="t" value="&lt;b&gt;Sequence Diagram: แก้ไข QTY / ลบอะไหล่&lt;/b&gt;" style="text;html=1;align=center;fontSize=14;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="270" y="10" width="380" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1" value="&lt;b&gt;User&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="100" y="50" width="100" height="650" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="&lt;b&gt;TableSparePart&lt;/b&gt;&lt;br&gt;(UI)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="350" y="50" width="120" height="650" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="&lt;b&gt;Backend API&lt;/b&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;size=40;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="650" y="50" width="100" height="650" as="geometry" />
+        </mxCell>
+
+        <!-- ALT Frame -->
+        <mxCell id="alt" value="alt [เลือก Action]" style="shape=umlFrame;whiteSpace=wrap;html=1;width=120;height=20;boundedLbl=1;verticalAlign=bottom;align=left;spacingLeft=5;fillColor=#FFF8F0;fillOpacity=30;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="110" width="670" height="490" as="geometry" />
+        </mxCell>
+
+        <!-- Edit QTY -->
+        <mxCell id="alt1" value="[แก้ไข QTY]" style="text;html=1;fontSize=10;fontStyle=3;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="130" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m1" value="กดปุ่ม Edit (✏️)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="165" as="sourcePoint" />
+            <mxPoint x="410" y="165" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" value="เปิด Dialog Edit QTY&#xa;(แสดง material + qty ปัจจุบัน)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="200" as="sourcePoint" />
+            <mxPoint x="150" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" value="ใส่จำนวนใหม่ + ยืนยัน" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="240" as="sourcePoint" />
+            <mxPoint x="410" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" value="POST /Mobile/SetWorkOrderSparePart&#xa;(payload: items ทั้งหมด + qty ใหม่ของ item นี้)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="280" as="sourcePoint" />
+            <mxPoint x="700" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4r" value="isSuccess" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="310" as="sourcePoint" />
+            <mxPoint x="410" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5" value="onInit() → reload ข้อมูลทั้งหมด" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="345" as="sourcePoint" />
+            <mxPoint x="700" y="345" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5r" value="ข้อมูลใหม่" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="370" as="sourcePoint" />
+            <mxPoint x="410" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Divider -->
+        <mxCell id="div1" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="400" as="sourcePoint" />
+            <mxPoint x="750" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Delete -->
+        <mxCell id="alt2" value="[ลบอะไหล่]" style="text;html=1;fontSize=10;fontStyle=3;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="100" y="405" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="m6" value="กดปุ่ม Delete (🗑️)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="440" as="sourcePoint" />
+            <mxPoint x="410" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" value="deletePart(componentId)&#xa;(จาก useWork Context)" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="480" as="sourcePoint" />
+            <mxPoint x="700" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7r" value="สำเร็จ" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="510" as="sourcePoint" />
+            <mxPoint x="410" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8" value="onLoad() + onLoadOldPart() → reload" style="html=1;verticalAlign=bottom;endArrow=block;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="545" as="sourcePoint" />
+            <mxPoint x="700" y="545" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8r" value="ข้อมูลใหม่" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="700" y="570" as="sourcePoint" />
+            <mxPoint x="410" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- แสดง -->
+        <mxCell id="m9" value="แสดงรายการอะไหล่ใหม่" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;fontSize=10;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="410" y="630" as="sourcePoint" />
+            <mxPoint x="150" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+</mxfile>

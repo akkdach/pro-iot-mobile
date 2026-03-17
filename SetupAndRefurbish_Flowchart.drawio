@@ -1,0 +1,127 @@
+<mxfile host="app.diagrams.net" agent="1.0" version="24.0.0">
+  <diagram name="SetupAndRefurbish" id="setup-refurbish-flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="750" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;ระบบ Setup / Refurbish&lt;/b&gt;&lt;br&gt;หน้า SetupAndRefurbish" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="350" y="15" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Swimlane: User -->
+        <mxCell id="lane_user" value="User" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="60" y="70" width="400" height="620" as="geometry" />
+        </mxCell>
+
+        <!-- Swimlane: System -->
+        <mxCell id="lane_system" value="System" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="460" y="70" width="400" height="620" as="geometry" />
+        </mxCell>
+
+        <!-- ===== USER SIDE ===== -->
+
+        <!-- เริ่มต้น -->
+        <mxCell id="u_start" value="เริ่มต้น" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="120" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- เข้าหน้า -->
+        <mxCell id="u_enter" value="เข้าหน้า&#xa;Setup / Refurbish" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="200" y="200" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- เลือก Station -->
+        <mxCell id="u_select" value="เลือก Station?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="205" y="310" width="110" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Work Order List -->
+        <mxCell id="u_wo" value="Work Order List" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="440" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Stock Report -->
+        <mxCell id="u_stock" value="Stock Report" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="490" width="100" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Station 0010-0080 -->
+        <mxCell id="u_station" value="Station&#xa;(Inspector / Remove /&#xa;Clean / Color /&#xa;Fix Cooling / Assembly /&#xa;Test / QC Packing)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="290" y="430" width="140" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- ===== SYSTEM SIDE ===== -->
+
+        <!-- แสดงเมนู Hex -->
+        <mxCell id="s_display" value="แสดงเมนู Hex&#xa;(10 ปุ่ม เรียง 2 แถว)&#xa;แต่ละปุ่มมี icon + ชื่อ" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="200" width="170" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Navigate to DashboardRefurbish -->
+        <mxCell id="s_navigate" value="navigate&#xa;→ /DashboardRefurbish&#xa;พร้อม state = step&#xa;(title, station, type)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="560" y="430" width="170" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- หน้า DashboardRefurbish -->
+        <mxCell id="s_dashboard" value="หน้า&#xa;DashboardRefurbish&#xa;(แสดง Work Order&#xa;ตาม Station ที่เลือก)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="570" y="550" width="150" height="65" as="geometry" />
+        </mxCell>
+
+        <!-- ===== ARROWS ===== -->
+
+        <!-- เริ่มต้น → เข้าหน้า -->
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_start" target="u_enter" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- เข้าหน้า → แสดงเมนู -->
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_enter" target="s_display" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- แสดงเมนู → เลือก Station -->
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="s_display" target="u_select" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- เลือก → Work Order List -->
+        <mxCell id="e4" value="Work Order List" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="u_select" target="u_wo" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- เลือก → Stock Report -->
+        <mxCell id="e5" value="Stock Report" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="u_select" target="u_stock" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- เลือก → Station -->
+        <mxCell id="e6" value="Station&#xa;(0010-0080)" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="u_select" target="u_station" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Work Order List → Navigate -->
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_wo" target="s_navigate" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Stock Report → Navigate -->
+        <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_stock" target="s_navigate" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Station → Navigate -->
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_station" target="s_navigate" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Navigate → Dashboard -->
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="s_navigate" target="s_dashboard" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

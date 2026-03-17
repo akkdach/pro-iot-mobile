@@ -26,7 +26,7 @@ import callApi from "../../Services/callApi";
 import HideImageIcon from "@mui/icons-material/HideImage";
 import SafeImage from "./SafeImage";
 import Swal from "sweetalert2";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { on } from "events";
 
 const uid = () => Math.random().toString(36).slice(2, 8);
@@ -61,10 +61,10 @@ type CartItem = {
 
 export default function TableSparePart() {
   const { work, item_component, setItem_Component, deletePart } = useWork();
+  const { orderId } = useParams();
 
   const location = useLocation();
   const row = location.state;
-  console.log("location row : ", row);
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"add" | "edit">("add");
   const [dataSparePart, setDataSparePart] = useState<SparePartApi[]>([]);
@@ -93,15 +93,8 @@ export default function TableSparePart() {
   useEffect(() => console.log("cart:", cart), [cart]);
 
   useEffect(() => {
-    // const spareList = onLoad();
-    // const init = async () => {
-
-    // };
-    // if (work?.orderid) {
-    //   init();
-    // }
-    onInit();
-  }, [work?.orderid]);
+    if (orderId) onInit();
+  }, [orderId]);
 
   const onInit = async () => {
     const spareList = await onLoad();
@@ -111,8 +104,7 @@ export default function TableSparePart() {
   };
 
   const onLoad = async () => {
-    console.log("mn_wk_ctr : ", work?.mN_WK_CTR);
-    console.log("orderid : ", work?.orderid);
+    console.log("orderId from URL: ", orderId);
     let res = await callApi.get("/Mobile/RemainingSparepart");
     const dataSparePartList = res.data.dataResult.sparepartList;
     console.log("on load get spare part : ", dataSparePartList);
@@ -121,10 +113,10 @@ export default function TableSparePart() {
   };
 
   const onLoadOldPart = async (spareList: SparePartApi[] = []) => {
-    if (!work?.orderid) return; // Prevent 401 loop
+    if (!orderId) return;
 
     const res = await callApi.get(
-      `/WorkOrderList/items_component/${work?.orderid}`
+      `/WorkOrderList/items_component/${orderId}`
     );
     const dataOldPart = res.data.dataResult;
     console.log("load old part : ", dataOldPart);
@@ -309,11 +301,11 @@ export default function TableSparePart() {
     if (!confirm.isConfirmed) return;
     const payload = Object.values(cart).map(({ item, qty }) => ({
       workOrderComponentId: item.workOrderComponentId,
-      workOrder: work?.orderid,
+      workOrder: orderId,
       material: item.material,
       matlDesc: item.materialDescription,
       requirementQuantity: qty,
-      requirementQuantityUnit: row.actuaL_QUANTITY_UNIT,
+      requirementQuantityUnit: row?.actuaL_QUANTITY_UNIT || "EA",
       moveType: true,
     }));
 
@@ -329,7 +321,7 @@ export default function TableSparePart() {
       console.log("payload : ", payload);
 
       const res = await callApi.post(
-        `/Mobile/SetWorkOrderSparePart?OrderId=${work?.orderid}`,
+        `/Mobile/SetWorkOrderSparePart?OrderId=${orderId}`,
         payload
       );
 
@@ -374,41 +366,32 @@ export default function TableSparePart() {
 
       const newQty = Math.max(1, Number(editQty || 1));
 
-      // 1. Update logic: Clone cart and update the specific item
-      const currentCart = { ...cart };
-
-      // Try to find existing cart item
-      let targetCartItem = currentCart[editItem.material];
-
-      if (!targetCartItem) {
-        // If not in cart, we need to create a new entry from dataSparePart or editItem
-        const spareInfo = dataSparePart.find(s => s.material === editItem.material);
-        if (!spareInfo) {
-          Swal.fire({ icon: 'error', title: 'Error', text: 'Material info not found' });
-          return;
+      // Build payload from item_component (same approach as WorkStation)
+      const payload = (item_component || []).map((item: any) => {
+        const matCode = item.material || item.reS_ITEM || "";
+        // If this is the item we are editing, use the new quantity
+        if (matCode === editItem.material) {
+          return {
+            workOrderComponentId: item.worK_ORDER_COMPONENT_ID,
+            workOrder: orderId,
+            material: item.reS_ITEM || item.material,
+            matL_DESC: item.matL_DESC,
+            requirementQuantity: newQty,
+            requirementQuantityUnit: item.actuaL_QUANTITY_UNIT || "EA",
+            moveType: true,
+          };
         }
-        targetCartItem = {
-          item: spareInfo,
-          qty: newQty
+        // Otherwise use existing quantity
+        return {
+          workOrderComponentId: item.worK_ORDER_COMPONENT_ID,
+          workOrder: orderId,
+          material: item.reS_ITEM || item.material,
+          matL_DESC: item.matL_DESC,
+          requirementQuantity: item.actuaL_QUANTITY,
+          requirementQuantityUnit: item.actuaL_QUANTITY_UNIT || "EA",
+          moveType: true,
         };
-        currentCart[editItem.material] = targetCartItem;
-      } else {
-        // Update existing
-        targetCartItem.qty = newQty;
-        currentCart[editItem.material] = targetCartItem;
-      }
-
-      // 2. Construct Payload from the UPDATED cart (ALL items)
-      // Note: We need to define `unit` on CartItem type or allow any
-      const payload = Object.values(currentCart).map((c: any) => ({
-        workOrderComponentId: c.item.workOrderComponentId,
-        workOrder: work?.orderid,
-        material: c.item.material,
-        matlDesc: c.item.materialDescription,
-        requirementQuantity: c.qty,
-        requirementQuantityUnit: c.unit || row?.actuaL_QUANTITY_UNIT, // Prefer item unit, fallback if needed
-        moveType: true,
-      }));
+      });
 
       Swal.fire({
         title: "กำลังบันทึก...",
@@ -416,13 +399,12 @@ export default function TableSparePart() {
         didOpen: () => Swal.showLoading(),
       });
 
-      // 3. Send the entire cart payload
       const res = await callApi.post(
-        `/Mobile/SetWorkOrderSparePart?OrderId=${work?.orderid}`,
+        `/Mobile/SetWorkOrderSparePart?OrderId=${orderId}`,
         payload
       );
 
-      if (res.data.dataResult.isSuccess === true) {
+      if (res.data.isSuccess === true) {
         await Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -431,16 +413,14 @@ export default function TableSparePart() {
           showConfirmButton: false,
         });
 
-        // 4. Update local state and close
-        setCart(currentCart);
         setOpenEditQty(false);
-        // Reload data from server to be sure
-        await onLoadOldPart();
+        // Reload data from server
+        await onInit();
       } else {
         await Swal.fire({
           icon: "error",
           title: "ผิดพลาด",
-          text: res.data.dataResult.message || "ไม่สามารถบันทึกข้อมูลได้",
+          text: res.data.dataResult?.message || "ไม่สามารถบันทึกข้อมูลได้",
           confirmButtonText: "ปิด",
         });
       }
@@ -521,153 +501,163 @@ export default function TableSparePart() {
             </Button>
           </Stack>
 
-          {/* Cards (CSS grid) */}
-          <Box
-            sx={{
-              display: "grid",
-              gap: 3,
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(3, 1fr)",
-                lg: "repeat(4, 1fr)",
-              },
-            }}
-          >
-            {(item_component ?? []).length === 0 ? (
-              <Fade in={true}>
-                <Box sx={{ gridColumn: "1/-1", textAlign: "center", py: 8 }}>
-                  <InventoryIcon
-                    sx={{ fontSize: 60, color: "#B0BEC5", mb: 2 }}
-                  />
-                  <Typography variant="h6" sx={{ color: "#90A4AE" }}>
-                    ไม่พบรายการอะไหล่ในคลัง
-                  </Typography>
-                </Box>
-              </Fade>
-            ) : (
-              (item_component ?? []).map((p) => (
-                <Card
-                  key={p.worK_ORDER_COMPONENT_ID}
-                  sx={{
-                    bgcolor: "#fff",
-                    borderRadius: 4,
-                    border: "1px solid #E3EAF2",
-                    boxShadow: "0 2px 12px 0 rgba(25, 118, 210, 0.06)",
-                    transition: "box-shadow 0.2s",
-                    "&:hover": {
-                      boxShadow: "0 4px 24px 0 rgba(25, 118, 210, 0.13)",
-                    },
-                  }}
-                >
-                  <CardContent sx={{ p: 3 }}>
-                    <Stack spacing={1.5}>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="flex-start"
-                        gap={1}
+          {/* ── Spare Part List ── */}
+          {(item_component ?? []).length === 0 ? (
+            <Fade in={true}>
+              <Box sx={{ textAlign: "center", py: 10 }}>
+                <InventoryIcon sx={{ fontSize: 56, color: "#CBD5E1", mb: 1.5 }} />
+                <Typography variant="h6" sx={{ color: "#94A3B8", fontWeight: 600 }}>
+                  ไม่พบรายการอะไหล่
+                </Typography>
+                <Typography variant="body2" sx={{ color: "#B0BEC5", mt: 0.5 }}>
+                  กดปุ่ม "เพิ่มอะไหล่" เพื่อเริ่มเพิ่มรายการ
+                </Typography>
+              </Box>
+            </Fade>
+          ) : (
+            <Stack spacing={0}>
+              {/* Table Header */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  px: 2.5,
+                  py: 1.5,
+                  bgcolor: "#F8FAFC",
+                  borderRadius: "12px 12px 0 0",
+                  border: "1px solid #E2E8F0",
+                  borderBottom: "2px solid #E2E8F0",
+                }}
+              >
+                <Typography variant="caption" sx={{ flex: 1, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  รายการอะไหล่
+                </Typography>
+                <Typography variant="caption" sx={{ width: 100, textAlign: "center", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  จำนวน
+                </Typography>
+                <Typography variant="caption" sx={{ width: 100, textAlign: "center", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.5 }}>
+                  จัดการ
+                </Typography>
+              </Box>
+
+              {/* Rows */}
+              {(item_component ?? []).map((p, idx) => {
+                const matCode = p.material || p.reS_ITEM || "";
+                const qty = cart[matCode]?.qty ?? p.actuaL_QUANTITY ?? 0;
+                const unit = p.actuaL_QUANTITY_UNIT || cart[matCode]?.unit || "";
+
+                return (
+                  <Box
+                    key={p.worK_ORDER_COMPONENT_ID}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      px: 2.5,
+                      py: 2,
+                      bgcolor: idx % 2 === 0 ? "#FFFFFF" : "#FAFBFC",
+                      borderLeft: "1px solid #E2E8F0",
+                      borderRight: "1px solid #E2E8F0",
+                      borderBottom: "1px solid #F1F5F9",
+                      transition: "background-color 0.15s ease",
+                      "&:hover": { bgcolor: "#F0F7FF" },
+                      "&:last-child": {
+                        borderRadius: "0 0 12px 12px",
+                        borderBottom: "1px solid #E2E8F0",
+                      },
+                    }}
+                  >
+                    {/* ── Info ── */}
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: "0.95rem",
+                          color: "#1E293B",
+                          lineHeight: 1.3,
+                        }}
+                        noWrap
                       >
-                        <Box sx={{ minWidth: 0 }}>
-                          <Typography
-                            fontWeight={900}
-                            sx={{ lineHeight: 1.25, color: "#1976D2" }}
-                            noWrap
-                          >
-                            {p.matL_DESC}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            sx={{ color: "#789" }}
-                            noWrap
-                          >
-                            {p.reserV_NO}
-                          </Typography>
-                        </Box>
-                        <Stack direction="row" spacing={0.5}>
-                          <IconButton
-                            size="small"
-                            sx={{
-                              color: "#1976D2",
-                              bgcolor: "#E3F2FD",
-                              border: "1px solid #BBDEFB",
-                              "&:hover": { bgcolor: "#BBDEFB" },
-                            }}
-                            onClick={() => {
-                              const matCode = p.material || p.reS_ITEM || "";
-
-                              const spare = (dataSparePart ?? []).find(
-                                (s: any) => s.material === matCode
-                              );
-
-                              const max =
-                                typeof spare?.znew === "number"
-                                  ? spare.znew
-                                  : typeof spare?.znew === "string"
-                                    ? Number(spare.znew)
-                                    : undefined;
-
-                              setEditItem({
-                                material: matCode,
-                                materialDescription: p.matL_DESC ?? "",
-                                qty: String(p.actuaL_QUANTITY ?? 0),
-                                max: max,
-                              });
-                              setEditQty(String(p.actuaL_QUANTITY ?? 0));
-                              setOpenEditQty(true);
-                            }}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-
-                          <IconButton
-                            size="small"
-                            sx={{
-                              color: "#D32F2F",
-                              bgcolor: "#FFEBEE",
-                              border: "1px solid #FFCDD2",
-                              "&:hover": { bgcolor: "#FFCDD2" },
-                            }}
-                            onClick={() => {
-                              handleDeleteItem(p.worK_ORDER_COMPONENT_ID!);
-                              console.log(
-                                "work order component ID in delete item function : ",
-                                p.worK_ORDER_COMPONENT_ID
-                              );
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Stack>
-                      </Stack>
-                      <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        alignItems="center"
-                      >
-                        <Chip
-                          label={`Qty: ${cart[p.material || p.reS_ITEM || ""]?.qty ?? p.actuaL_QUANTITY ?? 0}`}
-                          size="small"
-                          sx={{
-                            bgcolor: "#E3F2FD",
-                            color: "#1976D2",
-                            border: "1px solid #BBDEFB",
-                            fontWeight: 700,
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ color: "#374151" }}>
-                          <b>{p.matL_DESC}</b>
-                        </Typography>
-                      </Stack>
-                      <Typography variant="caption" sx={{ color: "#B0BEC5" }}>
-                        ID: {p.material}
+                        {p.matL_DESC || "-"}
                       </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "#94A3B8", mt: 0.25, display: "block" }}
+                        noWrap
+                      >
+                        {matCode}
+                      </Typography>
+                    </Box>
+
+                    {/* ── Qty ── */}
+                    <Box sx={{ width: 100, textAlign: "center" }}>
+                      <Chip
+                        label={`${qty}${unit ? ` ${unit}` : ""}`}
+                        size="small"
+                        sx={{
+                          bgcolor: "#EFF6FF",
+                          color: "#2563EB",
+                          border: "1px solid #DBEAFE",
+                          fontWeight: 700,
+                          fontSize: "0.8rem",
+                          minWidth: 50,
+                        }}
+                      />
+                    </Box>
+
+                    {/* ── Actions ── */}
+                    <Stack direction="row" spacing={0.5} sx={{ width: 100, justifyContent: "center" }}>
+                      <IconButton
+                        size="small"
+                        sx={{
+                          color: "#3b82f6",
+                          bgcolor: "#EFF6FF",
+                          border: "1px solid #DBEAFE",
+                          "&:hover": { bgcolor: "#DBEAFE" },
+                        }}
+                        onClick={() => {
+                          const spare = (dataSparePart ?? []).find(
+                            (s: any) => s.material === matCode
+                          );
+                          const max =
+                            typeof spare?.znew === "number"
+                              ? spare.znew
+                              : typeof spare?.znew === "string"
+                                ? Number(spare.znew)
+                                : undefined;
+
+                          setEditItem({
+                            material: matCode,
+                            materialDescription: p.matL_DESC ?? "",
+                            qty: String(p.actuaL_QUANTITY ?? 0),
+                            max: max,
+                          });
+                          setEditQty(String(p.actuaL_QUANTITY ?? 0));
+                          setOpenEditQty(true);
+                        }}
+                      >
+                        <EditIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
+
+                      <IconButton
+                        size="small"
+                        sx={{
+                          color: "#ef4444",
+                          bgcolor: "#FEF2F2",
+                          border: "1px solid #FECACA",
+                          "&:hover": { bgcolor: "#FECACA" },
+                        }}
+                        onClick={() => {
+                          handleDeleteItem(p.worK_ORDER_COMPONENT_ID!);
+                        }}
+                      >
+                        <DeleteIcon sx={{ fontSize: 18 }} />
+                      </IconButton>
                     </Stack>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </Box>
+                  </Box>
+                );
+              })}
+            </Stack>
+          )}
         </Box>
 
         {/* Dialog */}
@@ -879,17 +869,6 @@ export default function TableSparePart() {
                             label={`ค้างเบิก : ${sp.onWithdraw ? "Yes" : "No"}`}
                             sx={{
                               bgcolor: sp.onWithdraw ? "#FEF9C3" : "#F1F5F9",
-                              color: "#334155",
-                              border: "1px solid #E2E8F0",
-                              fontWeight: 700,
-                            }}
-                          />
-
-                          <Chip
-                            size="small"
-                            label={`คงเหลือ : ${sp.znew ?? "-"}`}
-                            sx={{
-                              bgcolor: "#F1F5F9",
                               color: "#334155",
                               border: "1px solid #E2E8F0",
                               fontWeight: 700,
@@ -1137,9 +1116,8 @@ export default function TableSparePart() {
                 <Button
                   variant="outlined"
                   onClick={() => {
-                    const n = Number(editQty);
-                    const max = editItem.max ?? Infinity;
-                    if (n < max) setEditQty(String(n + 1));
+                    const n = Number(editQty) || 0;
+                    setEditQty(String(n + 1));
                   }}
                   sx={{
                     minWidth: 45,
