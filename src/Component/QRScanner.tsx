@@ -74,7 +74,7 @@ const QRScanner: React.FC<QRScannerProps> = ({ open, onClose, onScan }) => {
           >
             <Scanner
               onScan={handleScan}
-              onError={(error) => console.error("Scanner error:", error)}
+              onError={(error: any) => console.error("Scanner error:", error)}
               constraints={{ facingMode: "environment" }}
               components={{ finder: true, torch: true }}
               styles={{

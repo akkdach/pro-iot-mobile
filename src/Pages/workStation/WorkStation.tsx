@@ -19,6 +19,7 @@ import {
   Tab,
   Tabs,
   Chip,
+  CircularProgress,
 } from "@mui/material";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import List from "@mui/material/List";
@@ -54,6 +55,13 @@ import { replaceImageBaseUrl } from "../../Services/imageUrl";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import PlayArrowRoundedIcon from "@mui/icons-material/PlayArrowRounded";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import FactCheckIcon from "@mui/icons-material/FactCheck";
+import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
+import ReplayIcon from "@mui/icons-material/Replay";
+import UndoIcon from "@mui/icons-material/Undo";
 import { useNavigate } from "react-router-dom";
 import CountTime from "../../Utility/countTime";
 import SimpleElapsedTimer from "../../Utility/SimpleElapsedTimer";
@@ -62,6 +70,7 @@ import { RemarkField } from "../../Utility/RemarkField";
 import EmployeeMultiSelectModal, { Employee } from "../../Utility/EmployeeSelect";
 import WorkerRows from "../../Utility/WorkerRows";
 import { CloseWorkMaster } from "../../Utility/CloseWorkMaster";
+import StationChecklist from "./StationChecklist";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -127,6 +136,7 @@ export default function WorkStation() {
     checkList,
     setCheckList,
     qcReturnWork,
+    submitChecklist,
   } = useWork();
   const location = useLocation();
   const row = location.state;
@@ -161,6 +171,9 @@ export default function WorkStation() {
 
   const [openEmpModal, setOpenEmpModal] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
+  const [openChecklist, setOpenChecklist] = useState(false);
+  const [checklistToken, setChecklistToken] = useState<string | null>(null);
+  const [checklistLoading, setChecklistLoading] = useState(false);
 
   const [getWorker, setGetWorker] = useState<any>([]);
 
@@ -523,6 +536,7 @@ export default function WorkStation() {
       await callApi.post(`/WorkOrderList/Employee/${work?.orderid}/${work?.current_operation}`, payload);
 
       await startWork();
+      await onLoad4();
     } catch (err) {
       console.log(err);
       setIsWorking(false);
@@ -788,7 +802,8 @@ export default function WorkStation() {
     // }
   };
 
-  const normalizedOp = work?.current_operation?.toString().padStart(4, "0");
+  const normalizedOp = (row?.station ?? row?.current_operation ?? work?.current_operation)?.toString().padStart(4, "0");
+  console.log("🔍 normalizedOp:", normalizedOp, "| row?.station:", row?.station, "| work?.current_operation:", work?.current_operation);
   const hasStarted = !!work?.actuaL_START_DATE;
   const hasFinished = !!work?.actuaL_FINISH_DATE;
 
@@ -1042,122 +1057,232 @@ export default function WorkStation() {
             </Box>
           </div>
 
-          <div>
-            <Stack
-              spacing={3}
-              direction="row"
-              sx={{
-                flexWrap: "wrap",
-                justifyContent: "center",
-                gap: 3,
-                padding: 2,
-              }}
-            >
-              {[
-                {
-                  label: "Start",
-                  from: "#2ecc71",
-                  to: "#27ae60",
-                  onClick: () => {
-                    // setIsWorking(true);
-                    // startWork();
-                    setOpenEmpModal(true);
-                  },
-                },
-                //{ label: "Hold", from: "#f1c40f", to: "#f39c12" },
-                {
-                  label: "Finish",
-                  from: "#3498db",
-                  to: "#2980b9",
-                  onClick: async () => {
+          {/* ── ACTION BUTTONS ── */}
+          <Box sx={{ px: 2, pb: 3, pt: 1 }}>
+
+            {/* ─── PRIMARY: Start / Finish ─── */}
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 2.5 }}>
+              {!isWorking && !hasFinished && (
+                <Button
+                  onClick={() => setOpenEmpModal(true)}
+                  variant="contained"
+                  startIcon={<PlayArrowRoundedIcon />}
+                  sx={{
+                    background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                    borderRadius: "14px",
+                    minWidth: 200,
+                    height: 64,
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: "#fff",
+                    textTransform: "none",
+                    letterSpacing: 0.5,
+                    boxShadow: "0 4px 14px rgba(34,197,94,0.4)",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 20px rgba(34,197,94,0.5)",
+                    },
+                    "&:active": { transform: "scale(0.97)" },
+                  }}
+                >
+                  Start
+                </Button>
+              )}
+
+              {isWorking && (
+                <Button
+                  onClick={async () => {
                     const mapped = checkedCodes.map((code) => ({ code }));
                     setCheckList(mapped);
                     setIsWorking(false);
                     const isSuccess = await finishWork(mapped);
-                    if (isSuccess) {
-                      navigate(-1);
+                    if (isSuccess) { navigate(-1); }
+                  }}
+                  variant="contained"
+                  startIcon={<CheckCircleOutlineIcon />}
+                  sx={{
+                    background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+                    borderRadius: "14px",
+                    minWidth: 200,
+                    height: 64,
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: "#fff",
+                    textTransform: "none",
+                    letterSpacing: 0.5,
+                    boxShadow: "0 4px 14px rgba(59,130,246,0.4)",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 20px rgba(59,130,246,0.5)",
+                    },
+                    "&:active": { transform: "scale(0.97)" },
+                  }}
+                >
+                  Finish
+                </Button>
+              )}
+            </Box>
+
+            {/* ─── Divider ─── */}
+            <Divider sx={{ mb: 2, borderColor: "rgba(0,0,0,0.06)" }} />
+
+            {/* ─── SECONDARY: Check List, Completed, Remark ─── */}
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5, mb: 2, flexWrap: "wrap" }}>
+              {["0010", "0030", "0070"].includes(normalizedOp ?? "") && (
+                <Button
+                  onClick={async () => {
+                    setChecklistLoading(true);
+                    try {
+                      const res = await fetch("http://localhost:5174/api/v1/checklist/token", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          orderId: orderId ?? "",
+                          updatedBy: (() => {
+                            try {
+                              const p = localStorage.getItem("profile");
+                              return p ? JSON.parse(p).employee_id ?? "unknown" : "unknown";
+                            } catch { return "unknown"; }
+                          })(),
+                        }),
+                      });
+                      const data = await res.json();
+                      setChecklistToken(data.token);
+                      setOpenChecklist(true);
+                    } catch (err) {
+                      console.error("❌ Failed to get checklist token:", err);
+                    } finally {
+                      setChecklistLoading(false);
                     }
+                  }}
+                  variant="outlined"
+                  startIcon={<FactCheckIcon />}
+                  sx={{
+                    borderRadius: "12px",
+                    minWidth: 150,
+                    height: 48,
+                    fontSize: 15,
+                    fontWeight: 600,
+                    textTransform: "none",
+                    borderColor: "#3b82f6",
+                    color: "#3b82f6",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      borderColor: "#2563eb",
+                      backgroundColor: "rgba(59,130,246,0.06)",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  Check List
+                </Button>
+              )}
+
+              <Button
+                onClick={completed}
+                variant="outlined"
+                startIcon={<AssignmentTurnedInIcon />}
+                sx={{
+                  borderRadius: "12px",
+                  minWidth: 150,
+                  height: 48,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  borderColor: "#8b5cf6",
+                  color: "#8b5cf6",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    borderColor: "#7c3aed",
+                    backgroundColor: "rgba(139,92,246,0.06)",
+                    transform: "translateY(-1px)",
                   },
-                },
-                {
-                  label: "Completed",
-                  from: "#9b59b6",
-                  to: "#8e44ad",
-                  onClick: checkListWork,
-                },
-                {
-                  label: "Completed.",
-                  from: "#2980b9",
-                  to: "#2471a3",
-                  onClick: completed,
-                  hide: normalizedOp !== "0090",
-                },
-                {
-                  label: "Return",
-                  from: "#e74c3c",
-                  to: "#c0392b",
-                  onClick: returnWork,
-                },
-                {
-                  label: "Remark",
-                  from: "purple",
-                  to: "blue",
-                  onClick: () => setOpenRemark(true),
-                },
-                {
-                  label: "Qc Return",
-                  from: "red",
-                  to: "blue",
-                  onClick: qcReturnWork,
-                },
-              ]
-                .filter((btn) => !btn.hide)
-                .map((btn, index) => (
-                  <Button
-                    key={index}
-                    onClick={btn.onClick}
-                    variant="contained"
-                    sx={{
-                      background: `linear-gradient(135deg, ${btn.from}, ${btn.to})`,
-                      borderRadius: "16px",
-                      width: 180,
-                      height: 70,
-                      padding: 0,
-                      fontSize: 20,
-                      fontWeight: 700,
-                      color: "#fff",
-                      textTransform: "none",
+                }}
+              >
+                Completed
+              </Button>
 
-                      boxShadow: `
-            0px 4px 15px rgba(0,0,0,0.25),
-            inset 0px 1px 4px rgba(255,255,255,0.25),
-            inset 0px -3px 6px rgba(0,0,0,0.2)
-          `,
+              <Button
+                onClick={() => setOpenRemark(true)}
+                variant="outlined"
+                startIcon={<StickyNote2OutlinedIcon />}
+                sx={{
+                  borderRadius: "12px",
+                  minWidth: 150,
+                  height: 48,
+                  fontSize: 15,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  borderColor: "#64748b",
+                  color: "#64748b",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    borderColor: "#475569",
+                    backgroundColor: "rgba(100,116,139,0.06)",
+                    transform: "translateY(-1px)",
+                  },
+                }}
+              >
+                Remark
+              </Button>
+            </Box>
 
-                      transition: "0.25s ease",
-                      "&:hover": {
-                        transform: "translateY(-4px) scale(1.03)",
-                        boxShadow: `
-              0px 10px 25px rgba(0,0,0,0.35),
-              inset 0px 1px 4px rgba(255,255,255,0.3),
-              inset 0px -3px 6px rgba(0,0,0,0.25)
-            `,
-                      },
+            {/* ─── DANGER: Return, Qc Return ─── */}
+            <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5, flexWrap: "wrap" }}>
+              <Button
+                onClick={returnWork}
+                variant="outlined"
+                startIcon={<ReplayIcon />}
+                sx={{
+                  borderRadius: "12px",
+                  minWidth: 150,
+                  height: 44,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  borderColor: "#ef4444",
+                  color: "#ef4444",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    borderColor: "#dc2626",
+                    backgroundColor: "rgba(239,68,68,0.06)",
+                    transform: "translateY(-1px)",
+                  },
+                }}
+              >
+                Return
+              </Button>
 
-                      "&:active": {
-                        transform: "scale(0.98)",
-                        boxShadow: `
-              0px 2px 10px rgba(0,0,0,0.25),
-              inset 0px 3px 8px rgba(0,0,0,0.3)
-            `,
-                      },
-                    }}
-                  >
-                    {btn.label}
-                  </Button>
-                ))}
-            </Stack>
-          </div>
+              <Button
+                onClick={qcReturnWork}
+                variant="outlined"
+                startIcon={<UndoIcon />}
+                sx={{
+                  borderRadius: "12px",
+                  minWidth: 150,
+                  height: 44,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  borderColor: "#ef4444",
+                  color: "#ef4444",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    borderColor: "#dc2626",
+                    backgroundColor: "rgba(239,68,68,0.06)",
+                    transform: "translateY(-1px)",
+                  },
+                }}
+              >
+                QC Return
+              </Button>
+            </Box>
+
+          </Box>
         </CustomTabPanel>
 
 
@@ -1178,7 +1303,7 @@ export default function WorkStation() {
               <Button
                 variant="contained"
                 onClick={() => {
-                  navigate("/TableSparePart", { state: { item_component } });
+                  navigate(`/TableSparePart/${orderId}`);
                 }}
                 sx={{
                   textTransform: "none",
@@ -1468,6 +1593,78 @@ export default function WorkStation() {
           }}
         />
 
+
+        {/* Station Checklist Dialog (iframe embed) */}
+        <Dialog
+          open={openChecklist}
+          onClose={() => setOpenChecklist(false)}
+          fullWidth
+          maxWidth={normalizedOp === "0010" ? "sm" : "lg"}
+          PaperProps={{
+            sx: {
+              borderRadius: 3,
+              maxHeight: "90vh",
+            },
+          }}
+        >
+          <Button
+            onClick={() => setOpenChecklist(false)}
+            color="inherit"
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              minWidth: 36,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              fontSize: "1.2rem",
+              zIndex: 1,
+              color: "#64748B",
+              "&:hover": { backgroundColor: "rgba(0,0,0,0.08)" },
+            }}
+          >
+            ✕
+          </Button>
+          <DialogContent sx={{ p: 0 }}>
+            {checklistToken ? (
+              normalizedOp === "0010" ? (
+                /* Inspector — ติ๊กเปลี่ยน/ล้าง */
+                <iframe
+                  src={`http://localhost:5174/checklist/embed-inspector?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(normalizedOp ?? "")}`}
+                  width="100%"
+                  height="600px"
+                  style={{ border: "none" }}
+                  title="Station Checklist"
+                />
+              ) : (
+                /* Station อื่น — แสดง 2 iframe คู่กัน */
+                <Box sx={{ display: "flex", width: "100%", height: "600px" }}>
+                  {/* งานจาก Inspector (read-only) */}
+                  <iframe
+                    src={`http://localhost:5174/checklist/embed-work?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}`}
+                    width="50%"
+                    height="100%"
+                    style={{ border: "none", borderRight: "1px solid #E2E8F0" }}
+                    title="Inspector Work"
+                  />
+                  {/* Checklist กรอกงาน */}
+                  <iframe
+                    src={`http://localhost:5174/checklist/embed?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}`}
+                    width="50%"
+                    height="100%"
+                    style={{ border: "none" }}
+                    title="Station Checklist"
+                  />
+                </Box>
+              )
+            ) : (
+              <Box sx={{ p: 4, textAlign: "center" }}>
+                <CircularProgress size={32} />
+              </Box>
+            )}
+          </DialogContent>
+        </Dialog>
 
         <EmployeeMultiSelectModal
           open={openEmpModal}

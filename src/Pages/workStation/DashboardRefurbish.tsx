@@ -269,7 +269,8 @@ const DashboardRefurbish = () => {
         navigate(`/WorkStation/${row.original.orderid}/${row.original.worK_ORDER_OPERATION_ID}`, {
           state: {
             current_operation: row.original.current_operation,
-            title: step?.title
+            title: step?.title,
+            station: step?.station,
           },
         });
       },

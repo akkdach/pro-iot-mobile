@@ -1,6 +1,7 @@
 import axios from "axios";
 import { splitDate } from "../Utility/DatetimeService";
 import callApi from "./callApi";
+import { renameImageFile } from "./renameImageFile";
 
 interface UploadImageParams {
     orderId: string;
@@ -39,14 +40,19 @@ export default async function callUploadImage(params: UploadImageParams) {
 
     const { year, month } = splitDate(startDate);
 
-    // 2) build FormData
+    // 2) rename file → {orderId}_{imageKey}_{timestamp}.{ext}
+    const renamedFile = params.imageKey
+        ? renameImageFile(params.image, params.orderId, params.imageKey)
+        : params.image;
+
+    // 3) build FormData
     const formData = new FormData();
     formData.append("tradCode", params.tradCode ?? "refurbish");
     formData.append("orderType", params.orderType ?? data[0]?.ordeR_TYPE ?? "01");
     formData.append("year", year);
     formData.append("month", month);
     formData.append("orderId", params.orderId);
-    formData.append("image", params.image, params.image.name);
+    formData.append("image", renamedFile, renamedFile.name);
 
     // 3) ยิง axios ตรงไป external upload server
     try {

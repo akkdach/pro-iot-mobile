@@ -12,10 +12,28 @@ export const formatDate = (
 ): string => {
   if (!utcDate) return "ไม่มีข้อมูล";
 
-  const date = new Date(utcDate);
+  let date: Date;
+
+  if (typeof utcDate === "string") {
+    // ถ้า string ไม่มี timezone (Z หรือ +) → parse เป็น local time
+    const s = utcDate.trim();
+    if (!s.includes("Z") && !s.includes("+") && !s.match(/\d{2}-\d{2}:\d{2}$/)) {
+      // แทนที่ T ด้วย space เพื่อบังคับ local time parsing
+      const parts = s.match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2}):?(\d{2})?/);
+      if (parts) {
+        const [, Y, Mo, D, H, Mi, S = "0"] = parts;
+        date = new Date(Number(Y), Number(Mo) - 1, Number(D), Number(H), Number(Mi), Number(S));
+      } else {
+        date = new Date(s);
+      }
+    } else {
+      date = new Date(s);
+    }
+  } else {
+    date = new Date(utcDate);
+  }
 
   if (isNaN(date.getTime())) return "ไม่มีข้อมูล";
-
 
   return date.toLocaleString("th-TH", {
     timeZone: "Asia/Bangkok",

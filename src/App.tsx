@@ -47,9 +47,25 @@ import DetailEachOrder from './Pages/Defect/DetailEachOrder';
 import QuizQuest from './Pages/Quiz/QuizQuest';
 import DashboardQuiz from './Pages/Quiz/DashboardQuiz';
 import NespressReceiveMachine from './Pages/Nespresso/NespressReceiveMachine';
+import ChecklistEmbed from './Pages/workStation/ChecklistEmbed';
 
 const token = localStorage.getItem('token');
+
+// ── ตรวจว่ากำลังอยู่ใน embed mode หรือเปล่า ──
+const isEmbedRoute = window.location.pathname.startsWith('/checklist/embed');
+
 function App() {
+  // ── Embed mode: render เฉพาะ ChecklistEmbed โดยไม่มี Layout / auth ──
+  if (isEmbedRoute) {
+    return (
+      <div className="App">
+        <Routes>
+          <Route path="/checklist/embed" element={<ChecklistEmbed />} />
+        </Routes>
+      </div>
+    );
+  }
+
   return (
     <div className="App">
 
@@ -78,7 +94,7 @@ function App() {
           <Route path="ActionPage" element={<ActionPage />}></Route>
           <Route path="SparePart" element={<SparePart />}></Route>
           <Route path="TestContextPage" element={<TestContextPage />}></Route>
-          <Route path="TableSparePart" element={<TableSparePart />}></Route>
+          <Route path="TableSparePart/:orderId" element={<TableSparePart />}></Route>
           <Route path="StockReport" element={<StockReport />}></Route>
           <Route path="StockReportItem/:resId" element={<StockReportItem />}></Route>
           <Route path="AddSpareFromStock" element={<AddSpareFromStock />}></Route>

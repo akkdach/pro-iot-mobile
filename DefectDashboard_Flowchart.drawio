@@ -1,0 +1,98 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.3.6">
+  <diagram name="DefectDashboard" id="defect-dashboard-flow">
+    <mxGraphModel dx="1042" dy="527" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" value="&lt;b&gt;ระบบ Defect Dashboard&lt;/b&gt;&lt;br&gt;หน้า DefectDashboard" vertex="1">
+          <mxGeometry height="50" width="220" x="330" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_user" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" value="User" vertex="1">
+          <mxGeometry height="700" width="360" x="80" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_system" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" value="System" vertex="1">
+          <mxGeometry height="700" width="360" x="440" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="u_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="เริ่มต้น" vertex="1">
+          <mxGeometry height="50" width="120" x="190" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="u_enter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="เข้าหน้า&#xa;Defect Dashboard" vertex="1">
+          <mxGeometry height="50" width="120" x="190" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="u_decision" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="โหลดข้อมูล&#xa;สำเร็จ?" vertex="1">
+          <mxGeometry height="80" width="110" x="195" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="u_error" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="แสดง Error" vertex="1">
+          <mxGeometry height="40" width="100" x="100" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="u_action" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="เลือก Action" vertex="1">
+          <mxGeometry height="80" width="110" x="195" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="u_detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="ไปหน้า&#xa;DetailEachOrder" vertex="1">
+          <mxGeometry height="50" width="120" x="100" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="u_confirm" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="ยืนยัน&#xa;Approve / Rework" vertex="1">
+          <mxGeometry height="50" width="120" x="280" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="s_get" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="GET&#xa;/WorkOrderList/Defect" vertex="1">
+          <mxGeometry height="50" width="150" x="550" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="s_display" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="แสดง Dashboard&#xa;Summary Card +&#xa;Defect Order Cards" vertex="1">
+          <mxGeometry height="60" width="150" x="550" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="s_post" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="POST&#xa;approve / notApprove" vertex="1">
+          <mxGeometry height="50" width="150" x="550" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="s_reload" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="Reload ข้อมูลใหม่" vertex="1">
+          <mxGeometry height="40" width="150" x="550" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="u_start" style="edgeStyle=orthogonalEdgeStyle;" target="u_enter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="u_enter" style="edgeStyle=orthogonalEdgeStyle;" target="s_get">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="s_get" style="edgeStyle=orthogonalEdgeStyle;" target="u_decision">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="u_decision" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="u_error" value="no">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="u_decision" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="s_display" value="yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="s_display" style="edgeStyle=orthogonalEdgeStyle;" target="u_action">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="u_action" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="u_detail" value="เปิด Card">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="u_action" style="edgeStyle=orthogonalEdgeStyle;fontSize=10;" target="u_confirm" value="Approve/Rework">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="u_confirm" style="edgeStyle=orthogonalEdgeStyle;" target="s_post">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="s_post" style="edgeStyle=orthogonalEdgeStyle;" target="s_reload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="s_reload" style="edgeStyle=orthogonalEdgeStyle;curved=1;" target="u_enter">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="750" y="680" />
+              <mxPoint x="750" y="160" />
+              <mxPoint x="250" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="u_error" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="u_enter">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100" y="245" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
