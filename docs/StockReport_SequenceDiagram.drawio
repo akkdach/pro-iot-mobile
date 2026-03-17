@@ -1,0 +1,235 @@
+<mxfile host="app.diagrams.net" modified="2026-03-17T07:42:00.000Z" agent="Antigravity" version="24.0.0" type="device">
+  <diagram id="seq-stockreport" name="StockReport Sequence Diagram">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== Actors / Participants ===== -->
+        <!-- User -->
+        <mxCell id="user_head" value="" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#003264;strokeColor=#003264;" vertex="1" parent="1">
+          <mxGeometry x="80" y="40" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="user_body" value="" style="shape=mxgraph.basic.orthogonal_triangle;whiteSpace=wrap;html=1;rotation=-180;fillColor=#003264;strokeColor=#003264;" vertex="1" parent="1">
+          <mxGeometry x="75" y="70" width="40" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="user_label" value="&lt;b&gt;User&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="70" y="10" width="50" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="user_line" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="95" y="105" as="sourcePoint" />
+            <mxPoint x="95" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- StockReport UI -->
+        <mxCell id="ui_box" value="&lt;b&gt;StockReport UI&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1cc4c4;fontColor=#ffffff;strokeColor=#0e9f9f;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="280" y="30" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="ui_line" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="75" as="sourcePoint" />
+            <mxPoint x="350" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- React State -->
+        <mxCell id="state_box" value="&lt;b&gt;React State&lt;/b&gt;&lt;br&gt;(useState / useMemo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#004a93;fontColor=#ffffff;strokeColor=#003264;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="560" y="25" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="state_line" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="75" as="sourcePoint" />
+            <mxPoint x="640" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Backend API -->
+        <mxCell id="api_box" value="&lt;b&gt;Backend API&lt;/b&gt;&lt;br&gt;callApi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dc2626;fontColor=#ffffff;strokeColor=#b91c1c;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="860" y="25" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="api_line" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="930" y="75" as="sourcePoint" />
+            <mxPoint x="930" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Router -->
+        <mxCell id="router_box" value="&lt;b&gt;React Router&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#059669;fontColor=#ffffff;strokeColor=#047857;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="30" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="router_line" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1185" y="75" as="sourcePoint" />
+            <mxPoint x="1185" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== SECTION 1: Page Load ===== -->
+        <mxCell id="section1" value="📥  Page Load" style="shape=mxgraph.basic.banner;whiteSpace=wrap;html=1;fillColor=#003264;fontColor=#ffffff;strokeColor=#002244;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="120" width="200" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- User opens page -->
+        <mxCell id="m1" value="เปิดหน้า /StockReport" style="endArrow=block;html=1;strokeColor=#003264;strokeWidth=2;fontSize=11;fontStyle=1;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="95" y="175" as="sourcePoint" />
+            <mxPoint x="350" y="175" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- UI → State: init -->
+        <mxCell id="m2" value="useEffect → setLoading(true)" style="endArrow=block;html=1;strokeColor=#004a93;strokeWidth=2;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="205" as="sourcePoint" />
+            <mxPoint x="640" y="205" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- State → API: GET -->
+        <mxCell id="m3" value="GET /WorkOrderList/stockReport" style="endArrow=block;html=1;strokeColor=#dc2626;strokeWidth=2;fontSize=11;fontStyle=1;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="240" as="sourcePoint" />
+            <mxPoint x="930" y="240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- API → State: response -->
+        <mxCell id="m4" value="{ dataResult: StockReportItem[] }" style="endArrow=block;html=1;strokeColor=#dc2626;strokeWidth=2;dashed=1;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="930" y="275" as="sourcePoint" />
+            <mxPoint x="640" y="275" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- State: setData -->
+        <mxCell id="m5_box" value="setData(dataResult)&lt;br&gt;setLoading(false)&lt;br&gt;useMemo → filtered, kpi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#004a93;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="560" y="295" width="170" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- State → UI: render -->
+        <mxCell id="m6" value="Render KPI + Filters + Table" style="endArrow=block;html=1;strokeColor=#1cc4c4;strokeWidth=2;dashed=1;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="370" as="sourcePoint" />
+            <mxPoint x="350" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== SECTION 2: Filter / Search ===== -->
+        <mxCell id="section2" value="🔍  Filter / Search" style="shape=mxgraph.basic.banner;whiteSpace=wrap;html=1;fillColor=#003264;fontColor=#ffffff;strokeColor=#002244;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="410" width="220" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- User types -->
+        <mxCell id="m7" value="พิมพ์ keyword / เลือก WC / Plant" style="endArrow=block;html=1;strokeColor=#003264;strokeWidth=2;fontSize=11;fontStyle=1;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="95" y="465" as="sourcePoint" />
+            <mxPoint x="350" y="465" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- UI → State: set filters -->
+        <mxCell id="m8" value="setQ(), setWorkCenter(), setPlant()" style="endArrow=block;html=1;strokeColor=#004a93;strokeWidth=2;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="495" as="sourcePoint" />
+            <mxPoint x="640" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- State recalc -->
+        <mxCell id="m9_box" value="useMemo → filtered&lt;br&gt;useMemo → kpi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f0fe;strokeColor=#004a93;fontSize=11;align=center;" vertex="1" parent="1">
+          <mxGeometry x="575" y="515" width="140" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- State → UI -->
+        <mxCell id="m10" value="Re-render table + KPI" style="endArrow=block;html=1;strokeColor=#1cc4c4;strokeWidth=2;dashed=1;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="575" as="sourcePoint" />
+            <mxPoint x="350" y="575" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== SECTION 3: Double-click → Dialog ===== -->
+        <mxCell id="section3" value="👁️  Double-click → Detail Dialog" style="shape=mxgraph.basic.banner;whiteSpace=wrap;html=1;fillColor=#003264;fontColor=#ffffff;strokeColor=#002244;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="615" width="290" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m11" value="Double-click row" style="endArrow=block;html=1;strokeColor=#003264;strokeWidth=2;fontSize=11;fontStyle=1;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="95" y="670" as="sourcePoint" />
+            <mxPoint x="350" y="670" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m12" value="setSelected(row), setOpen(true)" style="endArrow=block;html=1;strokeColor=#004a93;strokeWidth=2;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="700" as="sourcePoint" />
+            <mxPoint x="640" y="700" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m13" value="Show Dialog&lt;br&gt;(ID, WC, Plant, Date, Description)" style="endArrow=block;html=1;strokeColor=#1cc4c4;strokeWidth=2;dashed=1;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="735" as="sourcePoint" />
+            <mxPoint x="350" y="735" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m14" value="Close Dialog" style="endArrow=block;html=1;strokeColor=#003264;strokeWidth=2;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="95" y="770" as="sourcePoint" />
+            <mxPoint x="350" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m15" value="setOpen(false)" style="endArrow=block;html=1;strokeColor=#004a93;strokeWidth=2;fontSize=11;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="800" as="sourcePoint" />
+            <mxPoint x="640" y="800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== SECTION 4: Navigate to Detail ===== -->
+        <mxCell id="section4" value="📄  Click &quot;รายละเอียด&quot;" style="shape=mxgraph.basic.banner;whiteSpace=wrap;html=1;fillColor=#003264;fontColor=#ffffff;strokeColor=#002244;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="840" width="250" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m16" value="Click &quot;รายละเอียด&quot; button" style="endArrow=block;html=1;strokeColor=#003264;strokeWidth=2;fontSize=11;fontStyle=1;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="95" y="895" as="sourcePoint" />
+            <mxPoint x="350" y="895" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m17" value="navigate(&quot;/StockReportItem/{reS_ID}&quot;)" style="endArrow=block;html=1;strokeColor=#059669;strokeWidth=2;fontSize=11;fontStyle=1;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="925" as="sourcePoint" />
+            <mxPoint x="1185" y="925" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== SECTION 5: Add Spare ===== -->
+        <mxCell id="section5" value="➕  Click &quot;เพิ่มรายการ&quot;" style="shape=mxgraph.basic.banner;whiteSpace=wrap;html=1;fillColor=#003264;fontColor=#ffffff;strokeColor=#002244;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="960" width="250" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m18" value="Click &quot;เพิ่มรายการ&quot; button" style="endArrow=block;html=1;strokeColor=#003264;strokeWidth=2;fontSize=11;fontStyle=1;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="95" y="1015" as="sourcePoint" />
+            <mxPoint x="350" y="1015" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m19" value="navigate(&quot;/AddSpareFromStock&quot;)" style="endArrow=block;html=1;strokeColor=#059669;strokeWidth=2;fontSize=11;fontStyle=1;endFill=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="350" y="1045" as="sourcePoint" />
+            <mxPoint x="1185" y="1045" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
