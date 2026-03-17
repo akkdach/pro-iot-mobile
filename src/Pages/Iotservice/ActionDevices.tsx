@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-  Box,
-  Typography,
-  Button,
   CircularProgress,
-  Container,
   TextField,
   InputAdornment,
   IconButton,
@@ -14,18 +10,19 @@ import SensorsIcon from '@mui/icons-material/Sensors';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import StopIcon from '@mui/icons-material/Stop';
 import QrCode2Icon from '@mui/icons-material/QrCode2';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import callDevice from '../../Services/callDevice';
 import WifiIndicator from '../../Component/WifiIndicator';
 import BatteryIndicator from '../../Component/BatteryIndicator';
-import IotHeader from './HeaderIot';
 import Swal from 'sweetalert2';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import Countdown from '../../Component/Countdown';
 import QRScanner from '../../Component/QRScanner';
-
+import './ActionPages.css';
 
 export default function DeviceAction() {
   const { simEmi } = useParams();
@@ -40,12 +37,9 @@ export default function DeviceAction() {
   const [openScanner, setOpenScanner] = useState(false);
   const [orderId, setOrderId] = useState('');
 
-
-
   useEffect(() => {
     async function fetchDeviceInfo() {
       try {
-        // 1. หาค่า id จาก simEmi ก่อน
         const allDevices = await callDevice.get('/get_Devices_by_sn/' + simEmi);
         const match = allDevices.data.dataResult.devices;
         if (!match) {
@@ -59,11 +53,7 @@ export default function DeviceAction() {
         const deviceNo = match.deviceNo;
         const orderId = match.orderId;
 
-        setDeviceInfo({ deviceNo, orderId }); // เก็บ deviceNo, orderId สำหรับปุ่ม Start/Stop
-
-        // 2. ใช้ id เรียกข้อมูลละเอียด
-        // const workOrderRes = await callDevice.get(`/get_Devices/${deviceId}`);
-        // const deviceData = workOrderRes.data.dataResult;
+        setDeviceInfo({ deviceNo, orderId });
 
         if (match) {
           setBattValue(parseFloat(match?.battValue) || 0);
@@ -82,27 +72,17 @@ export default function DeviceAction() {
   }, []);
 
   const handleCountDown = async (action: 'Start' | 'Stop') => {
-
-    let stopTimeLocal: string | null = null;
-
-    if (stopTime) {
-      const combined = new Date();
-      combined.setHours(stopTime.hour(), stopTime.minute(), 0, 0);
-      stopTimeLocal = combined.toString();
-    }
-
     if (action === 'Start') {
       const now = new Date().toISOString();
-      setStartAt(now); // 👈 เก็บเวลาปัจจุบันไว้
+      setStartAt(now);
       if (stopTime) {
         setCountdownTarget(stopTime.toISOString());
       }
     }
-
     if (action === 'Stop') {
       setCountdownTarget(null);
     }
-  }
+  };
 
   const handleAction = async (action: 'Start' | 'Stop') => {
     if (!deviceInfo) return;
@@ -117,8 +97,7 @@ export default function DeviceAction() {
     }
     const now = new Date().toISOString();
     if (action === 'Start') {
-
-      setStartAt(now); // 👈 เก็บเวลาปัจจุบันไว้
+      setStartAt(now);
       if (stopTime) {
         setCountdownTarget(stopTime.toISOString());
       }
@@ -155,10 +134,8 @@ export default function DeviceAction() {
           confirmButtonColor: '#d33',
         });
       }
-
     } catch (error) {
       console.error(`Failed to ${action} device ${simEmi}:`, error);
-
       Swal.fire({
         icon: 'error',
         title: `เกิดข้อผิดพลาด`,
@@ -169,189 +146,185 @@ export default function DeviceAction() {
   };
 
   const handleInputChange = async (e: any) => {
-    const { name, value } = e.target
-    var newData: any = { ...deviceInfo, [name]: value }
+    const { name, value } = e.target;
+    var newData: any = { ...deviceInfo, [name]: value };
     setDeviceInfo(newData);
-  }
+  };
 
+  // Countdown display helper
+  const getCountdownDisplay = () => {
+    if (!countdownTarget) return null;
+    const diff = +new Date(countdownTarget) - +new Date();
+    if (diff <= 0) return '00:00:00';
+    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const m = Math.floor((diff / (1000 * 60)) % 60);
+    const s = Math.floor((diff / 1000) % 60);
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="action-loading">
+        <CircularProgress size={48} sx={{ color: '#1cc4c4' }} />
+        <span className="action-loading-text">Loading device info...</span>
+      </div>
+    );
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <>
-        <Box sx={{ p: 2, mb: -6 }}>
-          <Container maxWidth="sm" sx={{ py: 3, mt: -8 }}>
-            {loading ? (
-              <CircularProgress />
-            ) : (
-              <>
-                <SensorsIcon sx={{ fontSize: 60, color: '#1cc4c4', mb: 1 }} />
-                <Typography variant="h5" sx={{ fontWeight: 600, color: '#003264', mb: 1 }}>
-                  Device Control
-                </Typography>
-                <Typography variant="subtitle1" color="textSecondary" sx={{ mb: 1 }}>
-                  Device No. : {simEmi}
-                </Typography>
+      <div>
+        {/* Device Hero */}
+        <div className="device-hero">
+          <div className="hero-icon-ring">
+            <SensorsIcon style={{ fontSize: 42, color: '#1cc4c4' }} />
+          </div>
+          <span className="hero-device-label">Device No.</span>
+          <span className="hero-device-number">{simEmi}</span>
+          <span className="hero-subtitle">Device Control Panel</span>
+        </div>
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                  <Typography color="textSecondary" sx={{ fontWeight: 500, }}>
-                    Order ID : {deviceInfo?.orderId || '-'}
-                  </Typography>
-                </Box>
+        {/* Info Card */}
+        <div className="info-card">
+          <div className="info-card-title">Device Information</div>
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                  <Typography color="textSecondary" sx={{ fontWeight: 500, }}>
-                    Start Time : {StartAt ? new Date(StartAt).toLocaleString('th-TH') : '-'}
-                  </Typography>
-                </Box>
+          <div className="info-card-row">
+            <div className="info-card-icon">
+              <AssignmentIcon style={{ fontSize: 17, color: '#6b7fa3' }} />
+            </div>
+            <span className="info-card-label">Order ID</span>
+            <span className="info-card-value">{deviceInfo?.orderId || '—'}</span>
+          </div>
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
-                  <Typography color="textSecondary" sx={{ fontWeight: 500 }}>
-                    Finish Time : {
-                      stopTime
-                        ? stopTime.format('D/M/YYYY HH:mm:ss')
-                        : FinishAt
-                          ? new Date(FinishAt).toLocaleString('th-TH')
-                          : '-'
-                    }
-                  </Typography>
-                </Box>
+          <div className="info-card-row">
+            <div className="info-card-icon">
+              <AccessTimeIcon style={{ fontSize: 17, color: '#6b7fa3' }} />
+            </div>
+            <span className="info-card-label">Start Time</span>
+            <span className="info-card-value">
+              {StartAt ? new Date(StartAt).toLocaleString('th-TH') : '—'}
+            </span>
+          </div>
 
-                {countdownTarget && (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 2 }}>
-                    <Countdown targetDate={countdownTarget} />
-                  </Box>
-                )}
+          <div className="info-card-row">
+            <div className="info-card-icon">
+              <EventAvailableIcon style={{ fontSize: 17, color: '#6b7fa3' }} />
+            </div>
+            <span className="info-card-label">Finish Time</span>
+            <span className="info-card-value">
+              {stopTime
+                ? stopTime.format('D/M/YYYY HH:mm:ss')
+                : FinishAt
+                  ? new Date(FinishAt).toLocaleString('th-TH')
+                  : '—'}
+            </span>
+          </div>
+        </div>
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
-                  <BatteryIndicator level={battValue ?? 0} />
-                  <WifiIndicator strength={rssiValue ?? 0} isConnected={true} />
-                </Box>
+        {/* Countdown */}
+        {countdownTarget && (
+          <div className="countdown-card">
+            <div className="countdown-label">Countdown</div>
+            <div className="countdown-timer">{getCountdownDisplay()}</div>
+          </div>
+        )}
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', }}>
-                  <TextField
-                    name="orderId"
-                    value={orderId}
-                    onChange={(e) => {
-                      setOrderId(e.target.value);
-                      handleInputChange(e);
-                    }}
-                    variant="outlined"
-                    placeholder="Enter OrderID"
-                    sx={{
-                      height: 50,
-                      fontWeight: 500,
-                      wordBreak: 'break-word',
-                      overflowWrap: 'break-word',
-                      maxWidth: '100%',
-                      width: 300,
-                      mb: 2,
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '12px',
-                        backgroundColor: '#ffffff',
-                        boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
-                        '& fieldset': {
-                          borderColor: '#ddd',
-                        },
-                      },
-                      '& input': {
-                        padding: '12px 14px',
-                      },
-                    }}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton edge="end" size="small" onClick={() => setOpenScanner(true)}>
-                            <QrCode2Icon />
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Box>
+        {/* Indicators */}
+        <div className="indicators-row">
+          <BatteryIndicator level={battValue ?? 0} />
+          <WifiIndicator strength={rssiValue ?? 0} isConnected={true} />
+        </div>
 
-                {openScanner && (
-                  <QRScanner
-                    open={openScanner}
-                    onClose={() => setOpenScanner(false)}
-                    onScan={(value) => {
-                      setOrderId(value);
-                      handleInputChange({ target: { name: 'orderId', value } });
-                    }}
-                  />
-                )}
+        {/* Form Inputs */}
+        <div className="form-section">
+          <TextField
+            name="orderId"
+            value={orderId}
+            onChange={(e) => {
+              setOrderId(e.target.value);
+              handleInputChange(e);
+            }}
+            variant="outlined"
+            placeholder="Enter Order ID"
+            className="styled-input"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '14px',
+                backgroundColor: '#ffffff',
+                boxShadow: '0px 2px 12px rgba(0, 50, 100, 0.06)',
+                '& fieldset': { borderColor: 'rgba(0, 50, 100, 0.1)' },
+                '&:hover fieldset': { borderColor: '#1cc4c4' },
+                '&.Mui-focused fieldset': { borderColor: '#1cc4c4' },
+              },
+              '& input': { padding: '14px 16px' },
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton edge="end" size="small" onClick={() => setOpenScanner(true)}>
+                    <QrCode2Icon sx={{ color: '#6b7fa3' }} />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
+          {openScanner && (
+            <QRScanner
+              open={openScanner}
+              onClose={() => setOpenScanner(false)}
+              onScan={(value) => {
+                setOrderId(value);
+                handleInputChange({ target: { name: 'orderId', value } });
+              }}
+            />
+          )}
 
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 1 }}>
-                  <TimePicker
-                    label="เลือกเวลาหยุด (Stop Time)"
-                    value={stopTime}
-                    onChange={(newValue) => {
-                      console.log(newValue);
-                      setStopTime(newValue)
-                    }}
-                    ampm={false}
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                        InputProps: {
-                          sx: {
-                            height: 50,
-                            gap: 3,
-                            borderRadius: '12px',
-                            backgroundColor: '#ffffff',
-                            boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.05)',
-                            '& fieldset': {
-                              borderColor: '#ddd',
-                            },
-                            '& input': {
-                              padding: '12px 14px',
-                            },
-                          },
-                        },
-                        sx: {
-                          fontWeight: 500,
-                          wordBreak: 'break-word',
-                          overflowWrap: 'break-word',
-                          maxWidth: '100%',
-                          width: 300,
-                          mb: 1,
+          <TimePicker
+            label="Stop Time"
+            value={stopTime}
+            onChange={(newValue) => setStopTime(newValue)}
+            ampm={false}
+            slotProps={{
+              textField: {
+                className: 'styled-input',
+                sx: {
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '14px',
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0px 2px 12px rgba(0, 50, 100, 0.06)',
+                    '& fieldset': { borderColor: 'rgba(0, 50, 100, 0.1)' },
+                    '&:hover fieldset': { borderColor: '#1cc4c4' },
+                    '&.Mui-focused fieldset': { borderColor: '#1cc4c4' },
+                  },
+                  '& input': { padding: '14px 16px' },
+                },
+              },
+            }}
+          />
+        </div>
 
-                        },
-                      },
-                    }}
-                  /></Box>
+        {/* Action Buttons */}
+        <div className="action-buttons">
+          <button
+            className="action-btn start"
+            onClick={() => handleAction('Start')}
+            disabled={!deviceInfo}
+          >
+            <PowerSettingsNewIcon style={{ fontSize: 22 }} />
+            START DEVICE
+          </button>
 
-
-                <Button
-                  variant="contained"
-                  color="error"
-                  size="large"
-                  fullWidth
-                  sx={{ mb: 2, py: 0.2, fontSize: 18, borderRadius: 4, maxWidth: '100%', width: 300, }}
-                  startIcon={<StopIcon />}
-                  onClick={() => handleAction('Stop')}
-                  disabled={!deviceInfo}
-                >
-                  STOP DEVICE
-                </Button>
-
-                <Button
-                  variant="contained"
-                  color="success"
-                  size="large"
-                  fullWidth
-                  sx={{ mb: 1, py: 0.2, fontSize: 18, borderRadius: 4, maxWidth: '100%', width: 300 }}
-                  startIcon={<PowerSettingsNewIcon />}
-                  onClick={() => handleAction('Start')}
-                  disabled={!deviceInfo}
-                >
-                  START DEVICE
-                </Button>
-              </>
-            )}
-          </Container>
-        </Box>
-      </>
+          <button
+            className="action-btn stop"
+            onClick={() => handleAction('Stop')}
+            disabled={!deviceInfo}
+          >
+            <StopIcon style={{ fontSize: 22 }} />
+            STOP DEVICE
+          </button>
+        </div>
+      </div>
     </LocalizationProvider>
   );
 }
