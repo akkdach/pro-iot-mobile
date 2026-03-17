@@ -1,0 +1,191 @@
+<mxfile host="app.diagrams.net" agent="1.0" version="24.0.0">
+  <diagram name="TableSparePart" id="table-spare-part-flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="&lt;b&gt;ระบบ Spare Parts Inventory&lt;/b&gt;&lt;br&gt;หน้า TableSparePart" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="330" y="15" width="250" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Swimlane: User -->
+        <mxCell id="lane_user" value="User" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="60" y="70" width="400" height="790" as="geometry" />
+        </mxCell>
+
+        <!-- Swimlane: System -->
+        <mxCell id="lane_system" value="System / API" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="460" y="70" width="400" height="790" as="geometry" />
+        </mxCell>
+
+        <!-- ===== USER SIDE ===== -->
+
+        <!-- เริ่มต้น -->
+        <mxCell id="u_start" value="เริ่มต้น" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="120" width="120" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- เข้าหน้า -->
+        <mxCell id="u_enter" value="เข้าหน้า TableSparePart&#xa;(รับ orderId จาก URL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="185" y="195" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- แสดงรายการอะไหล่ -->
+        <mxCell id="u_display" value="แสดงรายการอะไหล่&#xa;(item_component)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="195" y="365" width="130" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- Decision: User Action -->
+        <mxCell id="u_action" value="User Action?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="210" y="450" width="100" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- เพิ่มอะไหล่ -->
+        <mxCell id="u_add" value="กดเพิ่มอะไหล่&#xa;→ เปิด Dialog&#xa;เลือกจากคลัง" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="570" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- เลือก + กำหนดจำนวน -->
+        <mxCell id="u_select" value="เลือกอะไหล่ +&#xa;กำหนด qty (+/-)&#xa;→ เพิ่มลง Cart" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="650" width="120" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- กดบันทึก -->
+        <mxCell id="u_save" value="กดบันทึก&#xa;(handleSave)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="80" y="730" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- แก้ไข qty -->
+        <mxCell id="u_edit" value="กดแก้ไข qty&#xa;(handleEditQty)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="280" y="570" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ลบอะไหล่ -->
+        <mxCell id="u_delete" value="กดลบอะไหล่&#xa;(handleDeleteItem)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="280" y="640" width="120" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ===== SYSTEM SIDE ===== -->
+
+        <!-- Load Data -->
+        <mxCell id="s_load" value="onInit:&#xa;1. GET /Mobile/RemainingSparepart&#xa;   (รายการอะไหล่ในคลัง)&#xa;2. GET /WorkOrderList&#xa;   /items_component/:orderId&#xa;   (อะไหล่เดิมใน Work Order)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="550" y="180" width="220" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- แสดง Spare Part + Cart -->
+        <mxCell id="s_display" value="แสดง:&#xa;- รายการอะไหล่ปัจจุบัน&#xa;- Cart สำหรับเพิ่มใหม่&#xa;- Dialog เลือกจากคลัง" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="570" y="340" width="180" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- POST Save -->
+        <mxCell id="s_save" value="POST /Mobile&#xa;/SetWorkOrderSparePart&#xa;?OrderId=xxx&#xa;(ส่ง payload ทั้ง cart)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="555" y="510" width="170" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- POST Edit -->
+        <mxCell id="s_edit" value="POST /Mobile&#xa;/SetWorkOrderSparePart&#xa;(แก้ qty ของ item เดียว)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="555" y="600" width="170" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- DELETE -->
+        <mxCell id="s_delete" value="deletePart()&#xa;→ ลบอะไหล่ออก" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="555" y="680" width="170" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Reload -->
+        <mxCell id="s_reload" value="Reload ข้อมูลใหม่&#xa;(onInit)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="770" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ===== ARROWS ===== -->
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_start" target="u_enter" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_enter" target="s_load" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="s_load" target="s_display" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="s_display" target="u_display" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_display" target="u_action" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e6" value="เพิ่มอะไหล่" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="u_action" target="u_add" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e7" value="แก้ไข qty" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="u_action" target="u_edit" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e8" value="ลบ" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="u_action" target="u_delete" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_add" target="u_select" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_select" target="u_save" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_save" target="s_save" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_edit" target="s_edit" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="u_delete" target="s_delete" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="s_save" target="s_reload" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="800" y="540" />
+              <mxPoint x="800" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="s_edit" target="s_reload" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="810" y="625" />
+              <mxPoint x="810" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;" edge="1" source="s_delete" target="s_reload" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Reload → loop back -->
+        <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;curved=1;" edge="1" source="s_reload" target="u_display" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="830" y="790" />
+              <mxPoint x="830" y="388" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
