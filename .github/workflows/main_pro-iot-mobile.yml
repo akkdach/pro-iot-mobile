@@ -27,6 +27,7 @@ jobs:
         env:
           CI: false
           REACT_APP_SERVICE_MANAGEMENT_URL: https://servicemanagement-eqg3bkfec8f5asg3.southeastasia-01.azurewebsites.net
+          REACT_APP_API_BASE_URL: https://service.bevproasia.com/api/v1
         run: |
           npm install --legacy-peer-deps
           npm run build
