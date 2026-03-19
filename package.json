@@ -30,6 +30,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^12.18.1",
     "html5-qrcode": "^2.3.8",
+    "jose": "^6.2.1",
     "leaflet": "^1.9.4",
     "material-react-table": "^3.2.1",
     "moment": "^2.30.1",
@@ -48,8 +49,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "npx env-cmd -f .env react-scripts start",
     "start:uat": "npx env-cmd -f .env.uat react-scripts start",
+    "start:local": "npx env-cmd -f .env.local react-scripts start",
     "build": "react-scripts build",
     "build:uat": "npx env-cmd -f .env.uat react-scripts build",
     "test": "react-scripts test",

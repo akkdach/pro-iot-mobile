@@ -1,0 +1,309 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36" version="29.6.1">
+  <diagram id="seq-add-spare-from-stock" name="AddSpareFromStock Sequence Diagram">
+    <mxGraphModel dx="1097" dy="591" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" value="Sequence Diagram: AddSpareFromStock" vertex="1">
+          <mxGeometry height="40" width="500" x="300" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_user" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" value="User" vertex="1">
+          <mxGeometry height="1550" width="120" x="80" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_ui" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=40;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" value="AddSpareFromStock&#xa;(React Component)" vertex="1">
+          <mxGeometry height="1550" width="160" x="340" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_api" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=40;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" value="Backend API&#xa;(callApi)" vertex="1">
+          <mxGeometry height="1550" width="140" x="640" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_swal" parent="1" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=40;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=14;" value="Database" vertex="1">
+          <mxGeometry height="1550" width="120" x="920" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="phase1" parent="1" style="text;html=1;fontSize=14;fontStyle=5;align=left;fillColor=#E8EAF6;rounded=1;strokeColor=#7986CB;spacingLeft=8;" value="1. Page Load" vertex="1">
+          <mxGeometry height="30" width="120" x="20" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="msg1" edge="1" parent="1" source="actor_user" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" target="actor_ui" value="เปิดหน้า AddSpareFromStock">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="250" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg2" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontStyle=1;fontColor=#1565C0;" target="actor_api" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="185" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg3" edge="1" parent="1" source="actor_api" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontColor=#2E7D32;" target="actor_ui" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="215" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg3b" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="245" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="phase2" parent="1" style="text;html=1;fontSize=14;fontStyle=5;align=left;fillColor=#E8EAF6;rounded=1;strokeColor=#7986CB;spacingLeft=8;" value="2. Select Work Center" vertex="1">
+          <mxGeometry height="30" width="170" x="20" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="msg4" edge="1" parent="1" source="actor_user" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" target="actor_ui" value="เลือก Work Center จาก dropdown">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="250" y="300" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg4b" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="335" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg5" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontStyle=1;fontColor=#1565C0;" target="actor_api" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="375" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg6" edge="1" parent="1" source="actor_api" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontColor=#2E7D32;" target="actor_ui" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg6b" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="445" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="phase3" parent="1" style="text;html=1;fontSize=14;fontStyle=5;align=left;fillColor=#E8EAF6;rounded=1;strokeColor=#7986CB;spacingLeft=8;" value="3. Open Dialog &amp; Select Items" vertex="1">
+          <mxGeometry height="30" width="210" x="20" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="msg7" edge="1" parent="1" source="actor_user" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" target="actor_ui" value="กด &quot;เลือกอะไหล่&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="250" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg7b" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg8" edge="1" parent="1" source="actor_user" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" target="actor_ui" value="พิมพ์ค้นหา Material / Description">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="250" y="565" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg8b" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="600" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg9" edge="1" parent="1" source="actor_user" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" target="actor_ui" value="กด &quot;เลือก&quot; → addOne(sp)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="250" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg9b" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="675" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="loop1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=120;height=20;fillColor=#F3E5F5;strokeColor=#AB47BC;fontSize=11;fontStyle=1;" value="loop [ปรับจำนวน]" vertex="1">
+          <mxGeometry height="100" width="500" x="50" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="msg10" edge="1" parent="1" source="actor_user" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" target="actor_ui" value="กด +/- หรือพิมพ์จำนวน">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="250" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg10b" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="775" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="phase4" parent="1" style="text;html=1;fontSize=14;fontStyle=5;align=left;fillColor=#E8EAF6;rounded=1;strokeColor=#7986CB;spacingLeft=8;" value="4. Save (handleSave)" vertex="1">
+          <mxGeometry height="30" width="170" x="20" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="msg11" edge="1" parent="1" source="actor_user" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" target="actor_ui" value="กด &quot;Save&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="250" y="865" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg11b" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="895" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg12" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontStyle=1;fontColor=#C62828;" target="actor_swal" value="Swal.fire({ icon: &quot;question&quot;, title: &quot;ยืนยันการบันทึก?&quot; })">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="700" y="930" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg12b" edge="1" parent="1" source="actor_swal" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#C62828;" target="actor_user" value="แสดง popup ยืนยัน&#xa;(จำนวนรายการ + จำนวนชิ้น)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="960" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt1" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;width=140;height=20;fillColor=#FFF3E0;strokeColor=#FF9800;fontSize=11;fontStyle=1;" value="alt [ยืนยัน / ยกเลิก]" vertex="1">
+          <mxGeometry height="540" width="1030" x="50" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="alt_label" parent="1" style="text;html=1;fontSize=11;fontStyle=3;align=left;fontColor=#2E7D32;spacingLeft=8;" value="[isConfirmed = true]" vertex="1">
+          <mxGeometry height="20" width="150" x="55" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="msg13" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontColor=#C62828;" target="actor_swal" value="Swal.fire({ title: &quot;กำลังบันทึก...&quot;, showLoading })">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="700" y="1040" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg14" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontStyle=1;fontColor=#1565C0;" target="actor_api" value="">
+          <mxGeometry relative="1" x="0.8654" y="25" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="1080" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg15" edge="1" parent="1" source="actor_api" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontColor=#2E7D32;" target="actor_ui" value="200 OK (success)">
+          <mxGeometry relative="1" x="-0.3824" y="-5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="1120" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg16" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontColor=#C62828;" target="actor_swal" value="Swal.close() → Swal.fire({ icon: &quot;success&quot; })">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="700" y="1155" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg16b" edge="1" parent="1" source="actor_swal" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#C62828;" target="actor_user" value="แสดง &quot;บันทึกสำเร็จ&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="1185" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg17" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="1220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt_divider" parent="1" style="line;strokeWidth=1;dashed=1;strokeColor=#FF9800;" value="" vertex="1">
+          <mxGeometry height="10" width="1030" x="50" y="1260" as="geometry" />
+        </mxCell>
+        <mxCell id="alt_label2" parent="1" style="text;html=1;fontSize=11;fontStyle=3;align=left;fontColor=#C62828;spacingLeft=8;" value="[error / API failed]" vertex="1">
+          <mxGeometry height="20" width="150" x="55" y="1275" as="geometry" />
+        </mxCell>
+        <mxCell id="msg18" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=horizontal;curved=0;rounded=0;fontSize=11;fontColor=#C62828;" target="actor_swal" value="Swal.close() → Swal.fire({ icon: &quot;error&quot; })">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="700" y="1305" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg18b" edge="1" parent="1" source="actor_swal" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#C62828;" target="actor_user" value="แสดง &quot;บันทึกไม่สำเร็จ&quot;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="500" y="1335" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="msg19" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="1370" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="alt_divider2" parent="1" style="line;strokeWidth=1;dashed=1;strokeColor=#FF9800;" value="" vertex="1">
+          <mxGeometry height="10" width="1030" x="50" y="1410" as="geometry" />
+        </mxCell>
+        <mxCell id="alt_label3" parent="1" style="text;html=1;fontSize=11;fontStyle=3;align=left;fontColor=#9E9E9E;spacingLeft=8;" value="[isConfirmed = false (ยกเลิก)]" vertex="1">
+          <mxGeometry height="20" width="200" x="55" y="1425" as="geometry" />
+        </mxCell>
+        <mxCell id="msg20" edge="1" parent="1" source="actor_ui" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#9E9E9E;" target="actor_ui" value="">
+          <mxGeometry relative="1" x="-0.5" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="470" y="1460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="note1" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=18;fillColor=#FFF9C4;strokeColor=#F9A825;align=left;spacingLeft=8;fontSize=11;verticalAlign=top;spacingTop=4;" value="API Endpoints:&#xa;1. GET /Mobile/TranferRequestTo_ddl&#xa;2. GET /Mobile/TranferRequestSparepartList&#xa;3. POST /Mobile/ReservationRequest_create&#xa;&#xa;State Management:&#xa;- cart: Record&lt;material, { item, qty }&gt;&#xa;- filteredSpareParts: client-side filter (useMemo)&#xa;- qty clamp: 1 ≤ qty ≤ stock (znew)" vertex="1">
+          <mxGeometry height="200" width="310" x="1640" y="180" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

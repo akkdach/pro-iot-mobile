@@ -1,0 +1,165 @@
+<mxfile host="app.diagrams.net" modified="2026-03-18T10:23:00.000Z" agent="Antigravity" version="24.0.0" type="device">
+  <diagram id="seq-setup-refurbish" name="SetupAndRefurbish Sequence Diagram">
+    <mxGraphModel dx="1600" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== Title ===== -->
+        <mxCell id="title" value="Sequence Diagram: SetupAndRefurbish" style="text;html=1;fontSize=20;fontStyle=1;align=center;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="250" y="10" width="500" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Actors ===== -->
+        <mxCell id="actor_user" value="User" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="80" y="70" width="120" height="1100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="actor_ui" value="SetupAndRefurbish&#xa;(React Component)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="340" y="70" width="160" height="1100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="actor_router" value="React Router&#xa;(useNavigate)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="640" y="70" width="140" height="1100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="actor_dashboard" value="DashboardRefurbish&#xa;(Target Page)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;size=40;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="920" y="70" width="160" height="1100" as="geometry" />
+        </mxCell>
+
+        <!-- ===== PHASE 1: Page Load ===== -->
+        <mxCell id="phase1" value="1. Page Load" style="text;html=1;fontSize=14;fontStyle=5;align=left;fillColor=#E8EAF6;rounded=1;strokeColor=#7986CB;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="130" width="120" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="msg1" value="เปิดหน้า SetupAndRefurbish" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" edge="1" parent="1" source="actor_user" target="actor_ui">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="250" y="150" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg1b" value="Render 10 Hex buttons (steps)&#xa;แบ่ง 2 แถว: topRow (even) / bottomRow (odd)&#xa;&#xa;steps = [&#xa;  Work Order List, Stock Report,&#xa;  Inspector(0010), Remove Part(0020),&#xa;  Clean(0030), Color(0040),&#xa;  Fix Cooling(0050), Assembly Part(0060),&#xa;  Test(0070), QC Packing(0080)&#xa;]" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" edge="1" parent="1" source="actor_ui" target="actor_ui">
+          <mxGeometry x="-0.5" relative="1" as="geometry">
+            <Array as="points"><mxPoint x="470" y="195" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== PHASE 2: Click Hex (Main Flow) ===== -->
+        <mxCell id="phase2" value="2. Click Hex Button" style="text;html=1;fontSize=14;fontStyle=5;align=left;fillColor=#E8EAF6;rounded=1;strokeColor=#7986CB;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="290" width="160" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="msg2" value="กดที่ Hex button (เช่น Inspector)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" edge="1" parent="1" source="actor_user" target="actor_ui">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="250" y="310" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg3" value="navigate(&quot;/DashboardRefurbish&quot;, { state: step })&#xa;&#xa;state = { id, title, icon, station }" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontStyle=1;fontColor=#1565C0;" edge="1" parent="1" source="actor_ui" target="actor_router">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="500" y="350" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg4" value="Route → /DashboardRefurbish&#xa;pass step data via location.state" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontColor=#2E7D32;" edge="1" parent="1" source="actor_router" target="actor_dashboard">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="800" y="395" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg4b" value="Render DashboardRefurbish&#xa;with station info" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#2E7D32;" edge="1" parent="1" source="actor_dashboard" target="actor_user">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="500" y="435" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== Steps data note ===== -->
+        <mxCell id="note_steps" value="Step → Station Mapping:&#xa;&#xa;Work Order List → (no station, type: workOrderList)&#xa;Stock Report → (no station, type: stockReport)&#xa;Inspector → station 0010&#xa;Remove Part → station 0020&#xa;Clean → station 0030&#xa;Color → station 0040&#xa;Fix Cooling → station 0050&#xa;Assembly Part → station 0060&#xa;Test → station 0070&#xa;QC Packing → station 0080" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=18;fillColor=#FFF9C4;strokeColor=#F9A825;align=left;spacingLeft=8;fontSize=11;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="130" width="280" height="240" as="geometry" />
+        </mxCell>
+
+        <!-- ===== PHASE 3: Login Dialog (Alternative Flow) ===== -->
+        <mxCell id="phase3" value="3. Login Dialog (Alt Flow)" style="text;html=1;fontSize=14;fontStyle=5;align=left;fillColor=#E8EAF6;rounded=1;strokeColor=#7986CB;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="20" y="490" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note_alt" value="หมายเหตุ: Dialog นี้เปิดจาก handleClickOpen()&#xa;แต่ปัจจุบันไม่ได้ถูกเรียกจาก UI โดยตรง&#xa;(ไม่มี button ที่ trigger handleClickOpen)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=18;fillColor=#FFECB3;strokeColor=#FF9800;align=left;spacingLeft=8;fontSize=11;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="490" width="280" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="msg5" value="(trigger: handleClickOpen)" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontColor=#9E9E9E;dashed=1;" edge="1" parent="1" source="actor_user" target="actor_ui">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="250" y="520" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg5b" value="setOpen(true) → เปิด Login Dialog&#xa;&#xa;Dialog ประกอบด้วย:&#xa;• TextField: ใส่รหัสพนักงาน (maxLength: 10)&#xa;• Select: เลือก Work (Hello/World/Margin)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" edge="1" parent="1" source="actor_ui" target="actor_ui">
+          <mxGeometry x="-0.5" relative="1" as="geometry">
+            <Array as="points"><mxPoint x="470" y="565" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- User fills form -->
+        <mxCell id="msg6" value="ใส่รหัสพนักงาน + เลือก Work" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;fontColor=#9E9E9E;dashed=1;" edge="1" parent="1" source="actor_user" target="actor_ui">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="250" y="625" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg6b" value="setWork(value) → update state" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" edge="1" parent="1" source="actor_ui" target="actor_ui">
+          <mxGeometry x="-0.5" relative="1" as="geometry">
+            <Array as="points"><mxPoint x="470" y="660" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Alt: submit or cancel -->
+        <mxCell id="alt1" value="alt [เข้าสู่ระบบ / ยกเลิก]" style="shape=umlFrame;whiteSpace=wrap;html=1;width=160;height=20;fillColor=#FFF3E0;strokeColor=#FF9800;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="700" width="760" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="alt_label1" value="[กด เข้าสู่ระบบ]" style="text;html=1;fontSize=11;fontStyle=3;align=left;fontColor=#2E7D32;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="55" y="720" width="120" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="msg7" value="กด &quot;เข้าสู่ระบบ&quot;" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" edge="1" parent="1" source="actor_user" target="actor_ui">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="250" y="745" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg7b" value="handleSubmit(event)&#xa;event.preventDefault()&#xa;(ยังไม่มี logic เพิ่มเติม)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" edge="1" parent="1" source="actor_ui" target="actor_ui">
+          <mxGeometry x="-0.5" relative="1" as="geometry">
+            <Array as="points"><mxPoint x="470" y="785" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Divider -->
+        <mxCell id="alt_divider" value="" style="line;strokeWidth=1;dashed=1;strokeColor=#FF9800;" vertex="1" parent="1">
+          <mxGeometry x="50" y="830" width="760" height="10" as="geometry" />
+        </mxCell>
+
+        <mxCell id="alt_label2" value="[กด ยกเลิก]" style="text;html=1;fontSize=11;fontStyle=3;align=left;fontColor=#C62828;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="55" y="845" width="120" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="msg8" value="กด &quot;ยกเลิก&quot;" style="html=1;verticalAlign=bottom;endArrow=block;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=11;" edge="1" parent="1" source="actor_user" target="actor_ui">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points"><mxPoint x="250" y="870" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="msg8b" value="handleClose()&#xa;setOpen(false) → ปิด Dialog" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;fontSize=10;fontColor=#666666;" edge="1" parent="1" source="actor_ui" target="actor_ui">
+          <mxGeometry x="-0.5" relative="1" as="geometry">
+            <Array as="points"><mxPoint x="470" y="910" /></Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== Summary Note ===== -->
+        <mxCell id="note_summary" value="สรุป SetupAndRefurbish:&#xa;&#xa;• ไม่มี API calls (ไม่เรียก backend)&#xa;• เป็นหน้า Menu สำหรับเลือก Station&#xa;• กดที่ Hex → navigate ไป DashboardRefurbish&#xa;  พร้อมส่ง step data (id, title, station)&#xa;• มี Login Dialog แต่ยังไม่ได้ใช้งานจริง&#xa;  (handleSubmit ว่างเปล่า)" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=18;fillColor=#E8F5E9;strokeColor=#4CAF50;align=left;spacingLeft=8;fontSize=11;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="400" width="280" height="170" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
