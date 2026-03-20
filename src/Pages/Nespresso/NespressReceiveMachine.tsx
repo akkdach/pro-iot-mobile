@@ -210,11 +210,15 @@ export default function NespressReceiveMachine() {
   const [mode, setMode] = useState<'api' | 'qr'>('api');
 
   // ===== API Fetch State =====
+  const BATCH_SIZE = 20;
   const [startDate, setStartDate] = useState<Dayjs>(dayjs().subtract(3, 'day'));
   const [endDate, setEndDate] = useState<Dayjs>(dayjs());
   const [apiItems, setApiItems] = useState<ApiItem[]>([]);
   const [apiLoading, setApiLoading] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Record<string, boolean>>({});
+  const [searchText, setSearchText] = useState('');
+  const [visibleCount, setVisibleCount] = useState(BATCH_SIZE);
+  const listEndRef = useRef<HTMLDivElement>(null);
 
   // ===== QR Scan State (original) =====
   const [items, setItems] = useState<NpsData[]>([]);
@@ -223,11 +227,12 @@ export default function NespressReceiveMachine() {
   const [expanded, setExpanded] = useState<string | false>(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // ===== API Fetch =====
+  // ===== API Fetch (load all at once) =====
   const handleFetchApi = async () => {
     setApiLoading(true);
     setApiItems([]);
     setSelectedIds({});
+    setVisibleCount(BATCH_SIZE);
     try {
       const res = await callApiOneleke('GET', 'bn09-internal-work', {
         params: {
@@ -237,7 +242,10 @@ export default function NespressReceiveMachine() {
         },
       });
       const raw: any[] = res.data?.data || res.data?.dataResult || [];
-      const list: ApiItem[] = raw.map((item, idx) => ({ ...item, _uid: `${item.ID || idx}_${idx}` }));
+      const list: ApiItem[] = raw.map((item, idx) => ({
+        ...item,
+        _uid: `${item.ID || idx}_${idx}`,
+      }));
       setApiItems(list);
     } catch (err) {
       console.error('Error fetching bn09-internal-work:', err);
@@ -254,18 +262,59 @@ export default function NespressReceiveMachine() {
     }
   }, []);
 
+  // ===== Client-side multi-search filter =====
+  const filteredApiItems = React.useMemo(() => {
+    const trimmed = searchText.trim();
+    if (!trimmed) return apiItems;
+    const terms = trimmed.split('|').map((t) => t.trim().toLowerCase()).filter(Boolean);
+    if (terms.length === 0) return apiItems;
+    return apiItems.filter((item) => {
+      const ticket = (item.Ticket || '').toLowerCase();
+      const serviceObj = (item.ServiceObject || '').toLowerCase();
+      return terms.some((term) => ticket.includes(term) || serviceObj.includes(term));
+    });
+  }, [apiItems, searchText]);
+
+  // Items to render (lazy render batch)
+  const visibleItems = React.useMemo(
+    () => filteredApiItems.slice(0, visibleCount),
+    [filteredApiItems, visibleCount]
+  );
+  const hasMore = visibleCount < filteredApiItems.length;
+
+  // Reset visible count when search changes
+  useEffect(() => {
+    setVisibleCount(BATCH_SIZE);
+  }, [searchText]);
+
+  // ===== Infinite Scroll Observer =====
+  useEffect(() => {
+    if (mode !== 'api' || !hasMore || apiLoading) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setVisibleCount((prev) => prev + BATCH_SIZE);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    const el = listEndRef.current;
+    if (el) observer.observe(el);
+    return () => { if (el) observer.unobserve(el); };
+  }, [mode, hasMore, apiLoading, visibleCount]);
+
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => ({ ...prev, [id]: !prev[id] })); // id = _uid
+    setSelectedIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   const toggleSelectAll = () => {
-    const allSelected = apiItems.length > 0 && apiItems.every((i) => selectedIds[i._uid]);
+    const allSelected = filteredApiItems.length > 0 && filteredApiItems.every((i) => selectedIds[i._uid]);
     const next: Record<string, boolean> = {};
-    apiItems.forEach((i) => (next[i._uid] = !allSelected));
+    filteredApiItems.forEach((i) => (next[i._uid] = !allSelected));
     setSelectedIds(next);
   };
 
-  const selectedCount = apiItems.filter((i) => selectedIds[i._uid]).length;
+  const selectedCount = filteredApiItems.filter((i) => selectedIds[i._uid]).length;
 
   const handleSaveApiItems = async () => {
     const selectedItems = apiItems.filter((i) => selectedIds[i._uid]);
@@ -555,7 +604,7 @@ export default function NespressReceiveMachine() {
                     fullWidth
                     variant="contained"
                     startIcon={apiLoading ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <Search />}
-                    onClick={handleFetchApi}
+                    onClick={() => handleFetchApi()}
                     disabled={apiLoading}
                     sx={{
                       borderRadius: '12px',
@@ -571,11 +620,48 @@ export default function NespressReceiveMachine() {
                 </CardContent>
               </Card>
 
+              {/* Search Box */}
+              <Card sx={{ ...cardSx, mb: 2 }}>
+                <CardContent sx={{ p: 2.5 }}>
+                  <Typography variant="caption" sx={{
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: 0.8,
+                    color: '#8896a6',
+                    mb: 1,
+                    display: 'block',
+                  }}>
+                    ค้นหา Ticket / Service Object
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    placeholder='พิมพ์ค้นหา เช่น TK001 | TK002'
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    InputProps={{
+                      startAdornment: <Search sx={{ color: '#8896a6', mr: 1 }} />,
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '12px',
+                        backgroundColor: '#fff',
+                      },
+                    }}
+                  />
+                  {searchText.trim() && (
+                    <Typography variant="caption" sx={{ color: '#8896a6', mt: 0.5, display: 'block' }}>
+                      พบ {filteredApiItems.length} จาก {apiItems.length} รายการ
+                    </Typography>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* Results Summary */}
-              {!apiLoading && apiItems.length > 0 && (
+              {!apiLoading && filteredApiItems.length > 0 && (
                 <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                   <Chip
-                    label={`${apiItems.length} รายการ • เลือก ${selectedCount}`}
+                    label={`${filteredApiItems.length} รายการ • เลือก ${selectedCount}`}
                     sx={{
                       fontWeight: 600,
                       fontSize: 13,
@@ -589,7 +675,7 @@ export default function NespressReceiveMachine() {
                     onClick={toggleSelectAll}
                     sx={{ fontWeight: 600, textTransform: 'none', color: '#003264' }}
                   >
-                    {apiItems.every((i) => selectedIds[i._uid]) ? 'ยกเลิกทั้งหมด' : 'เลือกทั้งหมด'}
+                    {filteredApiItems.every((i) => selectedIds[i._uid]) ? 'ยกเลิกทั้งหมด' : 'เลือกทั้งหมด'}
                   </Button>
                 </Box>
               )}
@@ -605,7 +691,7 @@ export default function NespressReceiveMachine() {
               )}
 
               {/* Empty */}
-              {!apiLoading && apiItems.length === 0 && (
+              {!apiLoading && apiItems.length === 0 && !searchText.trim() && (
                 <Card sx={{ ...cardSx, textAlign: 'center', py: 4 }}>
                   <CardContent>
                     <CloudDownload sx={{ fontSize: 56, color: '#ccc', mb: 1 }} />
@@ -620,9 +706,24 @@ export default function NespressReceiveMachine() {
               )}
 
               {/* API Item Cards */}
-              {!apiLoading && apiItems.length > 0 && (
+              {/* No search results */}
+              {!apiLoading && filteredApiItems.length === 0 && searchText.trim() && (
+                <Card sx={{ ...cardSx, textAlign: 'center', py: 3 }}>
+                  <CardContent>
+                    <Search sx={{ fontSize: 48, color: '#ccc', mb: 1 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#999', mb: 0.5 }}>
+                      ไม่พบรายการที่ค้นหา
+                    </Typography>
+                    <Typography variant="body2" sx={{ color: '#aaa' }}>
+                      ลองเปลี่ยนคำค้นหา หรือใช้ | คั่นเพื่อค้นหาหลายคำ
+                    </Typography>
+                  </CardContent>
+                </Card>
+              )}
+
+              {!apiLoading && visibleItems.length > 0 && (
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 3 }}>
-                  {apiItems.map((item) => {
+                  {visibleItems.map((item) => {
                     const isSelected = !!selectedIds[item._uid];
                     return (
                       <Card
@@ -740,6 +841,19 @@ export default function NespressReceiveMachine() {
                       </Card>
                     );
                   })}
+
+                  {/* Sentinel for infinite scroll */}
+                  <div ref={listEndRef} style={{ height: 1 }} />
+
+                  {/* End of list */}
+                  {!hasMore && filteredApiItems.length > 0 && (
+                    <Typography
+                      variant="caption"
+                      sx={{ textAlign: 'center', display: 'block', color: '#aaa', py: 1 }}
+                    >
+                      — แสดงครบทุกรายการแล้ว —
+                    </Typography>
+                  )}
                 </Box>
               )}
 
