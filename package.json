@@ -1,5 +1,5 @@
 {
-  "name": "Pro Service",
+  "name": "pro-service",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -51,11 +51,8 @@
   "scripts": {
     "start": "npx env-cmd -f .env react-scripts start",
     "start:uat": "npx env-cmd -f .env.uat react-scripts start",
-<<<<<<< HEAD
     "start:local": "npx env-cmd -f .env.local react-scripts start",
-=======
     "start:prod": "npx env-cmd -f .env.prod react-scripts start",
->>>>>>> 15be81bdde7ce73fe26c807c740abd42482c3e2f
     "build": "react-scripts build",
     "build:uat": "npx env-cmd -f .env.uat react-scripts build",
     "build:prod": "npx env-cmd -f .env.prod react-scripts build",
