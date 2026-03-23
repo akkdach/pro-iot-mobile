@@ -17,7 +17,7 @@
 - ระบบได้รับ orderId และ operationId จาก URL params
 
 **Post-Conditions:**
-- ระบบแสดงข้อมูล Work Order, Spare Parts, รูปภาพ, รายชื่อพนักงาน และ Checklist Status ครบถ้วน
+- ระบบแสดงข้อมูล Work Order, Spare Parts, รูปภาพ, รายชื่อพนักงาน และ Checklist Status
 - ระบบตรวจสอบสถานะงาน (isWorking) จาก acT_START_DATE / acT_END_DATE
 
 **Main Flow:**

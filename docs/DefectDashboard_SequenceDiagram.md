@@ -5,15 +5,15 @@
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant DD as ระบบ Defect Dashboard
+    participant DD as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>DD: เปิดหน้า Defect Dashboard
-    DD->>API: ดึงรายการ Defect (GET /WorkOrderList/Defect)
+    DD->>API: ดึงรายการ Defect
     API->>DB: Query Work Order ที่มี Defect
     DB-->>API: ส่งข้อมูลกลับ
-    API-->>DD: รายการ Work Order (เฉพาะ Station 0000)
+    API-->>DD: รายการ Work Order
     DD-->>U: แสดง Summary Card + รายการ Defect Order
 ```
 
@@ -24,7 +24,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant DD as ระบบ Defect Dashboard
+    participant DD as ระบบ Refurbish System
 
     U->>DD: ค้นหา (order / station / desc / equipment) หรือเปลี่ยน Sort
     DD->>DD: กรอง + เรียงลำดับจากข้อมูลที่โหลดไว้
@@ -38,7 +38,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant DD as ระบบ Defect Dashboard
+    participant DD as ระบบ Refurbish System
     participant Detail as หน้า DetailEachOrder
 
     U->>DD: กดปุ่ม "Open" ที่ Card รายการ
@@ -53,12 +53,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant DD as ระบบ Defect Dashboard
+    participant DD as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>DD: กดปุ่ม Approve ที่ Card รายการ
-    DD->>API: อนุมัติ Work Order (POST /WorkOrderList/approve/{orderId})
+    DD->>API: อนุมัติ Work Order   
     API->>DB: อัปเดตสถานะอนุมัติ
     DB-->>API: ยืนยัน
     API-->>DD: ผลลัพธ์
@@ -74,12 +74,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant DD as ระบบ Defect Dashboard
+    participant DD as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>DD: กดปุ่ม Rework ที่ Card รายการ
-    DD->>API: ไม่อนุมัติ (POST /WorkOrderList/notApprove/{orderId})
+    DD->>API: ไม่อนุมัติ 
     API->>DB: อัปเดตสถานะส่งกลับแก้ไข
     DB-->>API: ยืนยัน
     API-->>DD: ผลลัพธ์

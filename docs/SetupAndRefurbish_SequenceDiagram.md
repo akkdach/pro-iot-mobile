@@ -6,10 +6,12 @@
 sequenceDiagram
     participant U as ผู้ใช้
     participant SR as ระบบ SetupAndRefurbish
-    participant DB as หน้า DashboardRefurbish
+    participant DB as ฐานข้อมูล
 
     U->>SR: เปิดหน้า Setup / Refurbish
-    SR-->>U: แสดงเมนู Hex (รังผึ้ง) ของแต่ละ Station
+    SR-->>U: แสดงเมนู ของแต่ละ Station
+    SR->>DB: ดึงข้อมูล Station
+    DB-->>SR: ส่งข้อมูล Station
 ```
 
 ---
