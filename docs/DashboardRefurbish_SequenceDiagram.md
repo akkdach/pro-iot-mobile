@@ -10,10 +10,10 @@ sequenceDiagram
     participant DB as ฐานข้อมูล
 
     U->>DB_UI: เปิดหน้า Dashboard (เลือก Station หรือ Work Order List)
-    alt เข้าจาก Station (เช่น 0010, 0020, ...)
-        DB_UI->>API: ดึง Work Order ตาม Station (GET /WorkOrderList/workOrderList/{station})
+    alt เข้าจาก Station (เช่น inspector, remove, clean, ...)
+        DB_UI->>API: ดึง Work Order ตาม Station
     else เข้าจาก Work Order List (ไม่มี Station)
-        DB_UI->>API: ดึง Work Order ทั้งหมด (GET /WorkOrderList/workOrderList)
+        DB_UI->>API: ดึง Work Order ทั้งหมด
     end
     API->>DB: Query รายการ Work Order
     DB-->>API: ส่งข้อมูลกลับ
@@ -57,7 +57,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant DB_UI as ระบบ Dashboard
+    participant DB_UI as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
@@ -66,7 +66,7 @@ sequenceDiagram
     DB_UI->>U: ยืนยันการจ่ายงาน (จำนวน N รายการ)
     U->>DB_UI: ยืนยัน
     loop ทีละ Work Order
-        DB_UI->>API: จ่ายงาน (POST /WorkOrderList/StartWorkOrder)
+        DB_UI->>API: จ่ายงาน
         API->>DB: อัปเดตสถานะ Work Order
         DB-->>API: ยืนยัน
     end

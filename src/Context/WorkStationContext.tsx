@@ -352,6 +352,13 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         });
         // ถ้าไม่ยืนยัน ให้หยุด
         if (!confirmSend.isConfirmed) return;
+        const _res = await callApi.post(
+          "/WorkOrderList/Completed",
+          { ORDERID: work?.orderid },
+          { headers: { "Content-Type": "application/json" } }
+        );
+        const _data = _res.data;
+        console.log("Completed Work : ", _data);
 
         setCheckOutCloseType(newCloseType);
         console.log("CheckOutCloseType: ", newCloseType);
@@ -414,6 +421,14 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (!isConfirmed) return;
+
+      const _res = await callApi.post(
+        "/WorkOrderList/Completed",
+        { ORDERID: work?.orderid },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      const _data = _res.data;
+      console.log("Completed Work : ", _data);
 
       const selectedValue = String(value);
       const selected = options.find((x: any) => String(x.value) === selectedValue);

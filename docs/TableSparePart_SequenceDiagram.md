@@ -5,15 +5,15 @@
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant SP as ระบบ TableSparePart
+    participant SP as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>SP: เปิดหน้า TableSparePart (orderId)
-    SP->>API: ดึงอะไหล่ในคลัง (GET /Mobile/RemainingSparepart)
+    SP->>API: ดึงอะไหล่ในคลัง
     API->>DB: Query รายการอะไหล่ทั้งหมด
     DB-->>API: ส่งข้อมูลกลับ
-    SP->>API: ดึงอะไหล่เดิมของ Work Order (GET /WorkOrderList/items_component/{orderId})
+    SP->>API: ดึงอะไหล่เดิมของ Work Order
     API->>DB: Query อะไหล่ที่เคยเลือกไว้
     DB-->>API: ส่งข้อมูลกลับ
     API-->>SP: รายการอะไหล่ในคลัง + อะไหล่เดิม
@@ -27,7 +27,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant SP as ระบบ TableSparePart
+    participant SP as ระบบ Refurbish System
 
     U->>SP: กดปุ่ม "เพิ่มอะไหล่"
     SP-->>U: แสดง Dialog รายการอะไหล่ในคลัง
@@ -42,14 +42,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant SP as ระบบ TableSparePart
+    participant SP as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>SP: กดปุ่ม "บันทึก"
     SP->>U: ยืนยันการบันทึก
     U->>SP: ยืนยัน
-    SP->>API: บันทึกอะไหล่ทั้งหมด (POST /Mobile/SetWorkOrderSparePart)
+    SP->>API: บันทึกอะไหล่ทั้งหมด 
     API->>DB: บันทึก/อัปเดตรายการอะไหล่
     DB-->>API: ยืนยันการบันทึก
     API-->>SP: ผลลัพธ์
@@ -65,14 +65,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant SP as ระบบ TableSparePart
+    participant SP as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>SP: กดปุ่ม Edit (แก้ไข) ที่รายการอะไหล่
     SP-->>U: แสดง Dialog แก้ไขจำนวน
     U->>SP: กรอกจำนวนใหม่ + ยืนยัน
-    SP->>API: บันทึกจำนวนใหม่ (POST /Mobile/SetWorkOrderSparePart)
+    SP->>API: บันทึกจำนวนใหม่ 
     API->>DB: อัปเดตจำนวนอะไหล่
     DB-->>API: ยืนยัน
     API-->>SP: ผลลัพธ์
@@ -86,12 +86,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant SP as ระบบ TableSparePart
+    participant SP as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>SP: กดปุ่ม Delete (ลบ) ที่รายการอะไหล่
-    SP->>API: ลบรายการอะไหล่ (Delete API)
+    SP->>API: ลบรายการอะไหล่
     API->>DB: ลบข้อมูลอะไหล่
     DB-->>API: ยืนยันการลบ
     API-->>SP: ผลลัพธ์

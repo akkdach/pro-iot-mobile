@@ -4,7 +4,8 @@ const KNOWN_LEGACY_ORIGINS = [
     "http://localhost:7887",
     "http://10.50.9.50:7887"
 ];
-const DEFAULT_TO = "http://10.10.199.16:8080";
+const ENV_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:44496/api/v1";
+const DEFAULT_TO = ENV_BASE.replace(/\/v1\/?$/, "");
 
 type ReplaceImageUrlOptions = {
     from?: string | string[]; // base เดิม เช่น http://localhost:7887 หรือ array
@@ -12,7 +13,7 @@ type ReplaceImageUrlOptions = {
 };
 
 /**
- * Replace base url ของรูป (เช่น http://localhost:7887 -> http://10.10.199.16:8080)
+ * Replace base url ของรูป (เช่น http://localhost:7887 -> https://service.bevproasia.com)
  */
 export function replaceImageBaseUrl(
     input: string | null | undefined,
@@ -22,19 +23,34 @@ export function replaceImageBaseUrl(
 
     const to = options.to ?? DEFAULT_TO;
 
-    // Regex Check: ถ้าขึ้นต้นด้วย http:// หรือ https:// ให้เปลี่ยน Domain/IP ทันทีโดยไม่สนของเดิม
-    if (input.match(/^https?:\/\//)) {
-        return input.replace(/^https?:\/\/[^\/]+/, to);
+    // ถ้าเป็น blob: หรือ data: ไม่ต้องแปลง
+    if (input.startsWith("blob:") || input.startsWith("data:")) {
+        return input;
     }
 
-    // ถ้าไม่ใช่ http และไม่ใช่ blob: (คือเป็น relative path แบบ refurbish/...)
-    if (!input.startsWith("blob:") && !input.startsWith("data:")) {
-        // ถ้าขึ้นต้นด้วย / ให้ตัดออกก่อนค่อยต่อ (จะได้ไม่เป็น //)
-        const cleanPath = input.startsWith("/") ? input.slice(1) : input;
-        return `${to}/${cleanPath}`;
+    // ลบ legacy origins ออกจาก URL (ทุกรูปแบบ: http://, //, หรือ / นำหน้า)
+    let cleaned = input;
+    for (const origin of KNOWN_LEGACY_ORIGINS) {
+        // แปลง "http://localhost:7887" → หลายรูปแบบ regex
+        const host = origin.replace(/^https?:\/\//, ""); // "localhost:7887"
+        const pattern = new RegExp(`^(https?:)?//?${host.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, "i");
+        cleaned = cleaned.replace(pattern, "");
     }
 
-    return input;
+    // ลบ / ซ้ำที่ขึ้นต้น
+    cleaned = cleaned.replace(/^\/+/, "/");
+
+    // ถ้าเหลือ path → ต่อกับ base ใหม่
+    if (cleaned.startsWith("/")) {
+        return `${to}${cleaned}`;
+    }
+
+    // ถ้าเป็น URL เต็มอื่นๆ (เช่น https://prod-service.bevproasia.com/...) → ใช้ตรงๆ
+    if (cleaned.match(/^https?:\/\//)) {
+        return cleaned;
+    }
+
+    return `${to}/${cleaned}`;
 }
 
 /**

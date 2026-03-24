@@ -5,12 +5,12 @@
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant AS as ระบบ AddSpareFromStock
+    participant AS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
-    U->>AS: เปิดหน้า AddSpareFromStock
-    AS->>API: ดึงรายการ Work Center (GET /Mobile/TranferRequestTo_ddl)
+    U->>AS: เปิดหน้า ข้อมูลอะไหล่
+    AS->>API: ดึงรายการ Work Center
     API->>DB: Query รายการ Work Center
     DB-->>API: ส่งข้อมูลกลับ
     API-->>AS: รายการ Work Center
@@ -24,12 +24,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant AS as ระบบ AddSpareFromStock
+    participant AS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>AS: เลือก Work Center
-    AS->>API: ดึงอะไหล่ตาม Work Center (GET /Mobile/TranferRequestSparepartList)
+    AS->>API: ดึงอะไหล่ตาม Work Center
     API->>DB: Query อะไหล่ที่มีในสต็อก
     DB-->>API: ส่งข้อมูลกลับ
     API-->>AS: รายการอะไหล่ + จำนวนสต็อก
@@ -43,7 +43,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant AS as ระบบ AddSpareFromStock
+    participant AS as ระบบ Refurbish System
 
     U->>AS: กดปุ่ม "เลือกอะไหล่" → เปิด Dialog
     U->>AS: เลือกอะไหล่ + กำหนดจำนวน (+/-)
@@ -60,14 +60,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant AS as ระบบ AddSpareFromStock
+    participant AS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>AS: กดปุ่ม Save
     AS->>U: ยืนยันการบันทึก (จำนวนรายการ + ชิ้น)
     U->>AS: ยืนยัน
-    AS->>API: สร้างคำขอเบิก (POST /Mobile/ReservationRequest_create)
+    AS->>API: สร้างคำขอเบิก
     API->>DB: บันทึกคำขอเบิกอะไหล่
     DB-->>API: ยืนยันการบันทึก
     API-->>AS: ผลลัพธ์
