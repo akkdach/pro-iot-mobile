@@ -223,13 +223,6 @@ export default function DefectDashboard() {
                             <WorkOrderTodoCard
                                 key={r.orderid}
                                 row={r}
-                                onOpen={(row) => {
-                                    console.log("open orderId:", row.orderid);
-                                    console.log("open operationId:", row.worK_ORDER_OPERATION_ID);
-                                    navigate(`/DetailEachOrder/${row.orderid}/${row.worK_ORDER_OPERATION_ID}`, {
-                                        state: row
-                                    });
-                                }}
                                 onApprove={async (row) => {
                                     try {
                                         await callApi.post(`/WorkOrderList/approve/${row.orderid}`);

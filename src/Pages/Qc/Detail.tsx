@@ -218,13 +218,15 @@ export function WorkOrderTodoCard(props: {
                         </Typography>
                     </Box>
 
-                    <Stack direction="row" spacing={0.5} alignItems="center">
-                        <Tooltip title="Open">
-                            <IconButton size="small" onClick={() => onOpen?.(row)}>
-                                <OpenInNewIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    </Stack>
+                    {onOpen && (
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                            <Tooltip title="Open">
+                                <IconButton size="small" onClick={() => onOpen(row)}>
+                                    <OpenInNewIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </Stack>
+                    )}
                 </Stack>
 
                 <Divider sx={{ my: 1.5 }} />
