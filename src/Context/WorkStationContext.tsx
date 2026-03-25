@@ -43,6 +43,8 @@ interface Work {
 
   productioN_START_DATE?: Date;
   productioN_START_TIME?: string;
+
+  duratioN_NORMAL?: number;
 }
 
 interface Item_Component {
@@ -110,7 +112,7 @@ interface WorkContextType {
   checkList: CheckList[] | null;
   setCheckList: React.Dispatch<React.SetStateAction<CheckList[] | null>>;
 
-  startWork: () => void;
+  startWork: (overrides?: { orderid?: string; current_operation?: string }) => void;
   pauseWork: () => void;
   finishWork: (codes?: { code?: string }[]) => Promise<boolean>;
   checkListWork: () => void;
@@ -145,19 +147,23 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
   const timer = useTimer();
 
-  const startWork = async () => {
-    console.log("Work is start", work);
-    try {
-      if (!work?.orderid) return;
+  const startWork = async (overrides?: { orderid?: string; current_operation?: string }) => {
+    // ใช้ overrides ถ้ามี เพื่อแก้ปัญหา stale closure
+    const effectiveOrderId = overrides?.orderid ?? work?.orderid;
+    const effectiveOperation = overrides?.current_operation ?? work?.current_operation;
 
-      console.log("Work is start", work.orderid);
+    console.log("Work is start", { effectiveOrderId, effectiveOperation, work });
+    try {
+      if (!effectiveOrderId) return;
+
+      console.log("Work is start", effectiveOrderId);
 
 
 
 
       const confirm = await Swal.fire({
         title: "Start Work?",
-        text: `Start Work Order: ${work.orderid}?`,
+        text: `Start Work Order: ${effectiveOrderId}?`,
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Yes, Start",
@@ -170,8 +176,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
 
       const res = await callApi.post("/WorkOrderList/Start", {
-        ORDERID: work?.orderid,
-        current_operation: work?.current_operation ?? "",
+        ORDERID: effectiveOrderId,
+        current_operation: effectiveOperation ?? "",
       });
 
       const data = res.data;
