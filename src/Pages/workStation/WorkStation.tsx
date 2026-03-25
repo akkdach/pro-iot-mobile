@@ -300,20 +300,34 @@ export default function WorkStation() {
   }, [orderId, row?.current_operation]);
 
   const onLoad = async () => {
-    let res = await callApi.get(
-      `/WorkOrderList/items_component/${orderId}`
-    );
+    // ดึงข้อมูล items_component + Master spare part list พร้อมกัน
+    const [res, resMaster] = await Promise.all([
+      callApi.get(`/WorkOrderList/items_component/${orderId}`),
+      callApi.get("/Mobile/RemainingSparepart").catch(() => null),
+    ]);
+
     console.log("data Result No 1 : ", res.data.dataResult);
     const data = res.data.dataResult;
-    // setItem_Component(res.data);
+    const masterList: any[] = resMaster?.data?.dataResult?.sparepartList ?? [];
+
     if (data != null) {
       let newData = data.map((item: any) => {
+        // พยายามหาชื่ออะไหล่จาก response ก่อน
+        let desc = item?.matL_DESC || item?.MATL_DESC || item?.MatlDesc || item?.materialDescription;
+
+        // ถ้าไม่มี → fallback ไปหาจาก Master List
+        if (!desc && masterList.length > 0) {
+          const matKey = item?.material || item?.reS_ITEM;
+          const master = masterList.find((s: any) => s.material === matKey);
+          desc = master?.materialDescription;
+        }
+
         return {
           worK_ORDER_COMPONENT_ID: item?.worK_ORDER_COMPONENT_ID,
           orderid: item?.orderid,
           reserV_NO: item?.reserV_NO,
           reS_ITEM: item?.reS_ITEM || item?.material,
-          matL_DESC: item?.matL_DESC || item?.MATL_DESC || item?.MatlDesc || item?.materialDescription,
+          matL_DESC: desc,
           actuaL_QUANTITY: item?.actuaL_QUANTITY,
           actuaL_QUANTITY_UNIT: item?.actuaL_QUANTITY_UNIT,
           material: item?.material,
@@ -1629,11 +1643,14 @@ export default function WorkStation() {
             ✕
           </Button>
           <DialogContent sx={{ p: 0 }}>
-            {checklistToken ? (
-              normalizedOp === "0010" ? (
+            {checklistToken ? (() => {
+              const bearerToken = localStorage.getItem('token') ?? '';
+              const authParam = bearerToken ? `&auth=${encodeURIComponent(bearerToken)}` : '';
+
+              return normalizedOp === "0010" ? (
                 /* Inspector — ติ๊กเปลี่ยน/ล้าง */
                 <iframe
-                  src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-inspector?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(normalizedOp ?? "")}`}
+                  src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-inspector?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(normalizedOp ?? "")}${authParam}`}
                   width="100%"
                   height="600px"
                   style={{ border: "none" }}
@@ -1644,7 +1661,7 @@ export default function WorkStation() {
                 <Box sx={{ display: "flex", width: "100%", height: "600px" }}>
                   {/* งานจาก Inspector (read-only) */}
                   <iframe
-                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-work?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}`}
+                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-work?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}${authParam}`}
                     width="50%"
                     height="100%"
                     style={{ border: "none", borderRight: "1px solid #E2E8F0" }}
@@ -1652,15 +1669,15 @@ export default function WorkStation() {
                   />
                   {/* Checklist กรอกงาน */}
                   <iframe
-                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}`}
+                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}${authParam}`}
                     width="50%"
                     height="100%"
                     style={{ border: "none" }}
                     title="Station Checklist"
                   />
                 </Box>
-              )
-            ) : (
+              );
+            })() : (
               <Box sx={{ p: 4, textAlign: "center" }}>
                 <CircularProgress size={32} />
               </Box>
