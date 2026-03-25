@@ -1153,9 +1153,13 @@ export default function WorkStation() {
                   onClick={async () => {
                     setChecklistLoading(true);
                     try {
+                      const bearerToken = localStorage.getItem('token') ?? '';
                       const res = await fetch(`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/api/v1/checklist/token`, {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
+                        headers: {
+                          "Content-Type": "application/json",
+                          "Authorization": `Bearer ${bearerToken}`,
+                        },
                         body: JSON.stringify({
                           orderId: orderId ?? "",
                           updatedBy: (() => {
