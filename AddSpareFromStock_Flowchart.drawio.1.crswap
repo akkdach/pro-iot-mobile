@@ -4,8 +4,8 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" value="&lt;b&gt;ระบบ Refurbish System&lt;/b&gt;&lt;br&gt;หน้าเบิกอะไหล่" vertex="1">
-          <mxGeometry height="50" width="180" x="360" y="15" as="geometry" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" value="&lt;b&gt;ระบบ Add Spare Part From Stock&lt;/b&gt;&lt;br&gt;หน้า AddSpareFromStock" vertex="1">
+          <mxGeometry height="50" width="280" x="310" y="15" as="geometry" />
         </mxCell>
         <mxCell id="lane_user" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" value="User" vertex="1">
           <mxGeometry height="730" width="400" x="60" y="70" as="geometry" />
@@ -16,67 +16,61 @@
         <mxCell id="u_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;" value="เริ่มต้น" vertex="1">
           <mxGeometry height="45" width="120" x="200" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="G8D0-4QwJy5Q3zw732Gf-7" edge="1" parent="1" source="u_enter" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="s_load_wc">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="330" y="210" />
-              <mxPoint x="628" y="210" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
         <mxCell id="u_enter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" value="เข้าหน้า&#xa;Add Spare From Stock" vertex="1">
           <mxGeometry height="45" width="140" x="190" y="200" as="geometry" />
         </mxCell>
         <mxCell id="u_btn" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" value="กดปุ่ม &#39;เลือกอะไหล่&#39;&#xa;→ เปิด Dialog" vertex="1">
-          <mxGeometry height="45" width="130" x="190" y="280" as="geometry" />
+          <mxGeometry height="45" width="130" x="195" y="340" as="geometry" />
         </mxCell>
         <mxCell id="u_wc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="เลือก Work Center&#xa;(Dropdown)" vertex="1">
-          <mxGeometry height="40" width="130" x="80" y="385" as="geometry" />
+          <mxGeometry height="40" width="130" x="80" y="430" as="geometry" />
         </mxCell>
         <mxCell id="u_search" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="ค้นหาอะไหล่&#xa;(Material / Desc)" vertex="1">
-          <mxGeometry height="40" width="130" x="290" y="385" as="geometry" />
+          <mxGeometry height="40" width="130" x="290" y="430" as="geometry" />
         </mxCell>
         <mxCell id="u_display" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" value="แสดงรายการอะไหล่" vertex="1">
           <mxGeometry height="45" width="130" x="195" y="510" as="geometry" />
         </mxCell>
-        <mxCell id="G8D0-4QwJy5Q3zw732Gf-5" edge="1" parent="1" source="u_select" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;dashed=1;" target="u_display">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
         <mxCell id="u_select" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="เลือกอะไหล่&lt;br&gt;กำหนด qty (+/-)" vertex="1">
-          <mxGeometry height="42.5" width="130" x="130" y="600" as="geometry" />
-        </mxCell>
-        <mxCell id="G8D0-4QwJy5Q3zw732Gf-3" edge="1" parent="1" source="u_save" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="u_done" value="">
-          <mxGeometry relative="1" as="geometry" />
+          <mxGeometry height="50" width="130" x="90" y="600" as="geometry" />
         </mxCell>
         <mxCell id="u_save" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="กด Save" vertex="1">
           <mxGeometry height="40" width="130" x="280" y="600" as="geometry" />
         </mxCell>
         <mxCell id="u_done" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=10;" value="บันทึกสำเร็จ" vertex="1">
-          <mxGeometry height="45" width="120" x="200" y="727.5" as="geometry" />
+          <mxGeometry height="45" width="120" x="200" y="730" as="geometry" />
         </mxCell>
-        <mxCell id="G8D0-4QwJy5Q3zw732Gf-2" edge="1" parent="1" source="s_load_wc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="u_btn">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="s_load_wc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="GET&#xa;/Mobile/TranferRequestTo_ddl&#xa;(โหลด Work Center list)" vertex="1">
+          <mxGeometry height="50" width="200" x="565" y="220" as="geometry" />
         </mxCell>
-        <mxCell id="s_load_wc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="โหลด Work Center list" vertex="1">
-          <mxGeometry height="30" width="125" x="565" y="230" as="geometry" />
+        <mxCell id="s_load_sp" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="GET /Mobile&#xa;/TranferRequestSparepartList&#xa;?stge_loc=WC&#xa;(โหลดอะไหล่ตาม WC)" vertex="1">
+          <mxGeometry height="60" width="200" x="560" y="310" as="geometry" />
         </mxCell>
-        <mxCell id="s_load_sp" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="โหลดอะไหล่ตาม WC" vertex="1">
-          <mxGeometry height="40" width="130" x="562.5" y="310" as="geometry" />
-        </mxCell>
-        <mxCell id="s_filter" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="Filter อะไหล่&lt;br&gt;ตาม keyword" vertex="1">
-          <mxGeometry height="40" width="160" x="640" y="450" as="geometry" />
+        <mxCell id="s_filter" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="Filter อะไหล่ (useMemo)&#xa;ตาม keyword" vertex="1">
+          <mxGeometry height="40" width="160" x="580" y="430" as="geometry" />
         </mxCell>
         <mxCell id="s_display" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="แสดง Spare Part list&#xa;+ stock qty + ค้างเบิก&#xa;+ ปุ่ม เลือก/+/-/ลบ" vertex="1">
-          <mxGeometry height="55" width="180" x="570" y="520" as="geometry" />
+          <mxGeometry height="55" width="180" x="565" y="510" as="geometry" />
         </mxCell>
-        <mxCell id="s_save" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="ส่งข้อมูลคำข้อเข้าระบบ" vertex="1">
-          <mxGeometry height="45" width="170" x="590" y="597.5" as="geometry" />
+        <mxCell id="s_save" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="POST /Mobile&#xa;/ReservationRequest_create&#xa;payload: { stge_loc, items[] }" vertex="1">
+          <mxGeometry height="55" width="200" x="560" y="630" as="geometry" />
         </mxCell>
         <mxCell id="s_result" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="แสดงผล&lt;br&gt;สำเร็จ / ล้มเหลว" vertex="1">
-          <mxGeometry height="40" width="140" x="605" y="730" as="geometry" />
+          <mxGeometry height="40" width="140" x="590" y="730" as="geometry" />
         </mxCell>
         <mxCell id="e1" edge="1" parent="1" source="u_start" style="edgeStyle=orthogonalEdgeStyle;" target="u_enter">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="u_enter" style="edgeStyle=orthogonalEdgeStyle;" target="s_load_wc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="s_load_wc" style="edgeStyle=orthogonalEdgeStyle;" target="u_btn">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="390" y="215" />
+              <mxPoint x="390" y="363" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="e4" edge="1" parent="1" source="u_btn" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" target="u_wc" value="เลือก WC">
           <mxGeometry relative="1" as="geometry" />
@@ -84,16 +78,16 @@
         <mxCell id="e4b" edge="1" parent="1" source="u_btn" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" target="u_search" value="ค้นหา">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e5" edge="1" parent="1" source="u_wc" style="edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="s_load_sp">
+        <mxCell id="e5" edge="1" parent="1" source="u_wc" style="edgeStyle=orthogonalEdgeStyle;" target="s_load_sp">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e6" edge="1" parent="1" source="u_search" style="edgeStyle=orthogonalEdgeStyle;" target="s_filter">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e7" edge="1" parent="1" source="s_load_sp" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="s_filter">
+        <mxCell id="e7" edge="1" parent="1" source="s_load_sp" style="edgeStyle=orthogonalEdgeStyle;" target="s_filter">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e8" edge="1" parent="1" source="s_filter" style="edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" target="s_display">
+        <mxCell id="e8" edge="1" parent="1" source="s_filter" style="edgeStyle=orthogonalEdgeStyle;" target="s_display">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e9" edge="1" parent="1" source="s_display" style="edgeStyle=orthogonalEdgeStyle;" target="u_display">
@@ -104,6 +98,14 @@
         </mxCell>
         <mxCell id="e11" edge="1" parent="1" source="u_display" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" target="u_save" value="Save">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="u_select" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="u_display">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="155" y="580" />
+              <mxPoint x="260" y="580" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="e13" edge="1" parent="1" source="u_save" style="edgeStyle=orthogonalEdgeStyle;" target="s_save">
           <mxGeometry relative="1" as="geometry" />

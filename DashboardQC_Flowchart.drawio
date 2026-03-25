@@ -1,0 +1,151 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.6">
+  <diagram name="DashboardQC" id="dashboardqc-flow">
+    <mxGraphModel dx="1042" dy="561" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" value="&lt;b&gt;ระบบ Refurbish System&lt;/b&gt;&lt;br&gt;หน้าข้อมูลงาน QC" vertex="1">
+          <mxGeometry height="50" width="180" x="400" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_user" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" value="User" vertex="1">
+          <mxGeometry height="1000" width="450" x="40" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_system" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" value="System" vertex="1">
+          <mxGeometry height="1000" width="500" x="490" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;" value="เริ่มต้น" vertex="1">
+          <mxGeometry height="45" width="120" x="190" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="u_enter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" value="เข้าหน้า QC Dashboard" vertex="1">
+          <mxGeometry height="45" width="150" x="175" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="u_click_station" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontSize=10;" value="คลิก Station Card?&#xa;(QC สี / QC ทดสอบ / QC final)" vertex="1">
+          <mxGeometry height="80" width="190" x="155" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="u_search" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;" value="ค้นหา / เปลี่ยน ตาม filter" vertex="1">
+          <mxGeometry height="45" width="150" x="60" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="u_refresh" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" value="Refresh" vertex="1">
+          <mxGeometry height="40" width="120" x="305" y="1015" as="geometry" />
+        </mxCell>
+        <mxCell id="u_click_card" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;" value="Work Order Card" vertex="1">
+          <mxGeometry height="45" width="160" x="60" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="u_pagination" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;" value="เปลี่ยนหน้า" vertex="1">
+          <mxGeometry height="45" width="130" x="300" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="u_navigate" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="นำทางไปหน้าสำหรับการทำงาน" vertex="1">
+          <mxGeometry height="55" width="170" x="55" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="u_end" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;" value="&lt;span style=&quot;font-weight: normal;&quot;&gt;จบ&lt;/span&gt;" vertex="1">
+          <mxGeometry height="40" width="100" x="90" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="s_api" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="ข้อมูลงาน QC" vertex="1">
+          <mxGeometry height="55" width="200" x="615" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="bxebDdrzGAB0WFYYYqAy-2" edge="1" parent="1" source="s_response" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="s_kpi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s_response" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="รับ Response" vertex="1">
+          <mxGeometry height="45" width="170" x="630" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="s_kpi" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=9;align=left;spacingLeft=8;" value="Card ข้อมูล&lt;br&gt;- total, completed, inProgress, pending&lt;br&gt;- แยกตามสถานี&lt;br&gt;(isCompleted / isInProgress / isPending)" vertex="1">
+          <mxGeometry height="70" width="250" x="585" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="s_station_cards" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=9;align=left;spacingLeft=8;" value="แสดง 3 Station Cards&lt;br&gt;• QC สี&amp;nbsp;&lt;br&gt;• QC ทดสอบ&lt;br&gt;• QC final&amp;nbsp;" vertex="1">
+          <mxGeometry height="70" width="240" x="590" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="s_filter" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=9;align=left;spacingLeft=8;" value="กรองข้อมูล&amp;nbsp;&lt;br&gt;1. กรองตาม สถานี&lt;br&gt;2. กรองตาม Status&lt;br&gt;3. กรองตาม Search text&amp;nbsp;" vertex="1">
+          <mxGeometry height="60" width="160" x="630" y="572.5" as="geometry" />
+        </mxCell>
+        <mxCell id="s_cards" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=9;align=center;spacingLeft=8;" value="แสดง QC Todo List" vertex="1">
+          <mxGeometry height="50" width="170" x="620" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="s_empty" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="ถ้าไม่มีข้อมูล:&#xa;แสดง &quot;ไม่พบรายการ&quot;" vertex="1">
+          <mxGeometry height="45" width="180" x="610" y="830" as="geometry" />
+        </mxCell>
+        <mxCell id="s_pagination" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="โหลดข้อมูลอีกหน้าถัดไป" vertex="1">
+          <mxGeometry height="50" width="200" x="610" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="s_refetch" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="โหลดข้อมูลทั้งหมด" vertex="1">
+          <mxGeometry height="50" width="180" x="610" y="1010" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="u_start" style="edgeStyle=orthogonalEdgeStyle;" target="u_enter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="u_enter" style="edgeStyle=orthogonalEdgeStyle;" target="s_api">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="s_api" style="edgeStyle=orthogonalEdgeStyle;" target="s_response">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="s_kpi" style="edgeStyle=orthogonalEdgeStyle;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="s_station_cards">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="s_station_cards" style="edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.25;exitDx=0;exitDy=0;" target="u_click_station">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="u_click_station" style="edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="s_filter" value="เลือก">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="298" y="440" />
+              <mxPoint x="580" y="440" />
+              <mxPoint x="580" y="588" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="u_search" style="edgeStyle=orthogonalEdgeStyle;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="s_filter" style="edgeStyle=orthogonalEdgeStyle;" target="s_cards">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="705" y="660" />
+              <mxPoint x="705" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="s_cards" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="s_empty" value="ไม่มีข้อมูล">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="s_cards" style="edgeStyle=orthogonalEdgeStyle;" target="u_click_card">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="s_cards" style="edgeStyle=orthogonalEdgeStyle;exitX=0;exitY=0.75;exitDx=0;exitDy=0;" target="u_pagination">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="u_click_card" style="edgeStyle=orthogonalEdgeStyle;" target="u_navigate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="u_navigate" style="edgeStyle=orthogonalEdgeStyle;" target="u_end">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="u_pagination" style="edgeStyle=orthogonalEdgeStyle;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="s_pagination">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="s_pagination" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="s_cards" value="แสดงหน้าใหม่">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="945" />
+              <mxPoint x="870" y="745" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="u_refresh" style="edgeStyle=orthogonalEdgeStyle;" target="s_refetch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="s_refetch" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="s_response" value="reload ข้อมูลใหม่">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="1035" />
+              <mxPoint x="900" y="302" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="s_station_cards" style="edgeStyle=orthogonalEdgeStyle;" target="u_search" value="แสดง Todo List">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

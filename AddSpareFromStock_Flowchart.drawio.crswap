@@ -1,0 +1,117 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.6">
+  <diagram name="AddSpareFromStock" id="add-spare-from-stock-flow">
+    <mxGraphModel dx="1489" dy="801" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" value="&lt;b&gt;ระบบ Add Spare Part From Stock&lt;/b&gt;&lt;br&gt;หน้า AddSpareFromStock" vertex="1">
+          <mxGeometry height="50" width="280" x="310" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_user" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" value="User" vertex="1">
+          <mxGeometry height="730" width="400" x="60" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lane_system" parent="1" style="shape=table;startSize=30;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;fontSize=13;swimlaneLine=1;fillColor=#f5f5f5;strokeColor=#666666;" value="System / API" vertex="1">
+          <mxGeometry height="730" width="400" x="460" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="u_start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;" value="เริ่มต้น" vertex="1">
+          <mxGeometry height="45" width="120" x="200" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="u_enter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;" value="เข้าหน้า&#xa;Add Spare From Stock" vertex="1">
+          <mxGeometry height="45" width="140" x="190" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="u_btn" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=11;" value="กดปุ่ม &#39;เลือกอะไหล่&#39;&#xa;→ เปิด Dialog" vertex="1">
+          <mxGeometry height="45" width="130" x="195" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="u_wc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="เลือก Work Center&#xa;(Dropdown)" vertex="1">
+          <mxGeometry height="40" width="130" x="80" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="u_search" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="ค้นหาอะไหล่&#xa;(Material / Desc)" vertex="1">
+          <mxGeometry height="40" width="130" x="290" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="u_display" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="แสดงรายการอะไหล่&#xa;+ Cart Summary" vertex="1">
+          <mxGeometry height="45" width="130" x="195" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="u_select" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="เลือกอะไหล่&#xa;กำหนด qty (+/-)&#xa;→ เพิ่มลง Cart" vertex="1">
+          <mxGeometry height="50" width="130" x="90" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="u_save" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="กด Save&#xa;→ ยืนยัน (Swal)" vertex="1">
+          <mxGeometry height="40" width="130" x="280" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="u_done" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="บันทึกสำเร็จ&#xa;→ ล้าง Cart" vertex="1">
+          <mxGeometry height="45" width="120" x="200" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="s_load_wc" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="GET&#xa;/Mobile/TranferRequestTo_ddl&#xa;(โหลด Work Center list)" vertex="1">
+          <mxGeometry height="50" width="200" x="560" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="s_load_sp" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="GET /Mobile&#xa;/TranferRequestSparepartList&#xa;?stge_loc=WC&#xa;(โหลดอะไหล่ตาม WC)" vertex="1">
+          <mxGeometry height="60" width="200" x="560" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="s_filter" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;" value="Filter อะไหล่ (useMemo)&#xa;ตาม keyword" vertex="1">
+          <mxGeometry height="40" width="160" x="580" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="s_display" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="แสดง Spare Part list&#xa;+ stock qty + ค้างเบิก&#xa;+ ปุ่ม เลือก/+/-/ลบ" vertex="1">
+          <mxGeometry height="55" width="180" x="565" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="s_save" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="POST /Mobile&#xa;/ReservationRequest_create&#xa;payload: { stge_loc, items[] }" vertex="1">
+          <mxGeometry height="55" width="200" x="560" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="s_result" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="แสดงผล Swal&#xa;สำเร็จ / ล้มเหลว" vertex="1">
+          <mxGeometry height="40" width="140" x="590" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="u_start" style="edgeStyle=orthogonalEdgeStyle;" target="u_enter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="u_enter" style="edgeStyle=orthogonalEdgeStyle;" target="s_load_wc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="s_load_wc" style="edgeStyle=orthogonalEdgeStyle;" target="u_btn">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="u_btn" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" target="u_wc" value="เลือก WC">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4b" edge="1" parent="1" source="u_btn" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" target="u_search" value="ค้นหา">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="u_wc" style="edgeStyle=orthogonalEdgeStyle;" target="s_load_sp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="u_search" style="edgeStyle=orthogonalEdgeStyle;" target="s_filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="s_load_sp" style="edgeStyle=orthogonalEdgeStyle;" target="s_filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="s_filter" style="edgeStyle=orthogonalEdgeStyle;" target="s_display">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="s_display" style="edgeStyle=orthogonalEdgeStyle;" target="u_display">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="u_display" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" target="u_select" value="เลือก +/-">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="u_display" style="edgeStyle=orthogonalEdgeStyle;fontSize=9;" target="u_save" value="Save">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="u_select" style="edgeStyle=orthogonalEdgeStyle;dashed=1;" target="u_display">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="155" y="580" />
+              <mxPoint x="260" y="580" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="u_save" style="edgeStyle=orthogonalEdgeStyle;" target="s_save">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="s_save" style="edgeStyle=orthogonalEdgeStyle;" target="s_result">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="s_result" style="edgeStyle=orthogonalEdgeStyle;" target="u_done">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

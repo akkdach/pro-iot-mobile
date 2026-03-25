@@ -421,6 +421,7 @@ export default function WorkStation() {
 
           const serverUrl = boxDataLower[targetKey];
           const fixedUrl = replaceImageBaseUrl(serverUrl);
+          console.log(`🖼️ [${targetKey}] DB URL: "${serverUrl}" → Fixed URL: "${fixedUrl}"`);
 
           if (serverUrl) {
             // Found existing image, use it
@@ -779,6 +780,7 @@ export default function WorkStation() {
             orderId: String(orderId),
             image: file,
             imageKey: img.key,
+            imaStdId: img.id,
           });
 
           successCount++;

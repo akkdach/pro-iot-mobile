@@ -5,10 +5,10 @@
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant SR as ระบบ SetupAndRefurbish
+    participant SR as ระบบ Refurbish System
     participant DB as ฐานข้อมูล
 
-    U->>SR: เปิดหน้า Setup / Refurbish
+    U->>SR: เปิดหน้า 
     SR-->>U: แสดงเมนู ของแต่ละ Station
     SR->>DB: ดึงข้อมูล Station
     DB-->>SR: ส่งข้อมูล Station

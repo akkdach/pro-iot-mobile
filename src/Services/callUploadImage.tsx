@@ -11,6 +11,7 @@ interface UploadImageParams {
     year?: string;
     month?: string;
     imageKey?: string;
+    imaStdId?: number;
 }
 
 export default async function callUploadImage(params: UploadImageParams) {
@@ -45,20 +46,17 @@ export default async function callUploadImage(params: UploadImageParams) {
         ? renameImageFile(params.image, params.orderId, params.imageKey)
         : params.image;
 
-    // 3) build FormData
+    // 3) build FormData — API ต้องการ field ชื่อ "file"
     const formData = new FormData();
-    formData.append("tradCode", params.tradCode ?? "refurbish");
-    formData.append("orderType", params.orderType ?? data[0]?.ordeR_TYPE ?? "01");
-    formData.append("year", year);
-    formData.append("month", month);
-    formData.append("orderId", params.orderId);
-    formData.append("image", renamedFile, renamedFile.name);
+    formData.append("file", renamedFile, renamedFile.name);
 
     // 3) ยิง axios ตรงไป external upload server
     try {
         const token = localStorage.getItem("token");
+        const BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:44496/api/v1";
+        const uploadUrl = `${BASE}/upload?order_id=${encodeURIComponent(params.orderId)}&type_image=${encodeURIComponent(params.imageKey ?? "")}`;
         const response = await axios.post(
-            "http://10.10.199.16:8080/upload",
+            uploadUrl,
             formData,
             {
                 timeout: 5 * 60 * 1000,
@@ -90,9 +88,12 @@ export default async function callUploadImage(params: UploadImageParams) {
                 }
             });
 
-            // Override with new URL
-            // payload[params.imageKey] = typeof response.data === 'string' ? response.data : response.data?.url ?? response.data;
-            payload[params.imageKey] = response.data?.path || response.data;
+            // Override with new URL from upload response
+            const uploadResult = response.data;
+            const newUrl = typeof uploadResult === 'string'
+                ? uploadResult
+                : uploadResult?.fileDisplay ?? uploadResult?.path ?? uploadResult?.url ?? "";
+            payload[params.imageKey] = newUrl;
 
             console.log("Updating Image Payload:", payload);
 

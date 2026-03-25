@@ -5,16 +5,16 @@
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant WS as ระบบ WorkStation
+    participant WS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
-    U->>WS: เปิดหน้า WorkStation (orderId, operationId)
+    U->>WS: เปิดหน้า WorkStation
     WS->>API: ดึงข้อมูล Spare Part, Work Order, รูปภาพ, พนักงาน, Checklist
     API->>DB: Query ข้อมูลทั้งหมด
     DB-->>API: ส่งข้อมูลกลับ
     API-->>WS: ข้อมูล Work Order + Spare Part + รูปภาพ + พนักงาน + Checklist
-    WS-->>U: แสดงหน้า WorkStation พร้อมข้อมูล
+    WS-->>U: แสดงหน้าพร้อมข้อมูล
 ```
 
 ---
@@ -24,17 +24,17 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant WS as ระบบ WorkStation
+    participant WS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>WS: กดปุ่ม Start
     WS->>U: แสดง Modal เลือกพนักงาน
     U->>WS: เลือกพนักงานและยืนยัน
-    WS->>API: บันทึกพนักงาน (POST /WorkOrderList/Employee)
+    WS->>API: บันทึกพนักงาน
     API->>DB: บันทึกข้อมูลพนักงาน
     DB-->>API: ยืนยันการบันทึก
-    WS->>API: เริ่มงาน (POST /WorkOrderList/Start)
+    WS->>API: เริ่มงาน
     API->>DB: อัปเดตสถานะเริ่มงาน
     DB-->>API: ยืนยันการอัปเดต
     API-->>WS: ข้อมูลเวลาเริ่มงาน
@@ -48,14 +48,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant WS as ระบบ WorkStation
+    participant WS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>WS: กดปุ่ม Finish
     WS->>U: ยืนยันการจบงาน
     U->>WS: ยืนยัน
-    WS->>API: จบงาน (POST /WorkOrderList/Finish) + ส่ง Checked Code
+    WS->>API: จบงาน + ส่ง Checked Code
     API->>DB: อัปเดตสถานะจบงาน + บันทึก Checklist
     DB-->>API: ยืนยันการอัปเดต
     API-->>WS: ข้อมูลเวลาจบงาน
@@ -69,14 +69,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant WS as ระบบ WorkStation
+    participant WS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>WS: กดปุ่ม Completed
     WS->>U: เลือกโหมด (ปกติ / ไม่ปกติ)
     U->>WS: เลือกโหมด + ยืนยัน
-    WS->>API: ส่งข้อมูลปิดงาน (POST /Mobile/SetCheckOutCloseType)
+    WS->>API: ส่งข้อมูลปิดงาน
     API->>DB: บันทึกประเภทการปิดงาน
     DB-->>API: ยืนยันการบันทึก
     API-->>WS: ผลลัพธ์
@@ -90,16 +90,16 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant WS as ระบบ WorkStation
+    participant WS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>WS: กดปุ่ม Return
-    WS->>API: ดึง Station ที่สามารถส่งกลับได้ (GET /WorkOrderList/ReturnStation)
+    WS->>API: ดึง Station ที่สามารถส่งกลับได้
     API-->>WS: รายการ Station
     WS->>U: แสดงรายการ Station ให้เลือก + เหตุผล
     U->>WS: เลือก Station + เหตุผล + ยืนยัน
-    WS->>API: ส่งกลับ (POST /WorkOrderList/Return + /WorkOrderList/RemarkReturn)
+    WS->>API: ส่งกลับ
     API->>DB: อัปเดต Station + บันทึก Remark
     DB-->>API: ยืนยัน
     API-->>WS: ผลลัพธ์
@@ -113,12 +113,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant WS as ระบบ WorkStation
+    participant WS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
     U->>WS: แก้ไขจำนวน / ลบอะไหล่
-    WS->>API: อัปเดตอะไหล่ (POST /Mobile/SetWorkOrderSparePart)
+    WS->>API: อัปเดตอะไหล่
     API->>DB: บันทึกข้อมูลอะไหล่
     DB-->>API: ยืนยัน
     API-->>WS: ผลลัพธ์
@@ -132,17 +132,17 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant WS as ระบบ WorkStation
+    participant WS as ระบบ Refurbish System
     participant API as Backend API
     participant DB as ฐานข้อมูล
 
-    U->>WS: เลือกรูปภาพตาม Master Template
+    U->>WS: เลือกรูปภาพตามหัวข้อที่มี
     U->>WS: กดปุ่ม "บันทึกรูปภาพทั้งหมด"
-    WS->>API: อัปโหลดรูปภาพทีละรูป (Upload Image API)
+    WS->>API: อัปโหลดรูปภาพทีละรูป 
     API->>DB: บันทึกรูปภาพ
     DB-->>API: ยืนยัน
     API-->>WS: ผลลัพธ์
-    WS-->>U: แสดงผลสำเร็จ (จำนวนที่อัปโหลดสำเร็จ)
+    WS-->>U: แสดงผลสำเร็จ
 ```
 
 ---
@@ -152,14 +152,14 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     participant U as ผู้ใช้
-    participant WS as ระบบ WorkStation
+    participant WS as ระบบ Refurbish System
     participant CL as Service Checklist
     participant API as Backend API
 
     U->>WS: กดปุ่ม Check List
-    WS->>CL: ขอ Token (POST /api/v1/checklist/token)
+    WS->>CL: ขอ Token
     CL-->>WS: Token
-    WS->>U: เปิดหน้า Checklist (iframe พร้อม Token)
+    WS->>U: เปิดหน้า Checklist
     U->>WS: กรอก Checklist + บันทึก
     WS->>API: บันทึก Checklist
     API-->>WS: ยืนยัน
