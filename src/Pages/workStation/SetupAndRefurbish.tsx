@@ -36,14 +36,14 @@ import HomeWorkIcon from '@mui/icons-material/HomeWork';
 export const steps = [
   { id: 0, title: "Work Order List", icon: workorder, station: null, type: "workOrderList" },
   { id: 0.1, title: "Stock Report", icon: stock, station: null, type: "stockReport" },
-  { id: 1, title: "Inspector", icon: inspector, station: "0010" },
-  { id: 2, title: "Remove Part", icon: remove, station: "0020" },
-  { id: 3, title: "Clean", icon: clean, station: "0030" },
-  { id: 4, title: "Color", icon: color, station: "0040" },
-  { id: 5, title: "Fix Cooling", icon: fix, station: "0050" },
-  { id: 6, title: "Assembly Part", icon: assembly, station: "0060" },
-  { id: 7, title: "Test", icon: test, station: "0070" },
-  { id: 8, title: "QC Packing", icon: qc, station: "0080" },
+  { id: 1, title: "Inspector", icon: inspector, station: "0020" },
+  { id: 2, title: "Remove Part", icon: remove, station: "0030" },
+  { id: 3, title: "Clean", icon: clean, station: "0040" },
+  { id: 4, title: "Color", icon: color, station: "0050" },
+  { id: 5, title: "Fix Cooling", icon: fix, station: "0060" },
+  { id: 6, title: "Assembly Part", icon: assembly, station: "0070" },
+  { id: 7, title: "Test", icon: test, station: "0080" },
+  { id: 8, title: "QC Packing", icon: qc, station: "0090" },
 ];
 
 export default function SetupAndRefurbish() {

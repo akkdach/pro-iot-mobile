@@ -30,10 +30,10 @@ export default stationChecklistConfig;
     ════════════════════════════════════════════════════════════
 
 const stationChecklistConfig: StationChecklistGroup[] = [
-    // ─── Station 1: Inspector (0010) ───
+    // ─── Station 1: Inspector (0020) ───
     // แต่ละ item เลือกได้แค่อย่างเดียว: เปลี่ยน / ล้าง
     {
-        station: "0010",
+        station: "0020",
         title: "Inspector",
         categories: [
             // ── Section 1: ตรวจเช็คสภาพเครื่อง อุปกรณ์เครื่อง (5 items) ──
@@ -126,9 +126,9 @@ const stationChecklistConfig: StationChecklistGroup[] = [
     },
 
 
-    // ─── Station 2: Remove Part (0020) ───
+    // ─── Station 2: Remove Part (0030) ───
     {
-        station: "0020",
+        station: "0030",
         title: "Remove Part",
         categories: [
             {
@@ -147,9 +147,9 @@ const stationChecklistConfig: StationChecklistGroup[] = [
         ],
     },
 
-    // ─── Station 3: Clean (0030) ───
+    // ─── Station 3: Clean (0040) ───
     {
-        station: "0030",
+        station: "0040",
         title: "Clean",
         categories: [
             {
@@ -165,9 +165,9 @@ const stationChecklistConfig: StationChecklistGroup[] = [
         ],
     },
 
-    // ─── Station 4: Color (0040) ───
+    // ─── Station 4: Color (0050) ───
     {
-        station: "0040",
+        station: "0050",
         title: "Color",
         categories: [
             {
@@ -183,9 +183,9 @@ const stationChecklistConfig: StationChecklistGroup[] = [
         ],
     },
 
-    // ─── Station 5: Fix Cooling (0050) ───
+    // ─── Station 5: Fix Cooling (0060) ───
     {
-        station: "0050",
+        station: "0060",
         title: "Fix Cooling",
         categories: [
             {
@@ -201,9 +201,9 @@ const stationChecklistConfig: StationChecklistGroup[] = [
         ],
     },
 
-    // ─── Station 6: Assembly Part (0060) ───
+    // ─── Station 6: Assembly Part (0070) ───
     {
-        station: "0060",
+        station: "0070",
         title: "Assembly Part",
         categories: [
             {
@@ -219,9 +219,9 @@ const stationChecklistConfig: StationChecklistGroup[] = [
         ],
     },
 
-    // ─── Station 7: Test (0070) ───
+    // ─── Station 7: Test (0080) ───
     {
-        station: "0070",
+        station: "0080",
         title: "Test",
         categories: [
             {
@@ -242,9 +242,9 @@ const stationChecklistConfig: StationChecklistGroup[] = [
         ],
     },
 
-    // ─── Station 8: QC Packing (0080) ───
+    // ─── Station 8: QC Packing (0090) ───
     {
-        station: "0080",
+        station: "0090",
         title: "QC Packing",
         categories: [
             {

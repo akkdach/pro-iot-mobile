@@ -642,9 +642,9 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     const pad4 = (v: any) => String(v ?? "").trim().padStart(4, "0");
 
     const injectedToBase: Record<string, string> = {
-      "0049": "0040",
-      "0079": "0070",
-
+      "0059": "0050",
+      "0089": "0080",
+      "0099": "0090",
     };
 
     const currentStation = work?.current_operation;
@@ -817,9 +817,9 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     const pad4 = (v: any) => String(v ?? "").trim().padStart(4, "0");
 
     const injectedToBase: Record<string, string> = {
-      "0049": "0040",
-      "0079": "0070",
-
+      "0059": "0050",
+      "0089": "0080",
+      "0099": "0090",
     };
 
     const currentStation = work?.current_operation;

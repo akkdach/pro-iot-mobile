@@ -89,14 +89,14 @@ type DbItem = { code: string; isActive: boolean | null };
 const paginationModel = { page: 0, pageSize: 5 };
 
 const checkItems = [
-  { code: "0010", label: "Inspector" },
-  { code: "0020", label: "Remove Part" },
-  { code: "0030", label: "Clean" },
-  { code: "0040", label: "Color" },
-  { code: "0050", label: "Fix Cooling" },
-  { code: "0060", label: "Assembly Part" },
-  { code: "0070", label: "Test" },
-  { code: "0080", label: "Qc" },
+  { code: "0020", label: "Inspector" },
+  { code: "0030", label: "Remove Part" },
+  { code: "0040", label: "Clean" },
+  { code: "0050", label: "Color" },
+  { code: "0060", label: "Fix Cooling" },
+  { code: "0070", label: "Assembly Part" },
+  { code: "0080", label: "Test" },
+  { code: "0090", label: "Qc" },
 ];
 
 
@@ -113,9 +113,9 @@ const style = {
 // แปลง station พิเศษ → station หลัก เพื่อดึงพนักงาน
 const getParentStation = (station: string): string => {
   const specialStationMap: Record<string, string> = {
-    "0049": "0040",
-    "0079": "0070",
+    "0059": "0050",
     "0089": "0080",
+    "0099": "0090",
   };
   return specialStationMap[station] ?? station;
 };
@@ -497,7 +497,7 @@ export default function WorkStation() {
       setVisibleItems(checkItems);
       // setCheckedCodes([]);
       const station = String(row?.current_operation ?? "");
-      if (station === "0010") {
+      if (station === "0020") {
         setCheckedCodes(checkItems.map(c => c.code));
       } else {
         setCheckedCodes([]);
@@ -826,7 +826,7 @@ export default function WorkStation() {
   //console.log("Item component : ", item_component);
 
   const station = String(row?.current_operation ?? "");
-  const canEditChecklist = station === "0010";
+  const canEditChecklist = station === "0020";
 
   const toggleCode = (code: string) => {
     setCheckedCodes((prev) =>
