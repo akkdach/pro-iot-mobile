@@ -65,6 +65,7 @@ import UndoIcon from "@mui/icons-material/Undo";
 import { useNavigate } from "react-router-dom";
 import CountTime from "../../Utility/countTime";
 import SimpleElapsedTimer from "../../Utility/SimpleElapsedTimer";
+import StandardTimeCountdown from "../../Utility/StandardTimeCountdown";
 import { SlaTimer } from "../../Utility/SlaTimer";
 import { RemarkField } from "../../Utility/RemarkField";
 import EmployeeMultiSelectModal, { Employee } from "../../Utility/EmployeeSelect";
@@ -377,6 +378,7 @@ export default function WorkStation() {
       slA_FINISH_DATE: item.slA_FINISH_DATE ?? item.SLA_FINISH_DATE,
       slA_START_DATE: item.slA_START_DATE ?? item.SLA_START_DATE,
       slA_START_TIME: item.slA_START_TIME ?? item.SLA_START_TIME,
+      duratioN_NORMAL: item.duratioN_NORMAL ?? item.DURATION_NORMAL ?? 0,
     }));
 
 
@@ -541,16 +543,22 @@ export default function WorkStation() {
       setIsWorking(true);
       setSelectedEmployees(emps);
 
+      // ใช้ useParams เป็น fallback กรณี work state ยังโหลดไม่เสร็จ
+      const currentOrderId = work?.orderid ?? orderId;
+      const currentOperation = work?.current_operation ?? row?.current_operation;
+
       const payload = emps.map((e) => ({
-        ORDERID: work?.orderid,
-        current_operation: work?.current_operation,
+        ORDERID: currentOrderId,
+        current_operation: currentOperation,
         PERSONNEL_NUMBER: e.personnelNumber,
         NAME: e.personnelName,
       }));
 
-      await callApi.post(`/WorkOrderList/Employee/${work?.orderid}/${work?.current_operation}`, payload);
+      console.log("payload : ", payload);
 
-      await startWork();
+      await callApi.post(`/WorkOrderList/Employee/${currentOrderId}/${currentOperation}`, payload);
+
+      await startWork({ orderid: currentOrderId, current_operation: currentOperation });
       await onLoad4();
     } catch (err) {
       console.log(err);
@@ -952,45 +960,46 @@ export default function WorkStation() {
                 flexDirection: "column",
               }}
             >
-              {/* NEW TIMER DISPLAY */}
+              {/* ── AGENTIC TIMER CARD ── */}
               <Paper
                 elevation={6}
                 sx={{
                   mb: 2,
-                  p: 3,
+                  p: { xs: 2, sm: 2.5 },
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  background: "linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)",
+                  alignItems: "stretch",
+                  background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
                   borderRadius: 4,
-                  boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.1)",
+                  boxShadow: "0px 8px 24px rgba(0, 0, 0, 0.08)",
                   border: "1px solid rgba(226, 232, 240, 0.8)",
                   position: "relative",
                   overflow: "hidden",
+                  gap: { xs: 1, sm: 2 },
                 }}
               >
-                {/* Decorative background circle */}
+                {/* Decorative circle */}
                 <Box
                   sx={{
                     position: "absolute",
-                    right: -20,
-                    top: -20,
+                    right: -30,
+                    top: -30,
                     width: 100,
                     height: 100,
                     borderRadius: "50%",
-                    background: "rgba(37, 99, 235, 0.05)",
+                    background: "rgba(37, 99, 235, 0.04)",
                   }}
                 />
 
-                <Stack direction="column" alignItems="center" spacing={0}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "#64748B", mb: 0.5 }}>
-                    <AccessTimeIcon fontSize="small" />
-                    <Typography variant="overline" sx={{ fontWeight: 600, letterSpacing: 1.2 }}>
-                      TIME ELAPSED
+                {/* LEFT — Elapsed Time */}
+                <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#64748B", mb: 0.5 }}>
+                    <AccessTimeIcon sx={{ fontSize: 14 }} />
+                    <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 1, fontSize: 10, textTransform: "uppercase" }}>
+                      Elapsed
                     </Typography>
                   </Box>
                   <Typography
-                    variant="h3"
+                    component="div"
                     sx={{
                       fontWeight: 800,
                       background: isWorking
@@ -999,9 +1008,9 @@ export default function WorkStation() {
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       fontFamily: "'Roboto Mono', monospace",
-                      fontSize: { xs: "2.5rem", md: "3.5rem" },
-                      letterSpacing: -1,
-                      filter: "drop-shadow(0px 2px 4px rgba(37, 99, 235, 0.2))"
+                      fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2.2rem" },
+                      letterSpacing: -0.5,
+                      lineHeight: 1.1,
                     }}
                   >
                     <SimpleElapsedTimer
@@ -1009,8 +1018,27 @@ export default function WorkStation() {
                       running={isWorking}
                     />
                   </Typography>
-                </Stack>
+                </Box>
+
+                {/* Vertical Divider */}
+                <Box sx={{ width: "1px", bgcolor: "#e2e8f0", my: 0.5, flexShrink: 0 }} />
+
+                {/* RIGHT — Standard Time Countdown */}
+                <Box sx={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 1 }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "#64748B", mb: 0.5 }}>
+                    <AccessTimeIcon sx={{ fontSize: 14 }} />
+                    <Typography variant="caption" sx={{ fontWeight: 700, letterSpacing: 1, fontSize: 10, textTransform: "uppercase" }}>
+                      Std. Time
+                    </Typography>
+                  </Box>
+                  <StandardTimeCountdown
+                    startAt={work?.acT_START_DATE}
+                    durationMinutes={work?.duratioN_NORMAL}
+                    running={isWorking}
+                  />
+                </Box>
               </Paper>
+
 
               <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
                 <List sx={{ flex: 1 }}>
