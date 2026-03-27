@@ -167,14 +167,14 @@ export function WorkOrderTodoCard(props: {
     const status = getStatusMeta(row);
 
     const stationLabelMap: Record<string, string> = {
-        "0010": "Inspector",
-        "0020": "Remove Part",
-        "0030": "Clean",
-        "0040": "Color",
-        "0050": "Fix Cooling",
-        "0060": "Assembly Part",
-        "0070": "Test",
-        "0080": "QC",
+        "0020": "Inspector",
+        "0030": "Remove Part",
+        "0040": "Clean",
+        "0050": "Color",
+        "0060": "Fix Cooling",
+        "0070": "Assembly Part",
+        "0080": "Test",
+        "0090": "QC",
     };
 
     const stationCode = row.current_operation ?? row.station ?? "-";

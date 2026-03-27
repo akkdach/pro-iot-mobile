@@ -176,6 +176,10 @@ export default function WorkStation() {
   const [checklistToken, setChecklistToken] = useState<string | null>(null);
   const [checklistLoading, setChecklistLoading] = useState(false);
 
+  // Inspector-only dropdowns
+  const [selectedObjectType, setSelectedObjectType] = useState<string>("");
+  const [selectedClassification, setSelectedClassification] = useState<string>("");
+
   const [getWorker, setGetWorker] = useState<any>([]);
 
   const [checkedCodes, setCheckedCodes] = React.useState<string[]>([]);
@@ -379,6 +383,7 @@ export default function WorkStation() {
       slA_START_DATE: item.slA_START_DATE ?? item.SLA_START_DATE,
       slA_START_TIME: item.slA_START_TIME ?? item.SLA_START_TIME,
       duratioN_NORMAL: item.duratioN_NORMAL ?? item.DURATION_NORMAL ?? 0,
+      objecttype: item.objecttype ?? item.OBJECTTYPE ?? "",
     }));
 
 
@@ -948,6 +953,44 @@ export default function WorkStation() {
                 })}
               </Box>
 
+              {/* ─── Inspector-only: Object Type & Classification Dropdowns ─── */}
+              {normalizedOp === "0020" && (
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", px: 3, pb: 2 }}>
+                  <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>Object Type</InputLabel>
+                    <Select
+                      value={selectedObjectType || (work?.objecttype ?? row?.objecttype ?? "")}
+                      label="Object Type"
+                      onChange={(e) => setSelectedObjectType(e.target.value)}
+                    >
+                      <MenuItem value=""><em>-- เลือก --</em></MenuItem>
+                      {(work?.objecttype || row?.objecttype) ? (
+                        <MenuItem value={work?.objecttype || row?.objecttype}>
+                          {work?.objecttype || row?.objecttype}
+                        </MenuItem>
+                      ) : null}
+                    </Select>
+                  </FormControl>
+
+                  <FormControl size="small" sx={{ minWidth: 200 }}>
+                    <InputLabel>Classification</InputLabel>
+                    <Select
+                      value={selectedClassification}
+                      label="Classification"
+                      onChange={(e) => setSelectedClassification(e.target.value)}
+                    >
+                      <MenuItem value=""><em>-- เลือก --</em></MenuItem>
+                      <MenuItem value="Major A1">Major A1</MenuItem>
+                      <MenuItem value="Major A2">Major A2</MenuItem>
+                      <MenuItem value="Major A3">Major A3</MenuItem>
+                      <MenuItem value="Minor A1">Minor A1</MenuItem>
+                      <MenuItem value="Minor A2">Minor A2</MenuItem>
+                      <MenuItem value="Minor A3">Minor A3</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+
 
             </Box>
           </div>
@@ -1176,33 +1219,9 @@ export default function WorkStation() {
 
             {/* ─── SECONDARY: Check List, Completed, Remark ─── */}
             <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5, mb: 2, flexWrap: "wrap" }}>
-              {["0010", "0030", "0070"].includes(normalizedOp ?? "") && (
+              {["0020", "0040", "0080"].includes(normalizedOp ?? "") && (
                 <Button
-                  onClick={async () => {
-                    setChecklistLoading(true);
-                    try {
-                      const res = await fetch(`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/api/v1/checklist/token`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          orderId: orderId ?? "",
-                          updatedBy: (() => {
-                            try {
-                              const p = localStorage.getItem("profile");
-                              return p ? JSON.parse(p).employee_id ?? "unknown" : "unknown";
-                            } catch { return "unknown"; }
-                          })(),
-                        }),
-                      });
-                      const data = await res.json();
-                      setChecklistToken(data.token);
-                      setOpenChecklist(true);
-                    } catch (err) {
-                      console.error("❌ Failed to get checklist token:", err);
-                    } finally {
-                      setChecklistLoading(false);
-                    }
-                  }}
+                  onClick={() => setOpenChecklist(true)}
                   variant="outlined"
                   startIcon={<FactCheckIcon />}
                   sx={{
@@ -1643,7 +1662,7 @@ export default function WorkStation() {
           open={openChecklist}
           onClose={() => setOpenChecklist(false)}
           fullWidth
-          maxWidth={normalizedOp === "0010" ? "sm" : "lg"}
+          maxWidth={normalizedOp === "0020" ? "sm" : "lg"}
           PaperProps={{
             sx: {
               borderRadius: 3,
@@ -1671,14 +1690,15 @@ export default function WorkStation() {
             ✕
           </Button>
           <DialogContent sx={{ p: 0 }}>
-            {checklistToken ? (() => {
+            {(() => {
               const bearerToken = localStorage.getItem('token') ?? '';
               const authParam = bearerToken ? `&auth=${encodeURIComponent(bearerToken)}` : '';
+              const oid = encodeURIComponent(orderId ?? '');
 
-              return normalizedOp === "0010" ? (
+              return normalizedOp === "0020" ? (
                 /* Inspector — ติ๊กเปลี่ยน/ล้าง */
                 <iframe
-                  src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-inspector?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(normalizedOp ?? "")}${authParam}`}
+                  src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-inspector?orderId=${oid}${authParam}`}
                   width="100%"
                   height="600px"
                   style={{ border: "none" }}
@@ -1689,7 +1709,7 @@ export default function WorkStation() {
                 <Box sx={{ display: "flex", width: "100%", height: "600px" }}>
                   {/* งานจาก Inspector (read-only) */}
                   <iframe
-                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-work?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}${authParam}`}
+                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed-work?orderId=${oid}${authParam}`}
                     width="50%"
                     height="100%"
                     style={{ border: "none", borderRight: "1px solid #E2E8F0" }}
@@ -1697,7 +1717,7 @@ export default function WorkStation() {
                   />
                   {/* Checklist กรอกงาน */}
                   <iframe
-                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed?token=${encodeURIComponent(checklistToken)}&station=${encodeURIComponent(row?.station ?? normalizedOp ?? "")}${authParam}`}
+                    src={`${process.env.REACT_APP_SERVICE_MANAGEMENT_URL}/checklist/embed?orderId=${oid}&station=${encodeURIComponent(normalizedOp ?? '')}${authParam}`}
                     width="50%"
                     height="100%"
                     style={{ border: "none" }}
@@ -1705,11 +1725,7 @@ export default function WorkStation() {
                   />
                 </Box>
               );
-            })() : (
-              <Box sx={{ p: 4, textAlign: "center" }}>
-                <CircularProgress size={32} />
-              </Box>
-            )}
+            })()}
           </DialogContent>
         </Dialog>
 

@@ -271,6 +271,7 @@ const DashboardRefurbish = () => {
             current_operation: row.original.current_operation,
             title: step?.title,
             station: step?.station,
+            objecttype: (row.original as any).objecttype ?? "",
           },
         });
       },

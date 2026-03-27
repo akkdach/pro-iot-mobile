@@ -130,7 +130,7 @@ export default function Dashboard_QC_CardTodo() {
         const inProgress = rows.filter(isInProgress).length;
         const pending = rows.filter(isPending).length;
 
-        const stations = ["0049", "0079", "0080"];
+        const stations = ["0059", "0089", "0090"];
         const stationKpis = stations.reduce((acc, station) => {
             const stationRows = rows.filter((r) => String(r.current_operation || "").padStart(4, "0") === station);
             acc[station] = {
@@ -248,9 +248,9 @@ export default function Dashboard_QC_CardTodo() {
                 }}
             >
                 {[
-                    { station: "0049", title: "QC สี" },
-                    { station: "0079", title: "QC ทดสอบ" },
-                    { station: "0080", title: "QC final" },
+                    { station: "0059", title: "QC สี" },
+                    { station: "0089", title: "QC ทดสอบ" },
+                    { station: "0090", title: "QC final" },
                 ].map((item, idx) => {
                     const colors = ["#e67e22", "#3498db", "#9b59b6"]; // โทนสีแต่ละการ์ด
                     const stationData =

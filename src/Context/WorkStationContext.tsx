@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { createContext, useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import callApi from "../Services/callApi";
 import Header from "../Layout/Header";
 import Swal from "sweetalert2";
@@ -45,6 +46,7 @@ interface Work {
   productioN_START_TIME?: string;
 
   duratioN_NORMAL?: number;
+  objecttype?: string;
 }
 
 interface Item_Component {
@@ -131,6 +133,7 @@ interface WorkContextType {
 const WorkContext = createContext<WorkContextType | null>(null);
 
 export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
+  const navigate = useNavigate();
   const [work, setWork] = useState<Work | null>(null);
   const [item_component, setItem_Component] = useState<Item_Component[] | null>(
     null
@@ -806,6 +809,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         timer: 2000,
         showConfirmButton: false,
       });
+
+      navigate(-1);
     } catch (err: any) {
       console.error("ReturnWork Error:", err);
       await Swal.fire({
@@ -982,6 +987,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         timer: 2000,
         showConfirmButton: false,
       });
+
+      navigate(-1);
     } catch (err: any) {
       console.error("ReturnWork Error:", err);
       await Swal.fire({
