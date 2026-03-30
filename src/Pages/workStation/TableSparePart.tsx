@@ -21,12 +21,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AppHearder from "../../Component/AppHeader";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import { useWork } from "../../Context/WorkStationContext";
 import callApi from "../../Services/callApi";
 import HideImageIcon from "@mui/icons-material/HideImage";
 import SafeImage from "./SafeImage";
 import Swal from "sweetalert2";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { on } from "events";
 
 const uid = () => Math.random().toString(36).slice(2, 8);
@@ -44,8 +45,21 @@ type SparePartApi = {
 type CartItem = {
   item: SparePartApi;
   qty: number;
+  originalQty: number;  // จำนวนเดิมจาก DB (0 = รายการใหม่)
   unit?: string;
-  //orderid: string | number | null;
+};
+
+// TO Payload types
+type TOItem = {
+  material: string;
+  quantity: number;     // delta (เฉพาะค่าบวก — จำนวนที่เพิ่มขึ้น)
+  description: string;
+};
+
+type TOPayload = {
+  stge_loc: string;
+  material_type: string;
+  items: TOItem[];
 };
 
 // type EditItem = {
@@ -62,6 +76,7 @@ type CartItem = {
 export default function TableSparePart() {
   const { work, item_component, setItem_Component, deletePart } = useWork();
   const { orderId } = useParams();
+  const navigate = useNavigate();
 
   const location = useLocation();
   const row = location.state;
@@ -176,6 +191,7 @@ export default function TableSparePart() {
               materialDescription: desc || "",
             },
             qty: item.actuaL_QUANTITY,
+            originalQty: item.actuaL_QUANTITY,
             unit: item.actuaL_QUANTITY_UNIT,
           };
           console.log(`[${idx}] Added to cart:`, matKey);
@@ -245,8 +261,10 @@ export default function TableSparePart() {
   const addOne = (sp: any) => {
     setCart((prev) => {
       const key = sp.material;
-      const currentQty = prev[key]?.qty ?? 0;
-      return { ...prev, [key]: { item: sp, qty: currentQty + 1 } };
+      const existing = prev[key];
+      const currentQty = existing?.qty ?? 0;
+      const origQty = existing?.originalQty ?? 0;
+      return { ...prev, [key]: { item: sp, qty: currentQty + 1, originalQty: origQty } };
     });
   };
 
@@ -269,6 +287,7 @@ export default function TableSparePart() {
       const key = sp.material;
       const max = sp.quotaStock ?? Infinity;
       const nextQty = Math.max(0, Math.min(qty, max));
+      const origQty = prev[key]?.originalQty ?? 0;
 
       if (nextQty === 0) {
         const { [key]: _, ...rest } = prev;
@@ -276,7 +295,7 @@ export default function TableSparePart() {
       }
       return {
         ...prev,
-        [key]: { item: sp, qty: nextQty },
+        [key]: { item: sp, qty: nextQty, originalQty: origQty },
       };
     });
   };
@@ -286,6 +305,47 @@ export default function TableSparePart() {
       const { [material]: _, ...rest } = prev;
       return rest;
     });
+  };
+
+  // ===== Transfer Order (TO) — Delta Tracking =====
+  const buildTOPayload = (): TOPayload | null => {
+    const items: TOItem[] = Object.values(cart)
+      .filter(({ qty, originalQty }) => qty - originalQty > 0)  // เฉพาะ delta บวก (เพิ่มขึ้น)
+      .map(({ item, qty, originalQty }) => ({
+        material: item.material,
+        quantity: qty - originalQty,
+        description: item.materialDescription || '',
+      }));
+
+    if (items.length === 0) return null;
+
+    return {
+      stge_loc: work?.mN_WK_CTR || '',
+      material_type: '',
+      items,
+    };
+  };
+
+  const createTransferOrder = async (payload: TOPayload): Promise<boolean> => {
+    try {
+      console.log('📦 TO Payload:', JSON.stringify(payload, null, 2));
+
+      const res = await callApi.post('/Mobile/ReservationRequest_create', payload);
+      if (!res.data.isSuccess) {
+        throw new Error(res.data.message || 'สร้าง TO ไม่สำเร็จ');
+      }
+
+      console.log('✅ TO Created:', res.data);
+      return true;
+    } catch (err: any) {
+      console.error('TO Error:', err);
+      await Swal.fire({
+        icon: 'error',
+        title: 'สร้าง TO ไม่สำเร็จ',
+        text: err?.response?.data?.message || err?.message || 'เกิดข้อผิดพลาด',
+      });
+      return false;
+    }
   };
 
   const handleSave = async () => {
@@ -328,6 +388,28 @@ export default function TableSparePart() {
       console.log("save result:", res.data);
 
       if (res.data.isSuccess === true) {
+        // === สร้าง Transfer Order จากส่วนต่าง ===
+        const toPayload = buildTOPayload();
+        if (toPayload) {
+          const deltaHtml = toPayload.items
+            .map((d) => `<div style="text-align:left;font-size:13px;">• ${d.material}: +${d.quantity} ${d.description}</div>`)
+            .join('');
+
+          const confirmTO = await Swal.fire({
+            icon: 'info',
+            title: 'สร้าง Transfer Order?',
+            html: `<b>รายการที่เพิ่มขึ้น:</b><br/><br/>${deltaHtml}`,
+            showCancelButton: true,
+            confirmButtonText: 'สร้าง TO',
+            cancelButtonText: 'ข้าม',
+            confirmButtonColor: '#2563EB',
+          });
+
+          if (confirmTO.isConfirmed) {
+            await createTransferOrder(toPayload);
+          }
+        }
+
         await Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -405,6 +487,36 @@ export default function TableSparePart() {
       );
 
       if (res.data.isSuccess === true) {
+        // === สร้าง TO จากส่วนต่าง (เฉพาะเพิ่ม) ===
+        const oldQty = Number(editItem.qty) || 0;
+        const delta = newQty - oldQty;
+
+        if (delta > 0) {
+          const toPayload: TOPayload = {
+            stge_loc: work?.mN_WK_CTR || '',
+            material_type: '',
+            items: [{
+              material: editItem.material,
+              quantity: delta,
+              description: editItem.materialDescription,
+            }],
+          };
+
+          const confirmTO = await Swal.fire({
+            icon: 'info',
+            title: 'สร้าง Transfer Order?',
+            html: `<b>${editItem.material}:</b> +${delta}`,
+            showCancelButton: true,
+            confirmButtonText: 'สร้าง TO',
+            cancelButtonText: 'ข้าม',
+            confirmButtonColor: '#2563EB',
+          });
+
+          if (confirmTO.isConfirmed) {
+            await createTransferOrder(toPayload);
+          }
+        }
+
         await Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -481,24 +593,45 @@ export default function TableSparePart() {
               </Typography>
             </Box>
 
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={openAdd}
-              sx={{
-                fontWeight: 900,
-                borderRadius: 3,
-                textTransform: "none",
-                bgcolor: "#1976D2",
-                px: 3,
-                py: 1.2,
-                fontSize: 18,
-                boxShadow: "0 2px 8px 0 rgba(25, 118, 210, 0.08)",
-                "&:hover": { bgcolor: "#1565C0" },
-              }}
-            >
-              เพิ่มอะไหล่
-            </Button>
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant="outlined"
+                startIcon={<LocalShippingIcon />}
+                onClick={() => navigate(`/TransferOrderHistory/${orderId}`)}
+                sx={{
+                  fontWeight: 900,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  px: 3,
+                  py: 1.2,
+                  fontSize: 16,
+                  borderColor: "#94A3B8",
+                  color: "#475569",
+                  "&:hover": { borderColor: "#64748B", bgcolor: "#F8FAFC" },
+                }}
+              >
+                ดูรายการ TO
+              </Button>
+
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={openAdd}
+                sx={{
+                  fontWeight: 900,
+                  borderRadius: 3,
+                  textTransform: "none",
+                  bgcolor: "#1976D2",
+                  px: 3,
+                  py: 1.2,
+                  fontSize: 18,
+                  boxShadow: "0 2px 8px 0 rgba(25, 118, 210, 0.08)",
+                  "&:hover": { bgcolor: "#1565C0" },
+                }}
+              >
+                เพิ่มอะไหล่
+              </Button>
+            </Stack>
           </Stack>
 
           {/* ── Spare Part List ── */}
@@ -719,7 +852,7 @@ export default function TableSparePart() {
                       gap: 0.75,
                     }}
                   >
-                    {Object.values(cart).map(({ item, qty }) => (
+                    {Object.values(cart).map(({ item, qty, originalQty }) => (
                       <Box
                         key={item.material}
                         sx={{
@@ -748,7 +881,22 @@ export default function TableSparePart() {
 
                         {/* right */}
                         <Stack direction="row" spacing={1} alignItems="center">
-                          <Typography fontWeight={800}>x {qty}</Typography>
+                          <Typography fontWeight={800}>
+                            x {qty}
+                            {qty - originalQty > 0 && (
+                              <Chip
+                                size="small"
+                                label={`+${qty - originalQty}`}
+                                sx={{
+                                  ml: 0.5,
+                                  bgcolor: '#DCFCE7',
+                                  color: '#16A34A',
+                                  fontWeight: 700,
+                                  fontSize: '0.7rem',
+                                }}
+                              />
+                            )}
+                          </Typography>
 
                           <Button
                             size="small"

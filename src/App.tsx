@@ -37,6 +37,7 @@ import TableSparePart from './Pages/workStation/TableSparePart';
 import StockReport from './Pages/workStation/StockReport';
 import StockReportItem from './Pages/workStation/StockReportItem';
 import AddSpareFromStock from './Pages/workStation/AddSpareFromStock';
+import TransferOrderHistory from './Pages/workStation/TransferOrderHistory';
 import DashboardMonitoring from './Pages/workStation/DashboardMonitoring';
 import DashboardQC from './Pages/Qc/DashboardQC';
 import CheckSheet from './Pages/Safety/CheckSheet';
@@ -95,6 +96,7 @@ function App() {
           <Route path="SparePart" element={<SparePart />}></Route>
           <Route path="TestContextPage" element={<TestContextPage />}></Route>
           <Route path="TableSparePart/:orderId" element={<TableSparePart />}></Route>
+          <Route path="TransferOrderHistory/:orderId" element={<TransferOrderHistory />}></Route>
           <Route path="StockReport" element={<StockReport />}></Route>
           <Route path="StockReportItem/:resId" element={<StockReportItem />}></Route>
           <Route path="AddSpareFromStock" element={<AddSpareFromStock />}></Route>
