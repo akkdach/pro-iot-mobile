@@ -72,6 +72,8 @@ import EmployeeMultiSelectModal, { Employee } from "../../Utility/EmployeeSelect
 import WorkerRows from "../../Utility/WorkerRows";
 import { CloseWorkMaster } from "../../Utility/CloseWorkMaster";
 import StationChecklist from "./StationChecklist";
+import WorkOrderDetailTab from "./WorkOrderDetailTab";
+import BomTab from "./BomTab";
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -138,6 +140,7 @@ export default function WorkStation() {
     setCheckList,
     qcReturnWork,
     submitChecklist,
+    fetchWorkOrderDetail,
   } = useWork();
   const location = useLocation();
   const row = location.state;
@@ -293,6 +296,7 @@ export default function WorkStation() {
     onLoad2();
     onLoad3();
     onLoad4();
+    if (orderId) fetchWorkOrderDetail(orderId);
   }, []);
 
   const normalizeStation = (s?: string) => (s ? s.toString().padStart(4, "0") : "");
@@ -893,6 +897,24 @@ export default function WorkStation() {
                 minHeight: 60,
               }}
             />
+            <Tab
+              label="Detail"
+              {...a11yProps(4)}
+              sx={{
+                fontSize: "1.1rem",
+                padding: "12px 24px",
+                minHeight: 60,
+              }}
+            />
+            <Tab
+              label="BOM"
+              {...a11yProps(5)}
+              sx={{
+                fontSize: "1.1rem",
+                padding: "12px 24px",
+                minHeight: 60,
+              }}
+            />
           </Tabs>
         </Box>
 
@@ -1462,6 +1484,14 @@ export default function WorkStation() {
               </Button>
             </Box>
           </Box>
+        </CustomTabPanel>
+
+        <CustomTabPanel value={value} index={4} keepMounted>
+          <WorkOrderDetailTab />
+        </CustomTabPanel>
+
+        <CustomTabPanel value={value} index={5} keepMounted>
+          <BomTab />
         </CustomTabPanel>
 
       </Box>

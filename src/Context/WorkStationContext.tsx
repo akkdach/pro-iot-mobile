@@ -128,6 +128,15 @@ interface WorkContextType {
   setUploadImage: (file: File[]) => void;
   submitWork: () => void;
   submitChecklist: (stationCode: string, items: Record<string, string | boolean>) => Promise<boolean>;
+
+  workOrderDetail: any;
+  workOrderDetailLoading: boolean;
+  fetchWorkOrderDetail: (orderId: string) => Promise<void>;
+
+  bomData: any;
+  setBomData: React.Dispatch<React.SetStateAction<any>>;
+  bomLoading: boolean;
+  fetchBom: (orderType: string, serviceObjectGroup: string, mimj: string) => Promise<void>;
 }
 
 const WorkContext = createContext<WorkContextType | null>(null);
@@ -148,7 +157,43 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [checkList, setCheckList] = useState<CheckList[] | null>(null);
 
+  const [workOrderDetail, setWorkOrderDetail] = useState<any>(null);
+  const [workOrderDetailLoading, setWorkOrderDetailLoading] = useState(false);
+
   const timer = useTimer();
+
+  const fetchWorkOrderDetail = async (orderId: string) => {
+    setWorkOrderDetailLoading(true);
+    try {
+      const res = await callApi.get("/work_order_detail", {
+        params: { order_id: orderId },
+      });
+      setWorkOrderDetail(res.data?.dataResult ?? res.data);
+    } catch (err: any) {
+      console.error("fetchWorkOrderDetail Error:", err);
+      setWorkOrderDetail(null);
+    } finally {
+      setWorkOrderDetailLoading(false);
+    }
+  };
+
+  const [bomData, setBomData] = useState<any>(null);
+  const [bomLoading, setBomLoading] = useState(false);
+
+  const fetchBom = async (orderType: string, serviceObjectGroup: string, mimj: string) => {
+    setBomLoading(true);
+    try {
+      const res = await callApi.get("/refulbish/Master/BomRefurbish", {
+        params: { order_type: orderType, service_object_group: serviceObjectGroup, mimj },
+      });
+      setBomData(res.data?.dataResult ?? res.data);
+    } catch (err: any) {
+      console.error("fetchBom Error:", err);
+      setBomData(null);
+    } finally {
+      setBomLoading(false);
+    }
+  };
 
   const startWork = async (overrides?: { orderid?: string; current_operation?: string }) => {
     // ใช้ overrides ถ้ามี เพื่อแก้ปัญหา stale closure
@@ -1172,6 +1217,13 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         checkList,
         setCheckList,
         submitChecklist,
+        workOrderDetail,
+        workOrderDetailLoading,
+        fetchWorkOrderDetail,
+        bomData,
+        setBomData,
+        bomLoading,
+        fetchBom,
       }}
     >
       {children}
