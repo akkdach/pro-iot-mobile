@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Box,
   Paper,
@@ -17,6 +17,7 @@ import {
   DialogActions,
   TextField,
   Stack,
+  Autocomplete,
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import InventoryIcon from "@mui/icons-material/Inventory";
@@ -65,6 +66,25 @@ export default function BomTab() {
   const [addQty, setAddQty] = useState("1");
   const [addUnit, setAddUnit] = useState("PCE");
 
+  // Material Master
+  const [materialMaster, setMaterialMaster] = useState<any[]>([]);
+  const [materialLoading, setMaterialLoading] = useState(false);
+
+  const fetchMaterialMaster = useCallback(async () => {
+    if (materialMaster.length > 0) return; // already loaded
+    setMaterialLoading(true);
+    try {
+      const res = await callApi.get("/Mobile/GetMaterialMaster");
+      const list: any[] = res.data?.dataResult || res.data?.data || [];
+      console.log("✅ Material Master:", list.length, "items");
+      setMaterialMaster(list);
+    } catch (err) {
+      console.error("Material Master Error:", err);
+    } finally {
+      setMaterialLoading(false);
+    }
+  }, [materialMaster.length]);
+
   const handleFetchBom = () => {
     if (!selectedRepairType) { alert("กรุณาเลือกประเภทการซ่อมก่อน"); return; }
     const hdr = workOrderDetail?.header ?? {};
@@ -73,7 +93,17 @@ export default function BomTab() {
     if (!orderType) { alert("ไม่พบข้อมูล Order Type"); return; }
     setSaved(false);
     fetchBom(orderType, objectType, selectedRepairType);
+    fetchMaterialMaster(); // โหลด master เพื่อ map ชื่อ
   };
+
+  // สร้าง lookup map จาก materialMaster
+  const materialNameMap: Record<string, string> = React.useMemo(() => {
+    const map: Record<string, string> = {};
+    materialMaster.forEach((m: any) => {
+      if (m.material) map[m.material] = m.description || "";
+    });
+    return map;
+  }, [materialMaster]);
 
   /* ── Inline Edit Qty ── */
   const updateQty = (idx: number, val: string) => {
@@ -182,8 +212,14 @@ export default function BomTab() {
               const toRes = await callApi.post("/Mobile/ReservationRequest_create", toPayload);
 
               if (toRes.data.isSuccess) {
-                // ดึง resId จาก response เพื่อ approve อัตโนมัติ
-                const resId = toRes.data.dataResult?.reS_ID ?? toRes.data.dataResult?.resId ?? toRes.data.dataResult?.id;
+                // Log full response เพื่อดูโครงสร้าง
+                console.log("✅ TO Create Full Response:", JSON.stringify(toRes.data, null, 2));
+
+                // ดึง resId จาก response — ลองหลาย path
+                const dr = toRes.data.dataResult;
+                const resId = dr?.reS_ID ?? dr?.resId ?? dr?.res_id ?? dr?.id
+                  ?? (Array.isArray(dr) && dr.length > 0 ? (dr[0]?.reS_ID ?? dr[0]?.resId ?? dr[0]?.res_id ?? dr[0]?.id) : null)
+                  ?? toRes.data.reS_ID ?? toRes.data.resId ?? toRes.data.res_id ?? toRes.data.id;
                 console.log("✅ TO Created, resId:", resId);
 
                 if (resId) {
@@ -408,8 +444,14 @@ export default function BomTab() {
 
                         {/* รหัส + ชื่อ */}
                         <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight={700} color="#0f172a" fontSize={13} noWrap>{item.no ?? "-"}</Typography>
-                          <Typography variant="caption" color="text.secondary" fontSize={11} noWrap>{item.description ?? "-"}</Typography>
+                          <Typography variant="body2" fontWeight={700} color="#0f172a" fontSize={13} noWrap>
+                            {materialNameMap[item.no] || item.description || item.no || "-"}
+                          </Typography>
+                          {(materialNameMap[item.no] || item.description) && (
+                            <Typography variant="caption" color="text.secondary" fontSize={11} noWrap>
+                              {item.no ?? "-"}
+                            </Typography>
+                          )}
                         </Box>
 
                         {/* Inline Qty Input */}
@@ -495,12 +537,77 @@ export default function BomTab() {
       </AnimatePresence>
 
       {/* ═══ Add Item Dialog ═══ */}
-      <Dialog open={addOpen} onClose={() => setAddOpen(false)} fullWidth maxWidth="xs">
+      <Dialog
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        fullWidth
+        maxWidth="xs"
+        TransitionProps={{
+          onEnter: () => fetchMaterialMaster(),
+        }}
+      >
         <DialogTitle sx={{ fontWeight: 800 }}>เพิ่มอะไหล่</DialogTitle>
         <DialogContent>
           <Stack spacing={2} mt={1}>
-            <TextField label="รหัสอะไหล่" size="small" fullWidth value={addNo} onChange={(e) => setAddNo(e.target.value)} />
-            <TextField label="ชื่ออะไหล่" size="small" fullWidth value={addDesc} onChange={(e) => setAddDesc(e.target.value)} />
+            <Autocomplete
+              options={materialMaster}
+              loading={materialLoading}
+              getOptionLabel={(opt: any) =>
+                opt.material && opt.description
+                  ? `${opt.material} — ${opt.description}`
+                  : opt.material || opt.description || ""
+              }
+              filterOptions={(options, { inputValue }) => {
+                const term = inputValue.toLowerCase();
+                return options.filter((o: any) =>
+                  (o.material || "").toLowerCase().includes(term) ||
+                  (o.description || "").toLowerCase().includes(term)
+                ).slice(0, 50);
+              }}
+              onChange={(_, value: any) => {
+                if (value) {
+                  setAddNo(value.material || "");
+                  setAddDesc(value.description || "");
+                  setAddUnit(value.baseUom || value.unit || "PCE");
+                }
+              }}
+              renderOption={(props, opt: any) => (
+                <li {...props} key={opt.material}>
+                  <Box>
+                    <Typography fontSize={13} fontWeight={700} color="#1E293B">
+                      {opt.material}
+                    </Typography>
+                    <Typography fontSize={11} color="text.secondary" noWrap>
+                      {opt.description || "-"}
+                    </Typography>
+                  </Box>
+                </li>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="ค้นหาอะไหล่"
+                  size="small"
+                  placeholder="พิมพ์รหัสหรือชื่ออะไหล่..."
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {materialLoading ? <CircularProgress size={18} /> : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+              noOptionsText="ไม่พบอะไหล่"
+              loadingText="กำลังโหลด..."
+              fullWidth
+            />
+            <Stack direction="row" spacing={2}>
+              <TextField label="รหัส" size="small" value={addNo} onChange={(e) => setAddNo(e.target.value)} sx={{ flex: 1 }} />
+              <TextField label="ชื่อ" size="small" value={addDesc} onChange={(e) => setAddDesc(e.target.value)} sx={{ flex: 2 }} />
+            </Stack>
             <Stack direction="row" spacing={2}>
               <TextField label="จำนวน" type="number" size="small" value={addQty} onChange={(e) => setAddQty(e.target.value)} sx={{ flex: 1 }} />
               <TextField label="หน่วย" size="small" value={addUnit} onChange={(e) => setAddUnit(e.target.value)} sx={{ flex: 1 }} />
