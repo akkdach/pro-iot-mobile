@@ -257,6 +257,61 @@ export default function WorkStation() {
       );
 
       if (res.data.isSuccess === true) {
+        // === สร้าง TO จากส่วนต่าง (เฉพาะเพิ่ม) ===
+        const oldQty = Number(editItem.qty) || 0;
+        const delta = newQty - oldQty;
+
+        if (delta > 0) {
+          const toPayload = {
+            order_id: work?.orderid || "",
+            stge_loc: "1FL1",
+            material_type: "",
+            items: [{
+              material: editItem.material,
+              quantity: delta,
+              description: editItem.materialDescription,
+            }],
+          };
+
+          const confirmTO = await Swal.fire({
+            icon: "info",
+            title: "สร้าง Transfer Order?",
+            html: `<b>${editItem.material}:</b> +${delta} ${editItem.materialDescription}`,
+            showCancelButton: true,
+            confirmButtonText: "สร้าง TO",
+            cancelButtonText: "ข้าม",
+            confirmButtonColor: "#2563EB",
+          });
+
+          if (confirmTO.isConfirmed) {
+            try {
+              console.log("📦 TO Payload:", JSON.stringify(toPayload, null, 2));
+              const toRes = await callApi.post("/Mobile/ReservationRequest_create", toPayload);
+              if (toRes.data.isSuccess) {
+                await Swal.fire({
+                  icon: "success",
+                  title: "สร้าง TO สำเร็จ",
+                  timer: 1500,
+                  showConfirmButton: false,
+                });
+              } else {
+                await Swal.fire({
+                  icon: "error",
+                  title: "สร้าง TO ไม่สำเร็จ",
+                  text: toRes.data.message || "เกิดข้อผิดพลาด",
+                });
+              }
+            } catch (toErr: any) {
+              console.error("TO Create Error:", toErr);
+              await Swal.fire({
+                icon: "error",
+                title: "สร้าง TO ไม่สำเร็จ",
+                text: toErr?.response?.data?.message || toErr?.message || "เกิดข้อผิดพลาด",
+              });
+            }
+          }
+        }
+
         await Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -389,6 +444,10 @@ export default function WorkStation() {
       duratioN_NORMAL: item.duratioN_NORMAL ?? item.DURATION_NORMAL ?? 0,
       objecttype: item.objecttype ?? item.OBJECTTYPE ?? "",
     }));
+
+    // เก็บ mN_WK_CTR ไว้ใน localStorage เพื่อใช้ในหน้า TableSparePart
+    const wkCtr = item.mN_WK_CTR ?? item.MN_WK_CTR ?? '';
+    if (wkCtr) localStorage.setItem('mN_WK_CTR', wkCtr);
 
 
 
@@ -913,6 +972,7 @@ export default function WorkStation() {
                 fontSize: "1.1rem",
                 padding: "12px 24px",
                 minHeight: 60,
+                display: normalizedOp === "0030" ? "inline-flex" : "none",
               }}
             />
           </Tabs>
@@ -1616,7 +1676,7 @@ export default function WorkStation() {
                 setOpenEditQty(false);
               }}
             >
-              Save นะ
+              Save
             </Button>
           </DialogActions>
         </Dialog>
@@ -1722,7 +1782,7 @@ export default function WorkStation() {
           <DialogContent sx={{ p: 0 }}>
             {(() => {
               const bearerToken = localStorage.getItem('token') ?? '';
-              const authParam = bearerToken ? `&auth=${encodeURIComponent(bearerToken)}` : '';
+              const authParam = bearerToken ? `&token=${encodeURIComponent(bearerToken)}` : '';
               const oid = encodeURIComponent(orderId ?? '');
 
               return normalizedOp === "0020" ? (

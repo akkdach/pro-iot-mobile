@@ -28,7 +28,7 @@
     "axios": "^1.10.0",
     "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
-    "framer-motion": "^12.18.1",
+    "framer-motion": "^12.38.0",
     "html5-qrcode": "^2.3.8",
     "jose": "^6.2.1",
     "leaflet": "^1.9.4",

@@ -57,6 +57,7 @@ type TOItem = {
 };
 
 type TOPayload = {
+  order_id: string;
   stge_loc: string;
   material_type: string;
   items: TOItem[];
@@ -320,7 +321,8 @@ export default function TableSparePart() {
     if (items.length === 0) return null;
 
     return {
-      stge_loc: work?.mN_WK_CTR || '',
+      order_id: orderId || '',
+      stge_loc: '1FL1',
       material_type: '',
       items,
     };
@@ -329,6 +331,8 @@ export default function TableSparePart() {
   const createTransferOrder = async (payload: TOPayload): Promise<boolean> => {
     try {
       console.log('📦 TO Payload:', JSON.stringify(payload, null, 2));
+      console.log('🔑 stge_loc value:', `"${payload.stge_loc}"`, 'length:', payload.stge_loc.length);
+      console.log('🔑 work?.mN_WK_CTR:', work?.mN_WK_CTR);
 
       const res = await callApi.post('/Mobile/ReservationRequest_create', payload);
       if (!res.data.isSuccess) {
@@ -493,7 +497,8 @@ export default function TableSparePart() {
 
         if (delta > 0) {
           const toPayload: TOPayload = {
-            stge_loc: work?.mN_WK_CTR || '',
+            order_id: orderId || '',
+            stge_loc: '1FL1',
             material_type: '',
             items: [{
               material: editItem.material,

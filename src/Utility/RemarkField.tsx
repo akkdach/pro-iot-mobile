@@ -11,10 +11,15 @@ import {
     Typography,
     Fade,
     Stack,
+    TextField,
+    ToggleButton,
+    ToggleButtonGroup,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import EditNoteIcon from "@mui/icons-material/EditNote";
 
 export type RemarkOption = { value: string; label: string };
 
@@ -60,12 +65,16 @@ export const RemarkField: React.FC<RemarkFieldProps> = ({
 
     const [innerDropdown, setInnerDropdown] = useState(dropdownDefaultValue);
     const [saving, setSaving] = useState(false);
+    const [inputMode, setInputMode] = useState<"dropdown" | "text">("dropdown");
+    const [customText, setCustomText] = useState("");
 
     const ddValue = isControlledDropdown ? dropdownValue! : innerDropdown;
 
     useEffect(() => {
         if (!open) return;
         if (!isControlledDropdown) setInnerDropdown(dropdownDefaultValue ?? "");
+        setInputMode("dropdown");
+        setCustomText("");
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [open, dropdownDefaultValue]);
 
@@ -74,10 +83,14 @@ export const RemarkField: React.FC<RemarkFieldProps> = ({
         onDropdownChange?.(next);
     };
 
+    // ค่าสุดท้ายที่จะส่งออกไป
+    const finalValue = inputMode === "dropdown" ? ddValue : customText.trim();
+    const isMissingValue = !finalValue;
+
     const handleSave = async () => {
         try {
             setSaving(true);
-            await onSave(ddValue);
+            await onSave(finalValue);
             onClose();
         } finally {
             setSaving(false);
@@ -156,87 +169,165 @@ export const RemarkField: React.FC<RemarkFieldProps> = ({
             </Box>
 
             <DialogContent sx={{ px: 3, py: 3 }}>
+                {/* Toggle: Dropdown vs Text */}
+                <ToggleButtonGroup
+                    value={inputMode}
+                    exclusive
+                    onChange={(_, val) => val && setInputMode(val)}
+                    size="small"
+                    fullWidth
+                    sx={{
+                        mb: 2.5,
+                        "& .MuiToggleButton-root": {
+                            borderRadius: 2,
+                            fontWeight: 700,
+                            fontSize: "0.85rem",
+                            textTransform: "none",
+                            py: 1,
+                            border: "2px solid #E0E0E0",
+                            color: "#757575",
+                            "&.Mui-selected": {
+                                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                                color: "#fff",
+                                borderColor: "transparent",
+                                "&:hover": {
+                                    background: "linear-gradient(135deg, #5a6fd6 0%, #6a4393 100%)",
+                                },
+                            },
+                        },
+                    }}
+                >
+                    <ToggleButton value="dropdown">
+                        <ListAltIcon sx={{ mr: 0.5, fontSize: 18 }} />
+                        เลือกจากรายการ
+                    </ToggleButton>
+                    <ToggleButton value="text">
+                        <EditNoteIcon sx={{ mr: 0.5, fontSize: 18 }} />
+                        พิมพ์เอง
+                    </ToggleButton>
+                </ToggleButtonGroup>
+
                 {/* Selected option indicator */}
-                {ddValue && (
+                {finalValue && (
                     <Box
                         sx={{
                             mb: 2.5,
                             p: 1.5,
                             borderRadius: 2.5,
-                            backgroundColor: selectedColor.bg,
-                            border: `2px solid ${selectedColor.border}`,
+                            backgroundColor: inputMode === "dropdown" ? selectedColor.bg : "#F3E5F5",
+                            border: `2px solid ${inputMode === "dropdown" ? selectedColor.border : "#764ba2"}`,
                             display: "flex",
                             alignItems: "center",
                             gap: 1,
                             transition: "all 0.3s ease",
                         }}
                     >
-                        <Typography sx={{ fontSize: "1.3rem" }}>{selectedColor.icon}</Typography>
-                        <Typography sx={{ fontWeight: 700, color: selectedColor.border, fontSize: "0.9rem" }}>
-                            {dropdownOptions.find(o => o.value === ddValue)?.label ?? ddValue}
+                        <Typography sx={{ fontSize: "1.3rem" }}>
+                            {inputMode === "dropdown" ? selectedColor.icon : "✏️"}
+                        </Typography>
+                        <Typography sx={{
+                            fontWeight: 700,
+                            color: inputMode === "dropdown" ? selectedColor.border : "#764ba2",
+                            fontSize: "0.9rem",
+                        }}>
+                            {inputMode === "dropdown"
+                                ? (dropdownOptions.find(o => o.value === ddValue)?.label ?? ddValue)
+                                : customText.trim()}
                         </Typography>
                     </Box>
                 )}
 
-                {/* Dropdown */}
-                <FormControl fullWidth size="medium">
-                    <InputLabel sx={{ fontWeight: 600 }}>{dropdownLabel}</InputLabel>
-                    <Select
-                        label={dropdownLabel}
-                        value={ddValue}
-                        onChange={(e) => setDropdown(String(e.target.value))}
-                        disabled={dropdownDisabled || disabled || saving}
+                {/* === Mode: Dropdown === */}
+                {inputMode === "dropdown" && (
+                    <FormControl fullWidth size="medium">
+                        <InputLabel sx={{ fontWeight: 600 }}>{dropdownLabel}</InputLabel>
+                        <Select
+                            label={dropdownLabel}
+                            value={ddValue}
+                            onChange={(e) => setDropdown(String(e.target.value))}
+                            disabled={dropdownDisabled || disabled || saving}
+                            sx={{
+                                borderRadius: 2.5,
+                                backgroundColor: "#FAFAFA",
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#E0E0E0",
+                                    borderWidth: 2,
+                                },
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#667eea",
+                                },
+                                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#764ba2",
+                                },
+                            }}
+                        >
+                            {dropdownEmptyAllowed && (
+                                <MenuItem value="">
+                                    <Typography color="text.secondary">— เลือก —</Typography>
+                                </MenuItem>
+                            )}
+                            {dropdownOptions.map((opt) => (
+                                <MenuItem
+                                    key={opt.value}
+                                    value={opt.value}
+                                    sx={{
+                                        py: 1.2,
+                                        borderRadius: 1,
+                                        mx: 0.5,
+                                        "&:hover": { backgroundColor: "#F3E5F5" },
+                                        "&.Mui-selected": {
+                                            backgroundColor: "#EDE7F6",
+                                            "&:hover": { backgroundColor: "#E1BEE7" },
+                                        },
+                                    }}
+                                >
+                                    <Stack direction="row" alignItems="center" spacing={1}>
+                                        <Typography sx={{ fontSize: "1.1rem" }}>
+                                            {optionColorMap[opt.value]?.icon ?? "📝"}
+                                        </Typography>
+                                        <Typography sx={{ fontWeight: 600 }}>{opt.label}</Typography>
+                                    </Stack>
+                                </MenuItem>
+                            ))}
+                        </Select>
+
+                        {isDropdownMissing && (
+                            <Typography sx={{ fontSize: 12, color: "error.main", mt: 0.75, ml: 0.5 }}>
+                                กรุณาเลือก{dropdownLabel}
+                            </Typography>
+                        )}
+                    </FormControl>
+                )}
+
+                {/* === Mode: Free Text === */}
+                {inputMode === "text" && (
+                    <TextField
+                        fullWidth
+                        multiline
+                        minRows={3}
+                        maxRows={6}
+                        placeholder="พิมพ์ remark ที่ต้องการ..."
+                        value={customText}
+                        onChange={(e) => setCustomText(e.target.value)}
+                        disabled={disabled || saving}
                         sx={{
-                            borderRadius: 2.5,
-                            backgroundColor: "#FAFAFA",
-                            "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#E0E0E0",
-                                borderWidth: 2,
-                            },
-                            "&:hover .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#667eea",
-                            },
-                            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#764ba2",
+                            "& .MuiOutlinedInput-root": {
+                                borderRadius: 2.5,
+                                backgroundColor: "#FAFAFA",
+                                "& .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#E0E0E0",
+                                    borderWidth: 2,
+                                },
+                                "&:hover .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#667eea",
+                                },
+                                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                    borderColor: "#764ba2",
+                                },
                             },
                         }}
-                    >
-                        {dropdownEmptyAllowed && (
-                            <MenuItem value="">
-                                <Typography color="text.secondary">— เลือก —</Typography>
-                            </MenuItem>
-                        )}
-                        {dropdownOptions.map((opt) => (
-                            <MenuItem
-                                key={opt.value}
-                                value={opt.value}
-                                sx={{
-                                    py: 1.2,
-                                    borderRadius: 1,
-                                    mx: 0.5,
-                                    "&:hover": { backgroundColor: "#F3E5F5" },
-                                    "&.Mui-selected": {
-                                        backgroundColor: "#EDE7F6",
-                                        "&:hover": { backgroundColor: "#E1BEE7" },
-                                    },
-                                }}
-                            >
-                                <Stack direction="row" alignItems="center" spacing={1}>
-                                    <Typography sx={{ fontSize: "1.1rem" }}>
-                                        {optionColorMap[opt.value]?.icon ?? "📝"}
-                                    </Typography>
-                                    <Typography sx={{ fontWeight: 600 }}>{opt.label}</Typography>
-                                </Stack>
-                            </MenuItem>
-                        ))}
-                    </Select>
-
-                    {isDropdownMissing && (
-                        <Typography sx={{ fontSize: 12, color: "error.main", mt: 0.75, ml: 0.5 }}>
-                            กรุณาเลือก{dropdownLabel}
-                        </Typography>
-                    )}
-                </FormControl>
+                    />
+                )}
 
                 {/* Buttons */}
                 <Stack direction="row" spacing={1.5} sx={{ mt: 3 }}>
@@ -267,7 +358,7 @@ export const RemarkField: React.FC<RemarkFieldProps> = ({
                         fullWidth
                         variant="contained"
                         onClick={handleSave}
-                        disabled={disabled || saving || isDropdownMissing}
+                        disabled={disabled || saving || isMissingValue}
                         startIcon={<SaveIcon />}
                         sx={{
                             py: 1.3,

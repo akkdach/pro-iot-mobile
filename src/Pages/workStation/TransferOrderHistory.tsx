@@ -2,31 +2,66 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import callApi from "../../Services/callApi";
 import AppHearder from "../../Component/AppHeader";
-import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import InventoryRoundedIcon from "@mui/icons-material/InventoryRounded";
+import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import {
   Box,
   Typography,
   Stack,
   Paper,
   Chip,
-  Button,
   TextField,
   Skeleton,
   Alert,
-  Divider,
+  InputAdornment,
+  Fade,
+  IconButton,
 } from "@mui/material";
 
 // ===== Types =====
 type TOHistoryItem = {
-  id?: number;
+  reS_ID: number;
+  orderid: string;
+  worK_ORDER_OBJ: string | null;
+  wK_CTR: string;
+  worK_CENTER_OBJ: string | null;
+  assigneD_WK_CTR: string | null;
+  reS_DATE: string;
+  movE_TYPE: string | null;
+  movE_PLANT: string;
+  movE_STLOC: string;
+  weB_STATUS: number;
+  reservatioN_NO: string;
+  froM_VAN: string;
+  finaL_GR: string | null;
+  posT_SHIP: string | null;
+  materialType: string;
+  approvE_USER: string | null;
+  approvE_DATE: string | null;
+  approvE_TIME: string | null;
+  isApprove: string;
+  spare_part_request_item: any[] | null;
+};
+
+type SpareItem = {
+  reS_ITEM_ID: number;
+  reS_ID: number;
+  sparE_PART_REQUEST_OBJ: string | null;
+  wK_CTR: string;
+  worK_CENTER_OBJ: string | null;
+  orderid: string | null;
+  worK_ORDER_OBJ: string | null;
   material: string;
-  quantity: number;
-  description: string;
-  stge_loc?: string;
-  material_type?: string;
-  created_date?: string;
-  status?: string;
+  plant: string;
+  stgE_LOC: string;
+  batch: string | null;
+  vaL_TYPE: string | null;
+  entrY_QNT: number;
+  movement: string | null;
 };
 
 // ===== Helpers =====
@@ -35,28 +70,23 @@ const fmtDateTimeTH = (iso?: string | null) => {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "-";
   return d.toLocaleString("th-TH", {
-    year: "numeric",
-    month: "short",
     day: "2-digit",
+    month: "short",
     hour: "2-digit",
     minute: "2-digit",
   });
 };
 
-const statusColor = (status?: string) => {
-  switch (status?.toUpperCase()) {
-    case "COMPLETED":
-    case "C":
+const approveInfo = (val?: string) => {
+  switch (val?.toUpperCase()) {
     case "Y":
-      return { bg: "#DCFCE7", color: "#16A34A", label: "สำเร็จ" };
-    case "PENDING":
+      return { bg: "#DCFCE7", color: "#15803D", label: "อนุมัติแล้ว", dot: "#22C55E" };
     case "N":
-      return { bg: "#FEF9C3", color: "#A16207", label: "รอดำเนินการ" };
-    case "REJECTED":
+      return { bg: "#FEF3C7", color: "#92400E", label: "รอดำเนินการ", dot: "#F59E0B" };
     case "R":
-      return { bg: "#FEE2E2", color: "#DC2626", label: "ปฏิเสธ" };
+      return { bg: "#FEE2E2", color: "#DC2626", label: "ปฏิเสธ", dot: "#EF4444" };
     default:
-      return { bg: "#F1F5F9", color: "#64748B", label: status || "-" };
+      return { bg: "#F1F5F9", color: "#64748B", label: val || "-", dot: "#94A3B8" };
   }
 };
 
@@ -66,6 +96,8 @@ export default function TransferOrderHistory() {
   const { orderId } = useParams<{ orderId: string }>();
 
   const [data, setData] = useState<TOHistoryItem[]>([]);
+  const [spareItems, setSpareItems] = useState<Record<number, SpareItem[]>>({});
+  const [materialNames, setMaterialNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
@@ -78,13 +110,41 @@ export default function TransferOrderHistory() {
     setLoading(true);
     setError("");
     try {
-      // TODO: ใส่ endpoint จริงเมื่อได้
-      // const res = await callApi.get(`/Mobile/TransferOrderHistory/${orderId}`);
-      // const result = res.data?.dataResult || [];
-      // setData(result);
+      // ดึง TO History + Master spare part list พร้อมกัน
+      const [res, resMaster] = await Promise.all([
+        callApi.get(`/WorkOrderList/TO_history/${orderId}`),
+        callApi.get("/Mobile/RemainingSparepart").catch(() => null),
+      ]);
 
-      console.log("⏳ TO History API — waiting for endpoint. orderId:", orderId);
-      setData([]); // placeholder — ยังไม่มี API
+      const result: TOHistoryItem[] = res.data?.dataResult || [];
+      console.log("✅ TO History:", result);
+      setData(result);
+
+      // สร้าง map ชื่ออะไหล่จาก master list
+      const masterList: any[] = resMaster?.data?.dataResult?.sparepartList ?? [];
+      const nameMap: Record<string, string> = {};
+      masterList.forEach((sp: any) => {
+        if (sp.material && sp.materialDescription) {
+          nameMap[sp.material] = sp.materialDescription;
+        }
+      });
+      console.log("✅ Material Name Map:", nameMap);
+      setMaterialNames(nameMap);
+
+      // ดึง spare items ของแต่ละ TO
+      const spareMap: Record<number, SpareItem[]> = {};
+      await Promise.all(
+        result.map(async (to) => {
+          try {
+            const spareRes = await callApi.get(`/WorkOrderList/TO_history/spareItem/${to.reS_ID}`);
+            spareMap[to.reS_ID] = spareRes.data?.dataResult || [];
+          } catch {
+            spareMap[to.reS_ID] = [];
+          }
+        })
+      );
+      console.log("✅ Spare Items:", spareMap);
+      setSpareItems(spareMap);
     } catch (e: any) {
       console.error("TO History Error:", e);
       setError("โหลดข้อมูลไม่สำเร็จ");
@@ -94,258 +154,433 @@ export default function TransferOrderHistory() {
     }
   };
 
-  // Filter
   const filtered = useMemo(() => {
     const k = search.trim().toLowerCase();
     if (!k) return data;
     return data.filter(
       (item) =>
-        item.material.toLowerCase().includes(k) ||
-        (item.description || "").toLowerCase().includes(k) ||
-        (item.stge_loc || "").toLowerCase().includes(k)
+        (item.wK_CTR || "").toLowerCase().includes(k) ||
+        (item.reservatioN_NO || "").toLowerCase().includes(k) ||
+        (item.movE_STLOC || "").toLowerCase().includes(k) ||
+        (item.froM_VAN || "").toLowerCase().includes(k) ||
+        (item.movE_PLANT || "").toLowerCase().includes(k) ||
+        String(item.reS_ID).includes(k)
     );
   }, [data, search]);
 
-  // KPI
   const totalItems = filtered.length;
-  const totalQty = filtered.reduce((sum, x) => sum + (x.quantity || 0), 0);
+  const approvedCount = filtered.filter((x) => x.isApprove === "Y").length;
+  const pendingCount = filtered.filter((x) => x.isApprove === "N").length;
 
   return (
-    <Box sx={{ p: 2, background: "#f5f6fa", minHeight: "100vh" }}>
-      <AppHearder
-        title="Transfer Order History"
-        icon={<LocalShippingIcon />}
-      />
+    <Box sx={{ minHeight: "100vh", bgcolor: "#F4F6FA", pb: 6 }}>
+      <AppHearder title="TO History" icon={<LocalShippingIcon />} />
 
-      <Box sx={{ maxWidth: 1200, mx: "auto", mt: 7 }}>
-        {/* Header */}
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          justifyContent="space-between"
-          alignItems={{ xs: "flex-start", sm: "center" }}
-          gap={2}
-          mb={3}
-        >
-          <Box>
+      <Box sx={{ mt: 9, px: 1.5 }}>
 
-            <Typography
-              variant="h4"
-              fontWeight={900}
-              sx={{ letterSpacing: -0.5, color: "#1D3557", mt: 1 }}
-            >
-              รายการ Transfer Order
-            </Typography>
-            <Typography variant="body1" sx={{ color: "#5C6F7C", mt: 0.5 }}>
-              Work Order: <b>{orderId || "-"}</b> — แสดงรายการ TO
-              ที่สร้างจากการเพิ่มอะไหล่
-            </Typography>
-          </Box>
-
-          {/* KPI Cards */}
-          <Stack direction="row" spacing={1.5}>
-            <Paper
+        {/* ── Header ── */}
+        <Fade in timeout={400}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2.5} mt={1.5}>
+            <Box>
+              <Typography fontWeight={800} fontSize={20} sx={{ color: "#1E293B", lineHeight: 1.2 }}>
+                รายการ TO
+              </Typography>
+              <Typography variant="caption" sx={{ color: "#94A3B8" }}>
+                Order: <b style={{ color: "#3B82F6" }}>{orderId || "-"}</b>
+              </Typography>
+            </Box>
+            <IconButton
+              onClick={fetchTOHistory}
+              disabled={loading}
               sx={{
-                px: 2.5,
-                py: 1.5,
-                borderRadius: 3,
-                border: "1px solid #DBEAFE",
-                bgcolor: "#EFF6FF",
+                bgcolor: "#EEF2FF",
+                border: "1px solid #C7D2FE",
+                "&:hover": { bgcolor: "#E0E7FF" },
               }}
             >
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                fontWeight={600}
-              >
-                รายการ
-              </Typography>
-              <Typography variant="h5" fontWeight={900} color="#2563EB">
-                {totalItems}
-              </Typography>
-            </Paper>
-            <Paper
-              sx={{
-                px: 2.5,
-                py: 1.5,
-                borderRadius: 3,
-                border: "1px solid #BBF7D0",
-                bgcolor: "#F0FDF4",
-              }}
-            >
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                fontWeight={600}
-              >
-                จำนวนรวม
-              </Typography>
-              <Typography variant="h5" fontWeight={900} color="#16A34A">
-                {totalQty}
-              </Typography>
-            </Paper>
+              <RefreshRoundedIcon sx={{ color: "#6366F1", fontSize: 20 }} />
+            </IconButton>
           </Stack>
-        </Stack>
+        </Fade>
 
-        {/* Search */}
+        {/* ── KPI Row ── */}
+        <Fade in timeout={500}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 1.5,
+              mb: 2.5,
+            }}
+          >
+            <KpiCard
+              label="ทั้งหมด"
+              value={totalItems}
+              bgColor="#EFF6FF"
+              borderColor="#BFDBFE"
+              valueColor="#1D4ED8"
+              icon={<InventoryRoundedIcon sx={{ fontSize: 28, color: "#3B82F6", opacity: 0.15 }} />}
+            />
+            <KpiCard
+              label="อนุมัติ"
+              value={approvedCount}
+              bgColor="#F0FDF4"
+              borderColor="#BBF7D0"
+              valueColor="#15803D"
+              icon={<CheckCircleRoundedIcon sx={{ fontSize: 28, color: "#22C55E", opacity: 0.15 }} />}
+            />
+            <KpiCard
+              label="รอดำเนินการ"
+              value={pendingCount}
+              bgColor="#FFFBEB"
+              borderColor="#FDE68A"
+              valueColor="#92400E"
+              icon={<AccessTimeRoundedIcon sx={{ fontSize: 28, color: "#F59E0B", opacity: 0.15 }} />}
+            />
+          </Box>
+        </Fade>
+
+        {/* ── Search ── */}
         <TextField
-          placeholder="ค้นหา Material / Description..."
+          placeholder="ค้นหา..."
           size="small"
           fullWidth
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchRoundedIcon sx={{ color: "#94A3B8", fontSize: 18 }} />
+              </InputAdornment>
+            ),
+          }}
           sx={{
-            mb: 2,
-            bgcolor: "white",
-            borderRadius: 2,
-            "& .MuiOutlinedInput-root": { borderRadius: 2 },
+            mb: 2.5,
+            "& .MuiOutlinedInput-root": {
+              borderRadius: 2.5,
+              bgcolor: "#fff",
+              height: 42,
+              fontSize: "0.875rem",
+              border: "1px solid #E2E8F0",
+              "&:hover": { borderColor: "#CBD5E1" },
+              "&.Mui-focused": {
+                borderColor: "#3B82F6",
+                boxShadow: "0 0 0 3px rgba(59,130,246,0.08)",
+              },
+              "& fieldset": { border: "none" },
+            },
           }}
         />
 
         {/* Error */}
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 2, borderRadius: 2, fontSize: "0.85rem" }}>
             {error}
           </Alert>
         )}
 
         {/* Loading */}
         {loading && (
-          <Stack spacing={1.5}>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Paper key={i} sx={{ p: 2, borderRadius: 3 }}>
-                <Skeleton variant="text" width="40%" height={28} />
-                <Skeleton variant="text" width="70%" height={22} />
-                <Skeleton variant="rectangular" height={40} sx={{ mt: 1 }} />
+          <Stack spacing={2}>
+            {[1, 2, 3].map((i) => (
+              <Paper key={i} elevation={0} sx={{ p: 2, borderRadius: 3, border: "1px solid #E2E8F0" }}>
+                <Skeleton variant="text" width="50%" height={22} />
+                <Skeleton variant="text" width="70%" height={16} sx={{ mt: 0.5 }} />
+                <Skeleton variant="rounded" height={48} sx={{ mt: 1, borderRadius: 2 }} />
               </Paper>
             ))}
           </Stack>
         )}
 
-        {/* Empty State */}
-        {!loading && filtered.length === 0 && (
-          <Paper
-            sx={{
-              p: 6,
-              borderRadius: 3,
-              textAlign: "center",
-              border: "1px solid #E2E8F0",
-            }}
-          >
-            <LocalShippingIcon
-              sx={{ fontSize: 56, color: "#CBD5E1", mb: 1.5 }}
-            />
-            <Typography
-              variant="h6"
-              sx={{ color: "#94A3B8", fontWeight: 600 }}
-            >
-              ยังไม่มีรายการ Transfer Order
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: "#B0BEC5", mt: 0.5 }}
-            >
-              รายการ TO จะแสดงที่นี่เมื่อมีการเพิ่มอะไหล่และสร้าง TO สำเร็จ
-            </Typography>
-            <Typography
-              variant="caption"
-              sx={{ color: "#94A3B8", mt: 2, display: "block" }}
-            >
-              ⏳ API endpoint สำหรับดึงข้อมูล TO ยังไม่พร้อมใช้งาน
-            </Typography>
-          </Paper>
+        {/* Empty */}
+        {!loading && filtered.length === 0 && !error && (
+          <Fade in timeout={500}>
+            <Box sx={{ textAlign: "center", py: 6 }}>
+              <Box
+                sx={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: "50%",
+                  bgcolor: "#EEF2FF",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mx: "auto",
+                  mb: 2,
+                }}
+              >
+                <LocalShippingIcon sx={{ fontSize: 30, color: "#A5B4FC" }} />
+              </Box>
+              <Typography fontWeight={700} fontSize={16} sx={{ color: "#64748B" }}>
+                ยังไม่มีรายการ TO
+              </Typography>
+              <Typography variant="caption" sx={{ color: "#94A3B8", mt: 0.5, display: "block" }}>
+                รายการจะแสดงเมื่อมีการสร้าง TO สำเร็จ
+              </Typography>
+            </Box>
+          </Fade>
         )}
 
-        {/* TO List */}
+        {/* ── TO Cards ── */}
         {!loading && filtered.length > 0 && (
-          <Stack spacing={1.5}>
+          <Stack spacing={2}>
             {filtered.map((item, idx) => {
-              const sc = statusColor(item.status);
+              const status = approveInfo(item.isApprove);
               return (
-                <Paper
-                  key={item.id ?? idx}
-                  sx={{
-                    p: 2,
-                    borderRadius: 3,
-                    border: "1px solid #E2E8F0",
-                    transition: "box-shadow 0.15s ease",
-                    "&:hover": {
-                      boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
-                    },
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    alignItems="flex-start"
+                <Fade in timeout={300 + idx * 60} key={item.reS_ID ?? idx}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      borderRadius: 3,
+                      border: "1px solid #E2E8F0",
+                      overflow: "hidden",
+                      transition: "box-shadow 0.15s",
+                      "&:active": { boxShadow: "0 0 0 2px rgba(59,130,246,0.15)" },
+                    }}
                   >
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography fontWeight={800} noWrap>
-                        {item.material}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ color: "#64748B" }}
-                        noWrap
+                    {/* Color bar */}
+                    <Box sx={{ height: 3, bgcolor: status.dot }} />
+
+                    <Box sx={{ p: 2, py: 2.5 }}>
+                      {/* Top: ID + Status */}
+                      <Stack direction="row" justifyContent="space-between" alignItems="center">
+                        <Box>
+                          <Typography fontWeight={800} fontSize={15} sx={{ color: "#1E293B" }}>
+                            TO #{item.reS_ID}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: "#94A3B8", lineHeight: 1 }}>
+                            {fmtDateTimeTH(item.reS_DATE)}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          size="small"
+                          label={status.label}
+                          sx={{
+                            bgcolor: status.bg,
+                            color: status.color,
+                            fontWeight: 700,
+                            fontSize: "0.7rem",
+                            height: 24,
+                            borderRadius: 1.5,
+                          }}
+                        />
+                      </Stack>
+
+                      {/* Detail 2x2 grid */}
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: "12px 12px",
+                          mt: 2,
+                          p: 1.5,
+                          borderRadius: 2,
+                          bgcolor: "#FAFBFC",
+                        }}
                       >
-                        {item.description || "-"}
-                      </Typography>
+                        <MiniDetail label="Work Center" value={item.wK_CTR} />
+                        <MiniDetail label="Plant" value={item.movE_PLANT} />
+                        <MiniDetail label="SLOC ปลายทาง" value={item.movE_STLOC} />
+                        <MiniDetail label="จากคลัง" value={item.froM_VAN} />
+                      </Box>
+
+                      {/* ── Spare Part Items ── */}
+                      {(spareItems[item.reS_ID] || []).length > 0 && (
+                        <Box
+                          sx={{
+                            mt: 2,
+                            borderRadius: 2,
+                            border: "1px solid #E2E8F0",
+                            overflow: "hidden",
+                          }}
+                        >
+                          {/* Table header */}
+                          <Box
+                            sx={{
+                              display: "grid",
+                              gridTemplateColumns: "1fr 80px 80px",
+                              px: 1.5,
+                              py: 1,
+                              bgcolor: "#F1F5F9",
+                              borderBottom: "1px solid #E2E8F0",
+                            }}
+                          >
+                            <Typography sx={{ fontSize: "0.6rem", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.3 }}>
+                              Material
+                            </Typography>
+                            <Typography sx={{ fontSize: "0.6rem", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.3, textAlign: "center" }}>
+                              จำนวน
+                            </Typography>
+                            <Typography sx={{ fontSize: "0.6rem", fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 0.3, textAlign: "center" }}>
+                              SLOC
+                            </Typography>
+                          </Box>
+
+                          {/* Rows */}
+                          {(spareItems[item.reS_ID] || []).map((sp, spIdx) => (
+                            <Box
+                              key={sp.reS_ITEM_ID}
+                              sx={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 80px 80px",
+                                px: 1.5,
+                                py: 1,
+                                bgcolor: spIdx % 2 === 0 ? "#fff" : "#FAFBFC",
+                                borderBottom: spIdx < (spareItems[item.reS_ID] || []).length - 1 ? "1px solid #F1F5F9" : "none",
+                                alignItems: "center",
+                              }}
+                            >
+                              <Box>
+                                <Typography fontWeight={700} fontSize={13} sx={{ color: "#334155" }} noWrap>
+                                  {materialNames[sp.material] || sp.material}
+                                </Typography>
+                                {materialNames[sp.material] && (
+                                  <Typography sx={{ fontSize: "0.6rem", color: "#94A3B8", lineHeight: 1.2 }} noWrap>
+                                    {sp.material}
+                                  </Typography>
+                                )}
+                              </Box>
+                              <Chip
+                                size="small"
+                                label={sp.entrY_QNT}
+                                sx={{
+                                  bgcolor: "#DCFCE7",
+                                  color: "#15803D",
+                                  fontWeight: 800,
+                                  fontSize: "0.75rem",
+                                  height: 22,
+                                  borderRadius: 1.5,
+                                  mx: "auto",
+                                }}
+                              />
+                              <Typography fontSize={12} sx={{ color: "#64748B", textAlign: "center" }}>
+                                {sp.stgE_LOC || "-"}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
+
+                      {/* Extra chips */}
+                      {(item.materialType || item.reservatioN_NO) && (
+                        <Stack direction="row" spacing={0.75} mt={1.5} flexWrap="wrap" useFlexGap>
+                          {item.materialType && (
+                            <Chip
+                              size="small"
+                              label={`ประเภท: ${item.materialType}`}
+                              variant="outlined"
+                              sx={{ fontSize: "0.7rem", height: 22, borderRadius: 1.5, borderColor: "#E2E8F0" }}
+                            />
+                          )}
+                          {item.reservatioN_NO && (
+                            <Chip
+                              size="small"
+                              label={`Resv: ${item.reservatioN_NO}`}
+                              sx={{
+                                fontSize: "0.7rem",
+                                height: 22,
+                                borderRadius: 1.5,
+                                bgcolor: "#EFF6FF",
+                                color: "#2563EB",
+                                fontWeight: 600,
+                              }}
+                            />
+                          )}
+                        </Stack>
+                      )}
+
+                      {/* Approve footer */}
+                      {item.approvE_USER && (
+                        <Stack direction="row" alignItems="center" spacing={0.5} mt={1.5} sx={{ pt: 1, borderTop: "1px solid #F1F5F9" }}>
+                          <CheckCircleRoundedIcon sx={{ fontSize: 13, color: "#22C55E" }} />
+                          <Typography variant="caption" sx={{ color: "#64748B", fontSize: "0.7rem" }}>
+                            {item.approvE_USER}
+                            {item.approvE_DATE ? ` · ${fmtDateTimeTH(item.approvE_DATE)}` : ""}
+                          </Typography>
+                        </Stack>
+                      )}
                     </Box>
-
-                    <Stack
-                      direction="row"
-                      spacing={1}
-                      alignItems="center"
-                    >
-                      <Chip
-                        size="small"
-                        label={`+${item.quantity}`}
-                        sx={{
-                          bgcolor: "#DCFCE7",
-                          color: "#16A34A",
-                          fontWeight: 700,
-                          fontSize: "0.85rem",
-                        }}
-                      />
-                      <Chip
-                        size="small"
-                        label={sc.label}
-                        sx={{
-                          bgcolor: sc.bg,
-                          color: sc.color,
-                          fontWeight: 700,
-                        }}
-                      />
-                    </Stack>
-                  </Stack>
-
-                  <Divider sx={{ my: 1 }} />
-
-                  <Stack
-                    direction="row"
-                    spacing={1.5}
-                    flexWrap="wrap"
-                  >
-                    {item.stge_loc && (
-                      <Chip
-                        size="small"
-                        label={`SLOC: ${item.stge_loc}`}
-                        variant="outlined"
-                      />
-                    )}
-                    {item.created_date && (
-                      <Chip
-                        size="small"
-                        label={fmtDateTimeTH(item.created_date)}
-                        variant="outlined"
-                      />
-                    )}
-                  </Stack>
-                </Paper>
+                  </Paper>
+                </Fade>
               );
             })}
           </Stack>
         )}
       </Box>
+    </Box>
+  );
+}
+
+// ===== KPI Card =====
+function KpiCard({
+  label,
+  value,
+  bgColor,
+  borderColor,
+  valueColor,
+  icon,
+}: {
+  label: string;
+  value: number;
+  bgColor: string;
+  borderColor: string;
+  valueColor: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        px: 1.5,
+        py: 1.25,
+        borderRadius: 2.5,
+        bgcolor: bgColor,
+        border: `1px solid ${borderColor}`,
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      <Box sx={{ position: "absolute", right: 4, bottom: 2 }}>{icon}</Box>
+      <Typography
+        sx={{
+          fontSize: "0.6rem",
+          fontWeight: 700,
+          color: valueColor,
+          textTransform: "uppercase",
+          letterSpacing: 0.3,
+          lineHeight: 1,
+          opacity: 0.8,
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography fontWeight={900} fontSize={24} sx={{ color: valueColor, lineHeight: 1.2, mt: 0.25 }}>
+        {value}
+      </Typography>
+    </Paper>
+  );
+}
+
+// ===== Mini Detail Cell =====
+function MiniDetail({ label, value }: { label: string; value?: string | null }) {
+  return (
+    <Box>
+      <Typography
+        sx={{
+          fontSize: "0.6rem",
+          fontWeight: 600,
+          color: "#94A3B8",
+          textTransform: "uppercase",
+          letterSpacing: 0.3,
+          lineHeight: 1,
+          mb: 0.25,
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography fontWeight={700} fontSize={13} sx={{ color: "#334155", lineHeight: 1.2 }}>
+        {value || "-"}
+      </Typography>
     </Box>
   );
 }
