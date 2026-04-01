@@ -110,22 +110,22 @@ export default function TransferOrderHistory() {
     setLoading(true);
     setError("");
     try {
-      // ดึง TO History + Master spare part list พร้อมกัน
+      // ดึง TO History + Material Master พร้อมกัน
       const [res, resMaster] = await Promise.all([
         callApi.get(`/WorkOrderList/TO_history/${orderId}`),
-        callApi.get("/Mobile/RemainingSparepart").catch(() => null),
+        callApi.get("/Mobile/GetMaterialMaster").catch(() => null),
       ]);
 
       const result: TOHistoryItem[] = res.data?.dataResult || [];
       console.log("✅ TO History:", result);
       setData(result);
 
-      // สร้าง map ชื่ออะไหล่จาก master list
-      const masterList: any[] = resMaster?.data?.dataResult?.sparepartList ?? [];
+      // สร้าง map ชื่ออะไหล่จาก Material Master
+      const masterList: any[] = resMaster?.data?.dataResult ?? [];
       const nameMap: Record<string, string> = {};
       masterList.forEach((sp: any) => {
-        if (sp.material && sp.materialDescription) {
-          nameMap[sp.material] = sp.materialDescription;
+        if (sp.material && sp.description) {
+          nameMap[sp.material] = sp.description;
         }
       });
       console.log("✅ Material Name Map:", nameMap);

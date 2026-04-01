@@ -202,7 +202,7 @@ export default function BomTab() {
             try {
               const toPayload = {
                 order_id: currentOrderId,
-                stge_loc: work?.mN_WK_CTR || "1FL1",
+                stge_loc: "1FL1",
                 material_type: "",
                 items: toItems,
               };
@@ -212,51 +212,81 @@ export default function BomTab() {
               const toRes = await callApi.post("/Mobile/ReservationRequest_create", toPayload);
 
               if (toRes.data.isSuccess) {
-                // Log full response เพื่อดูโครงสร้าง
-                console.log("✅ TO Create Full Response:", JSON.stringify(toRes.data, null, 2));
+                console.log("✅ TO Create Response:", JSON.stringify(toRes.data, null, 2));
 
-                // ดึง resId จาก response — ลองหลาย path
-                const dr = toRes.data.dataResult;
-                const resId = dr?.reS_ID ?? dr?.resId ?? dr?.res_id ?? dr?.id
-                  ?? (Array.isArray(dr) && dr.length > 0 ? (dr[0]?.reS_ID ?? dr[0]?.resId ?? dr[0]?.res_id ?? dr[0]?.id) : null)
-                  ?? toRes.data.reS_ID ?? toRes.data.resId ?? toRes.data.res_id ?? toRes.data.id;
-                console.log("✅ TO Created, resId:", resId);
+                // ดึง res_id จาก ApproveTO_data
+                try {
+                  const approveDataRes = await callApi.get(`/WorkOrderList/ApproveTO_data/${currentOrderId}`);
+                  console.log("📋 ApproveTO_data Response:", JSON.stringify(approveDataRes.data, null, 2));
 
-                if (resId) {
-                  try {
-                    const approveRes = await callApi.post(`/Mobile/ReservationRequest_approve/${resId}`);
-                    console.log("✅ TO Approved:", approveRes.data);
+                  const rawResult = approveDataRes.data?.dataResult;
+                  console.log("📋 ApproveTO_data rawResult:", rawResult, "| type:", typeof rawResult);
 
-                    if (approveRes.data.isSuccess) {
+                  // รองรับทั้ง array, object เดี่ยว, หรือ null
+                  const approveList: any[] = Array.isArray(rawResult)
+                    ? rawResult
+                    : rawResult && typeof rawResult === "object"
+                      ? [rawResult]
+                      : [];
+                  console.log("📋 ApproveTO_data List:", approveList);
+
+                  // กรองเฉพาะที่ยังไม่ approve (isApprove === "N")
+                  const pendingList = approveList.filter((item: any) => item.isApprove === "N");
+                  console.log("📋 Pending Approve:", pendingList);
+
+                  if (pendingList.length > 0) {
+                    let approveSuccess = 0;
+                    let approveFail = 0;
+
+                    for (const item of pendingList) {
+                      const resId = item.reS_ID ?? item.res_id ?? item.resId;
+                      console.log(`🔄 Approving TO resId: ${resId}`);
+                      try {
+                        const approveRes = await callApi.post(`/Mobile/ReservationRequest_approve/${resId}`);
+                        console.log(`✅ Approve resId ${resId}:`, approveRes.data);
+                        if (approveRes.data.isSuccess) {
+                          approveSuccess++;
+                        } else {
+                          approveFail++;
+                          console.warn(`⚠️ Approve failed for resId ${resId}:`, approveRes.data.message);
+                        }
+                      } catch (approveErr: any) {
+                        approveFail++;
+                        console.error(`❌ Approve error for resId ${resId}:`, approveErr);
+                      }
+                    }
+
+                    if (approveFail === 0) {
                       await Swal.fire({
                         icon: "success",
                         title: "สร้างและอนุมัติ TO สำเร็จ",
-                        text: `TO #${resId} สร้างและอนุมัติเรียบร้อย (${toItems.length} รายการ)`,
+                        text: `อนุมัติ ${approveSuccess} รายการเรียบร้อย`,
                         timer: 2000,
                         showConfirmButton: false,
                       });
                     } else {
                       await Swal.fire({
                         icon: "warning",
-                        title: "สร้าง TO สำเร็จ แต่อนุมัติไม่สำเร็จ",
-                        text: approveRes.data.message || "กรุณาไปอนุมัติที่หน้า TO History",
+                        title: "อนุมัติบางส่วน",
+                        text: `สำเร็จ ${approveSuccess} / ไม่สำเร็จ ${approveFail}`,
                       });
                     }
-                  } catch (approveErr: any) {
-                    console.error("TO Approve Error:", approveErr);
+                  } else {
+                    console.log("📋 ไม่มี TO ที่รอ approve");
                     await Swal.fire({
-                      icon: "warning",
-                      title: "สร้าง TO สำเร็จ แต่อนุมัติไม่สำเร็จ",
-                      text: approveErr?.response?.data?.message || "กรุณาไปอนุมัติที่หน้า TO History",
+                      icon: "success",
+                      title: "สร้าง TO สำเร็จ",
+                      text: `สร้าง Transfer Order เรียบร้อย (${toItems.length} รายการ)`,
+                      timer: 2000,
+                      showConfirmButton: false,
                     });
                   }
-                } else {
+                } catch (approveDataErr: any) {
+                  console.error("❌ ApproveTO_data Error:", approveDataErr);
                   await Swal.fire({
-                    icon: "success",
-                    title: "สร้าง TO สำเร็จ",
-                    text: `สร้าง Transfer Order เรียบร้อย (${toItems.length} รายการ)`,
-                    timer: 2000,
-                    showConfirmButton: false,
+                    icon: "warning",
+                    title: "สร้าง TO สำเร็จ แต่อนุมัติไม่สำเร็จ",
+                    text: "ไม่สามารถดึงข้อมูล approve ได้ กรุณาไปอนุมัติที่หน้า TO History",
                   });
                 }
               } else {

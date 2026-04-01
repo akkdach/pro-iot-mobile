@@ -1302,7 +1302,7 @@ export default function TableSparePart() {
               setOpenEditQty(false);
             }}
           >
-            Save นะ
+            Save
           </Button>
         </DialogActions>
       </Dialog>

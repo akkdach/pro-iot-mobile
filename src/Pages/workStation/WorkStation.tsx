@@ -364,26 +364,26 @@ export default function WorkStation() {
   }, [orderId, row?.current_operation]);
 
   const onLoad = async () => {
-    // ดึงข้อมูล items_component + Master spare part list พร้อมกัน
+    // ดึงข้อมูล items_component + Material Master พร้อมกัน
     const [res, resMaster] = await Promise.all([
       callApi.get(`/WorkOrderList/items_component/${orderId}`),
-      callApi.get("/Mobile/RemainingSparepart").catch(() => null),
+      callApi.get("/Mobile/GetMaterialMaster").catch(() => null),
     ]);
 
     console.log("data Result No 1 : ", res.data.dataResult);
     const data = res.data.dataResult;
-    const masterList: any[] = resMaster?.data?.dataResult?.sparepartList ?? [];
+    const masterList: any[] = resMaster?.data?.dataResult ?? resMaster?.data?.data ?? [];
 
     if (data != null) {
       let newData = data.map((item: any) => {
         // พยายามหาชื่ออะไหล่จาก response ก่อน
         let desc = item?.matL_DESC || item?.MATL_DESC || item?.MatlDesc || item?.materialDescription;
 
-        // ถ้าไม่มี → fallback ไปหาจาก Master List
+        // ถ้าไม่มี → fallback ไปหาจาก Material Master
         if (!desc && masterList.length > 0) {
           const matKey = item?.material || item?.reS_ITEM;
           const master = masterList.find((s: any) => s.material === matKey);
-          desc = master?.materialDescription;
+          desc = master?.description;
         }
 
         return {
@@ -1036,7 +1036,7 @@ export default function WorkStation() {
               </Box>
 
               {/* ─── Inspector-only: Object Type & Classification Dropdowns ─── */}
-              {normalizedOp === "0020" && (
+              {/* {normalizedOp === "0020" && (
                 <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", px: 3, pb: 2 }}>
                   <FormControl size="small" sx={{ minWidth: 200 }}>
                     <InputLabel>Object Type</InputLabel>
@@ -1071,7 +1071,7 @@ export default function WorkStation() {
                     </Select>
                   </FormControl>
                 </Box>
-              )}
+              )} */}
 
 
             </Box>

@@ -22,6 +22,7 @@ import SmsFailedIcon from '@mui/icons-material/SmsFailed';
 import AppHearder from "../../Component/AppHeader";
 import callApi from "../../Services/callApi";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
     WorkOrderRow,
     WorkOrderTodoCard,
@@ -224,19 +225,69 @@ export default function DefectDashboard() {
                                 key={r.orderid}
                                 row={r}
                                 onApprove={async (row) => {
+                                    const confirm = await Swal.fire({
+                                        title: "Approve?",
+                                        text: `ยืนยันการ Approve Work Order: ${row.orderid}?`,
+                                        icon: "question",
+                                        showCancelButton: true,
+                                        confirmButtonText: "Yes, Approve",
+                                        cancelButtonText: "Cancel",
+                                        confirmButtonColor: "#27ae60",
+                                        cancelButtonColor: "#95a5a6",
+                                    });
+
+                                    if (!confirm.isConfirmed) return;
+
                                     try {
                                         await callApi.post(`/WorkOrderList/approve/${row.orderid}`);
+                                        await Swal.fire({
+                                            title: "Approved!",
+                                            text: `Work Order ${row.orderid} ได้รับการ Approve แล้ว`,
+                                            icon: "success",
+                                            timer: 2000,
+                                            showConfirmButton: false,
+                                        });
                                         onLoad();
-                                    } catch (error) {
+                                    } catch (error: any) {
                                         console.error("Approve error:", error);
+                                        await Swal.fire({
+                                            title: "Error",
+                                            text: error?.response?.data?.Message || "ไม่สามารถ Approve ได้",
+                                            icon: "error",
+                                        });
                                     }
                                 }}
                                 onRework={async (row) => {
+                                    const confirm = await Swal.fire({
+                                        title: "Not Approve?",
+                                        text: `ยืนยันการ Not Approve Work Order: ${row.orderid}?`,
+                                        icon: "warning",
+                                        showCancelButton: true,
+                                        confirmButtonText: "Yes, Not Approve",
+                                        cancelButtonText: "Cancel",
+                                        confirmButtonColor: "#e74c3c",
+                                        cancelButtonColor: "#95a5a6",
+                                    });
+
+                                    if (!confirm.isConfirmed) return;
+
                                     try {
                                         await callApi.post(`/WorkOrderList/notApprove/${row.orderid}`);
+                                        await Swal.fire({
+                                            title: "Not Approved",
+                                            text: `Work Order ${row.orderid} ถูก Not Approve แล้ว`,
+                                            icon: "success",
+                                            timer: 2000,
+                                            showConfirmButton: false,
+                                        });
                                         onLoad();
-                                    } catch (error) {
+                                    } catch (error: any) {
                                         console.error("Rework error:", error);
+                                        await Swal.fire({
+                                            title: "Error",
+                                            text: error?.response?.data?.Message || "ไม่สามารถ Not Approve ได้",
+                                            icon: "error",
+                                        });
                                     }
                                 }}
                             />

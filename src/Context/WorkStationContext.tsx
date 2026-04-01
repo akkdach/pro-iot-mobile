@@ -369,12 +369,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
     // ปกติ -> เรียก API ตัวเดิม
     if (pick.isConfirmed) {
       try {
-        const res = await callApi.get(
-          `/Mobile/GetCheckOutCloseType?WorkOrder=${encodeURIComponent(String(work.orderid))}`
-        );
-        const data = res.data.dataResult;
-        console.log("Normal API data:", data);
-
         const newCloseType = {
           closeType: 1,
           workOrder: work?.orderid,
@@ -384,6 +378,14 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
           lon: 0,
           code: "",
         };
+
+        const res = await callApi.post(
+          `/Mobile/SetCheckOutCloseType`,
+          newCloseType
+        );
+        const data = res.data.dataResult;
+        console.log("Normal API data:", data);
+
 
         const confirmSend = await Swal.fire({
           title: "ยืนยันข้อมูล",
