@@ -1327,29 +1327,31 @@ export default function WorkStation() {
                 </Button>
               )}
 
-              <Button
-                onClick={completed}
-                variant="outlined"
-                startIcon={<AssignmentTurnedInIcon />}
-                sx={{
-                  borderRadius: "12px",
-                  minWidth: 150,
-                  height: 48,
-                  fontSize: 15,
-                  fontWeight: 600,
-                  textTransform: "none",
-                  borderColor: "#8b5cf6",
-                  color: "#8b5cf6",
-                  transition: "all 0.2s ease",
-                  "&:hover": {
-                    borderColor: "#7c3aed",
-                    backgroundColor: "rgba(139,92,246,0.06)",
-                    transform: "translateY(-1px)",
-                  },
-                }}
-              >
-                Completed
-              </Button>
+              {["0020", "0090"].includes(normalizedOp ?? "") && (
+                <Button
+                  onClick={completed}
+                  variant="outlined"
+                  startIcon={<AssignmentTurnedInIcon />}
+                  sx={{
+                    borderRadius: "12px",
+                    minWidth: 150,
+                    height: 48,
+                    fontSize: 15,
+                    fontWeight: 600,
+                    textTransform: "none",
+                    borderColor: "#8b5cf6",
+                    color: "#8b5cf6",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      borderColor: "#7c3aed",
+                      backgroundColor: "rgba(139,92,246,0.06)",
+                      transform: "translateY(-1px)",
+                    },
+                  }}
+                >
+                  Completed
+                </Button>
+              )}
 
               <Button
                 onClick={() => setOpenRemark(true)}
