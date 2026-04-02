@@ -478,19 +478,9 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!isConfirmed) return;
 
-      const _res = await callApi.post(
-        "/WorkOrderList/Completed",
-        { ORDERID: work?.orderid },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      const _data = _res.data;
-      console.log("Completed Work : ", _data);
-
       const selectedValue = String(value);
       const selected = options.find((x: any) => String(x.value) === selectedValue);
-
       console.log("Selected close type:", selected);
-
 
       if (!work?.orderid) {
         await Swal.fire({
@@ -501,14 +491,85 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      // 🌟 ขั้นตอนใหม่: เลือก PMACTTYPE
+      const pmactOptions = {
+        "MJ1": "Major A1 (MJ1)",
+        "MJ2": "Major A2 (MJ2)",
+        "MJ3": "Major A3 (MJ3)",
+        "MN1": "Minor A1 (MN1)",
+        "MN2": "Minor A2 (MN2)",
+        "MN3": "Minor A3 (MN3)",
+      };
+
+      const pmactPick = await Swal.fire({
+        title: "PM ACT TYPE",
+        text: "กรุณาเลือกประเภทการซ่อมบำรุง",
+        icon: "info",
+        input: "select",
+        inputOptions: pmactOptions,
+        inputPlaceholder: "เลือกข้อมูล...",
+        showCancelButton: true,
+        confirmButtonText: "ถัดไป",
+        cancelButtonText: "ยกเลิก",
+        inputValidator: (v) => (!v ? "กรุณาเลือก PMACTTYPE" : undefined),
+      });
+
+      if (!pmactPick.isConfirmed) return;
+
+      const selectedPmactCode = String(pmactPick.value);
+      const selectedPmactLabel = pmactOptions[selectedPmactCode as keyof typeof pmactOptions];
+
+      // ดึงเหตุผลจาก API
+      let selectedReasonCode = "";
+      let selectedReasonLabel = "";
+      try {
+        const closeTypeRes = await callApi.get(
+          `/Mobile/CheckOutOptionDdlCloseType?WorkOrder=${work.orderid}&CodeGroup=SVF`
+        );
+        const reasonList = closeTypeRes.data?.dataResult ?? closeTypeRes.data?.data ?? [];
+        console.log("📋 GetCheckOutCloseType:", reasonList);
+
+        if (reasonList.length > 0) {
+          const reasonOptions = Object.fromEntries(
+            reasonList.map((item: any) => [
+              item.code,
+              item.shortText ?? "-"
+            ])
+          );
+
+          const reasonPick = await Swal.fire({
+            title: "เลือกเหตุผล",
+            text: "กรุณาเลือกเหตุผลการปิดงาน",
+            icon: "info",
+            input: "select",
+            inputOptions: reasonOptions,
+            inputPlaceholder: "เลือกเหตุผล...",
+            showCancelButton: true,
+            confirmButtonText: "ยืนยัน",
+            cancelButtonText: "ยกเลิก",
+            inputValidator: (v) => (!v ? "กรุณาเลือกเหตุผล" : undefined),
+          });
+
+          if (!reasonPick.isConfirmed) return;
+
+          selectedReasonCode = String(reasonPick.value);
+          const reasonItem = reasonList.find((item: any) =>
+            item.code === selectedReasonCode
+          );
+          selectedReasonLabel = reasonItem?.shortText ?? selectedReasonCode;
+        }
+      } catch (err) {
+        console.error("Fetch close type error:", err);
+      }
+
       const newCloseType_not_normal = {
         closeType: Number(selectedValue),
         workOrder: work.orderid,
-        shortText: "",
+        shortText: selectedReasonLabel,
         mobile_remark: "",
         lat: 0,
         lon: 0,
-        code: String(selected?.value ?? ""),
+        code: selectedReasonCode || String(selected?.value ?? ""),
       };
 
       const confirm = await Swal.fire({
@@ -518,6 +579,8 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       <div><b>WorkOrder:</b> ${newCloseType_not_normal.workOrder}</div>
       <div><b>Close Type:</b> ${newCloseType_not_normal.closeType}</div>
       <div><b>รายการ:</b> ${selected?.label ?? "-"}</div>
+      <div><b>PMACTTYPE:</b> ${selectedPmactLabel}</div>
+      <div><b>เหตุผล:</b> ${selectedReasonLabel || "-"}</div>
     </div>
   `,
         icon: "question",
@@ -528,6 +591,26 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       if (!confirm.isConfirmed) return;
+
+      // ดำเนินการ Completed งาน (ต่อเมื่อยืนยันแล้วเท่านั้น)
+      const _res = await callApi.post(
+        "/WorkOrderList/Completed",
+        { ORDERID: work?.orderid },
+        { headers: { "Content-Type": "application/json" } }
+      );
+      const _data = _res.data;
+      console.log("Completed Work : ", _data);
+
+      // Save Change Type (PMACTTYPE)
+      try {
+        const pmactRes = await callApi.post(
+          `/WorkOrderList/SaveChangeType/${work.orderid}`,
+          { major_code: selectedPmactCode, major_label: selectedPmactLabel }
+        );
+        console.log("Save PMACTTYPE : ", pmactRes.data);
+      } catch (err) {
+        console.error("Save PMACTTYPE failed: ", err);
+      }
 
       setCheckOutCloseType(newCloseType_not_normal);
 

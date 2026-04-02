@@ -172,6 +172,8 @@ export default function WorkStation() {
 
   const [openRemark, setOpenRemark] = useState(false);
   const [remark, setRemark] = useState("");
+  const [repairCostPercent, setRepairCostPercent] = useState<number | null>(null);
+  const [repairCost, setRepairCost] = useState<number | null>(null);
 
   const [openEmpModal, setOpenEmpModal] = useState(false);
   const [selectedEmployees, setSelectedEmployees] = useState<Employee[]>([]);
@@ -470,6 +472,20 @@ export default function WorkStation() {
       setIsWorking(true);
     } else {
       setIsWorking(false);
+    }
+
+    // Fetch repair cost data
+    try {
+      const priceRes = await callApi.get(`/WorkOrderList/Price/${orderId}`);
+      const priceData = priceRes.data?.dataResult ?? priceRes.data;
+      const priceItem = Array.isArray(priceData) ? priceData[0] : priceData;
+      if (priceItem) {
+        setRepairCostPercent(priceItem.repair_cost_percent ?? null);
+        setRepairCost(priceItem.repair_cost ?? null);
+        console.log("Repair Cost:", priceItem.repair_cost, "Percent:", priceItem.repair_cost_percent);
+      }
+    } catch (err) {
+      console.error("Fetch Price error:", err);
     }
   };
 
@@ -1236,7 +1252,7 @@ export default function WorkStation() {
               </Paper>
 
 
-              <Box sx={{ display: "flex", gap: 2, width: "100%" }}>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, width: "100%" }}>
                 <List sx={{ flex: 1 }}>
                   <ListItem
                     sx={{ display: "flex", justifyContent: "space-between" }}
@@ -1293,6 +1309,39 @@ export default function WorkStation() {
                     <Typography>{formatTime(work?.acT_END_TIME)}</Typography>
                   </ListItem>
                 </List>
+
+                {/* ── REPAIR COST CARDS ── */}
+                <Box sx={{ display: "flex", gap: 1.5, width: "100%", flexBasis: "100%" }}>
+                  <Box sx={{
+                    flex: 1, borderRadius: "10px", px: 1.5, py: 1,
+                    background: (repairCostPercent ?? 0) > 35
+                      ? "linear-gradient(135deg, #fef2f2, #fee2e2)"
+                      : "linear-gradient(135deg, #f0fdf4, #dcfce7)",
+                    border: (repairCostPercent ?? 0) > 35 ? "1px solid #fca5a5" : "1px solid #86efac",
+                  }}>
+                    <Typography sx={{ fontSize: 11, color: "#64748b", fontWeight: 500 }}>Repair Cost %</Typography>
+                    <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5 }}>
+                      <Typography sx={{ fontSize: 18, fontWeight: 800, color: (repairCostPercent ?? 0) > 35 ? "#dc2626" : "#16a34a" }}>
+                        {repairCostPercent != null ? `${repairCostPercent.toFixed(2)}%` : "-"}
+                      </Typography>
+                      {repairCostPercent != null && (
+                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: (repairCostPercent ?? 0) > 35 ? "#ef4444" : "#22c55e" }}>
+                          {(repairCostPercent ?? 0) > 35 ? "⚠ เกิน" : "✓ ปกติ"}
+                        </Typography>
+                      )}
+                    </Box>
+                  </Box>
+                  <Box sx={{
+                    flex: 1, borderRadius: "10px", px: 1.5, py: 1,
+                    background: "linear-gradient(135deg, #eff6ff, #dbeafe)",
+                    border: "1px solid #93c5fd",
+                  }}>
+                    <Typography sx={{ fontSize: 11, color: "#64748b", fontWeight: 500 }}>Repair Cost</Typography>
+                    <Typography sx={{ fontSize: 18, fontWeight: 800, color: "#1d4ed8" }}>
+                      {repairCost != null ? `฿${repairCost.toLocaleString("th-TH", { minimumFractionDigits: 2 })}` : "-"}
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             </Box>
           </div>
