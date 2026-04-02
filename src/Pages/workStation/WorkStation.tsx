@@ -195,6 +195,11 @@ export default function WorkStation() {
   console.log("orderid from useParams : ", orderId);
   console.log("operationid from useParams : ", operationId);
 
+  // ── Auto-save refs ──
+  const checkedCodesRef = React.useRef<string[]>([]);
+  const initialCheckedCodesRef = React.useRef<string[]>([]);
+  const visibleItemsRef = React.useRef(checkItems);
+
   // useRef to persist state across renders (workaround for double invocation)
   const selectedFilesRef = React.useRef<Record<string, FileState>>({});
 
@@ -344,7 +349,12 @@ export default function WorkStation() {
 
   useEffect(() => {
     console.log("checked codes:", checkedCodes);
+    checkedCodesRef.current = checkedCodes;
   }, [checkedCodes]);
+
+  useEffect(() => {
+    visibleItemsRef.current = visibleItems;
+  }, [visibleItems]);
 
   useEffect(() => {
     onLoad();
@@ -568,9 +578,12 @@ export default function WorkStation() {
       // setCheckedCodes([]);
       const station = String(row?.current_operation ?? "");
       if (station === "0020") {
-        setCheckedCodes(checkItems.map(c => c.code));
+        const allCodes = checkItems.map(c => c.code);
+        setCheckedCodes(allCodes);
+        initialCheckedCodesRef.current = allCodes;
       } else {
         setCheckedCodes([]);
+        initialCheckedCodesRef.current = [];
       }
 
       return;
@@ -599,6 +612,7 @@ export default function WorkStation() {
       .filter((i) => i.isActive === true)
       .map((i) => i.code);
     setCheckedCodes(codes);
+    initialCheckedCodesRef.current = [...codes];
   };
 
 
@@ -904,11 +918,68 @@ export default function WorkStation() {
   const station = String(row?.current_operation ?? "");
   const canEditChecklist = station === "0020";
 
+  // ── Auto-save helpers ──
+  const hasCheckedChanged = (codes: string[]): boolean => {
+    const initial = initialCheckedCodesRef.current;
+    const sortedCodes = [...codes].sort();
+    const sortedInitial = [...initial].sort();
+    return (
+      sortedCodes.length !== sortedInitial.length ||
+      sortedCodes.some((c, i) => c !== sortedInitial[i])
+    );
+  };
+
+  const buildSavePayload = (codes: string[]) => {
+    return visibleItemsRef.current.map((item) => ({
+      Code: item.code,
+      IsActive: codes.includes(item.code),
+    }));
+  };
+
+  // ── Auto-save useEffect: navigate (unmount) + browser refresh/close ──
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (!orderId || !canEditChecklist) return;
+      if (!hasCheckedChanged(checkedCodesRef.current)) return;
+
+      const payload = buildSavePayload(checkedCodesRef.current);
+      const url = `${process.env.REACT_APP_API_BASE_URL}/WorkOrderList/SaveChecked/${orderId}`;
+      const token = localStorage.getItem("token") ?? "";
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      }).catch(() => { });
+
+      console.log("🔔 fetch+keepalive: auto-saved checkedCodes before unload");
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+
+      // Auto-save on navigate (component unmount)
+      if (!orderId || !canEditChecklist) return;
+      if (!hasCheckedChanged(checkedCodesRef.current)) return;
+
+      const payload = buildSavePayload(checkedCodesRef.current);
+      callApi
+        .post(`/WorkOrderList/SaveChecked/${orderId}`, payload)
+        .then(() => console.log("✅ Auto-saved checkedCodes on navigate"))
+        .catch((err: any) => console.error("❌ Failed to auto-save:", err));
+    };
+  }, []);
+
   const toggleCode = (code: string) => {
     setCheckedCodes((prev) =>
       prev.includes(code) ? prev.filter((x) => x !== code) : [...prev, code]
     );
-
   };
 
   return (

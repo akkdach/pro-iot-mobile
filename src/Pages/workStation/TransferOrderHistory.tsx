@@ -346,7 +346,7 @@ export default function TransferOrderHistory() {
                       <Stack direction="row" justifyContent="space-between" alignItems="center">
                         <Box>
                           <Typography fontWeight={800} fontSize={15} sx={{ color: "#1E293B" }}>
-                            TO #{item.reS_ID}
+                            TO #{item.reservatioN_NO} (resId: {item.reS_ID})
                           </Typography>
                           <Typography variant="caption" sx={{ color: "#94A3B8", lineHeight: 1 }}>
                             {fmtDateTimeTH(item.reS_DATE)}

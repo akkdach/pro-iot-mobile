@@ -43,6 +43,15 @@ const repairTypes = [
   "Minor A3",
 ];
 
+const repairTypeCodeMap: Record<string, string> = {
+  "Major A1": "MJ1",
+  "Major A2": "MJ2",
+  "Major A3": "MJ3",
+  "Minor A1": "MN1",
+  "Minor A2": "MN2",
+  "Minor A3": "MN3",
+};
+
 const headerLabels: Record<string, string> = {
   serviceOrderTypeCode: "ประเภทใบสั่งงาน",
   standardServiceCode: "รหัสบริการ",
@@ -51,6 +60,9 @@ const headerLabels: Record<string, string> = {
   modelNo: "รุ่นเครื่อง",
   serviceObjectGroup: "กลุ่มอุปกรณ์",
 };
+
+// Module-level: persist ข้าม unmount/remount
+let _lastRepairType = "";
 
 export default function BomTab() {
   const { bomData, setBomData, bomLoading, fetchBom, workOrderDetail, work } = useWork();
@@ -85,14 +97,15 @@ export default function BomTab() {
     }
   }, [materialMaster.length]);
 
-  const handleFetchBom = () => {
+  const handleFetchBom = async () => {
     if (!selectedRepairType) { alert("กรุณาเลือกประเภทการซ่อมก่อน"); return; }
     const hdr = workOrderDetail?.header ?? {};
     const orderType = work?.ordeR_TYPE ?? hdr?.orderType ?? "";
     const objectType = hdr?.objectType ?? work?.objecttype ?? "";
     if (!orderType) { alert("ไม่พบข้อมูล Order Type"); return; }
     setSaved(false);
-    fetchBom(orderType, objectType, selectedRepairType);
+    _lastRepairType = selectedRepairType; // เก็บค่าไว้ใน module-level ก่อนดึง BOM
+    await fetchBom(orderType, objectType, selectedRepairType);
     fetchMaterialMaster(); // โหลด master เพื่อ map ชื่อ
   };
 
@@ -132,6 +145,7 @@ export default function BomTab() {
 
   /* ── Save BOM → SetWorkOrderSparePart ── */
   const handleSaveBom = async () => {
+    console.log("🟡 handleSaveBom CALLED!", { orderId, workOrderId: work?.orderid, selectedRepairType, linesLength: lines?.length });
     const currentOrderId = work?.orderid ?? orderId;
     if (!currentOrderId) {
       Swal.fire({ icon: "warning", title: "ไม่พบ Order ID", text: "ไม่สามารถบันทึกได้" });
@@ -173,7 +187,24 @@ export default function BomTab() {
         payload
       );
 
+      console.log("🔍 SetWorkOrderSparePart response:", res.data);
+
       if (res.data.isSuccess === true) {
+        // ── Save Change Type ตอนบันทึกอะไหล่สำเร็จ ──
+        const repairType = _lastRepairType || selectedRepairType;
+        const majorCode = repairTypeCodeMap[repairType];
+        console.log("🔍 SaveChangeType debug:", { repairType, majorCode, currentOrderId });
+        if (majorCode) {
+          try {
+            await callApi.post(`/WorkOrderList/SaveChangeType/${currentOrderId}`, {
+              major_code: majorCode,
+              major_label: repairType,
+            });
+            console.log("✅ SaveChangeType:", majorCode, selectedRepairType);
+          } catch (err) {
+            console.error("❌ SaveChangeType Error:", err);
+          }
+        }
         // === สร้าง Transfer Order ===
         const toItems = lines
           .filter((item: any) => (Number(item.quantity) || 0) > 0)
