@@ -56,7 +56,6 @@ const headerLabels: Record<string, string> = {
   serviceOrderTypeCode: "ประเภทใบสั่งงาน",
   standardServiceCode: "รหัสบริการ",
   mimj: "ประเภทการซ่อม",
-  descEng: "รายละเอียด",
   modelNo: "รุ่นเครื่อง",
   serviceObjectGroup: "กลุ่มอุปกรณ์",
 };
@@ -70,6 +69,10 @@ export default function BomTab() {
   const [selectedRepairType, setSelectedRepairType] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Service Code selector
+  const [rawBomData, setRawBomData] = useState<any[] | null>(null);
+  const [selectedServiceCode, setSelectedServiceCode] = useState<string>("");
 
   // Add Dialog
   const [addOpen, setAddOpen] = useState(false);
@@ -103,11 +106,100 @@ export default function BomTab() {
     const orderType = work?.ordeR_TYPE ?? hdr?.orderType ?? "";
     const objectType = hdr?.objectType ?? work?.objecttype ?? "";
     if (!orderType) { alert("ไม่พบข้อมูล Order Type"); return; }
+
     setSaved(false);
-    _lastRepairType = selectedRepairType; // เก็บค่าไว้ใน module-level ก่อนดึง BOM
-    await fetchBom(orderType, objectType, selectedRepairType);
-    fetchMaterialMaster(); // โหลด master เพื่อ map ชื่อ
+    setSelectedServiceCode("");
+    setRawBomData(null);
+    _lastRepairType = selectedRepairType;
+
+    const result = await fetchBom(orderType, objectType, selectedRepairType);
+    fetchMaterialMaster();
+
+    if (!Array.isArray(result) || result.length === 0) {
+      Swal.fire({ icon: "warning", title: "ไม่มีข้อมูล BOM" });
+      return;
+    }
+
+    // เก็บ raw data
+    setRawBomData(result);
+
+    // สร้าง unique service codes
+    const map = new Map<string, { desc: string; group: string }>();
+    result.forEach((item: any) => {
+      if (item.standardServiceCode && !map.has(item.standardServiceCode)) {
+        map.set(item.standardServiceCode, {
+          desc: item.descEng || "-",
+          group: item.serviceObjectGroup || "-",
+        });
+      }
+    });
+    const options = Array.from(map.entries()).map(([code, info]) => ({ code, ...info }));
+
+    // ใช้ Swal แทน MUI Dialog (เพราะ BomTab ถูก remount จาก CustomTabPanel)
+    await showServiceCodeSwal(options, result);
   };
+
+  // แสดง SweetAlert ให้เลือก Service Code
+  const showServiceCodeSwal = async (options: { code: string; desc: string; group: string }[], rawData: any[]) => {
+    const inputOptions: Record<string, string> = {};
+    options.forEach((opt) => {
+      inputOptions[opt.code] = `${opt.desc}\n(${opt.code} | ${opt.group})`;
+    });
+
+    // สร้าง HTML สำหรับแสดง options แบบสวยๆ
+    const optionsHtml = options.map((opt, i) =>
+      `<div style="text-align:left; padding:12px; margin:6px 0; border:1px solid #e2e8f0; border-radius:10px; cursor:pointer; transition:all 0.2s;" 
+            class="swal-sc-option" data-code="${opt.code}"
+            onmouseover="this.style.background='#eff6ff';this.style.borderColor='#2563eb'" 
+            onmouseout="this.style.background='#fff';this.style.borderColor='#e2e8f0'">
+        <div style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:4px">${opt.desc}</div>
+        <div style="font-size:12px;color:#64748b"><b>Service Code:</b> ${opt.code}</div>
+        <div style="font-size:12px;color:#64748b"><b>Object Group:</b> ${opt.group}</div>
+      </div>`
+    ).join("");
+
+    const swalResult = await Swal.fire({
+      title: "📋 เลือกรหัสบริการ",
+      html: `<div style="max-height:400px;overflow-y:auto">${optionsHtml}</div>`,
+      showConfirmButton: false,
+      showCancelButton: true,
+      cancelButtonText: "ยกเลิก",
+      didOpen: () => {
+        const container = Swal.getHtmlContainer();
+        if (!container) return;
+        container.querySelectorAll(".swal-sc-option").forEach((el) => {
+          el.addEventListener("click", () => {
+            const code = (el as HTMLElement).getAttribute("data-code");
+            if (code) Swal.close({ isConfirmed: true, isDenied: false, isDismissed: false, value: code } as any);
+          });
+        });
+      },
+    });
+
+    if (swalResult.isConfirmed && swalResult.value) {
+      const code = swalResult.value as string;
+      setSelectedServiceCode(code);
+      const filtered = rawData.filter((item: any) => item.standardServiceCode === code);
+      console.log("📋 Selected:", code, "→", filtered.length, "items");
+      setBomData(filtered);
+      setSaved(false);
+    }
+  };
+
+  // สร้างรายการ unique service codes (สำหรับปุ่มเปลี่ยน)
+  const serviceCodeOptions = React.useMemo(() => {
+    if (!Array.isArray(rawBomData)) return [];
+    const map = new Map<string, { desc: string; group: string }>();
+    rawBomData.forEach((item: any) => {
+      if (item.standardServiceCode && !map.has(item.standardServiceCode)) {
+        map.set(item.standardServiceCode, {
+          desc: item.descEng || "-",
+          group: item.serviceObjectGroup || "-",
+        });
+      }
+    });
+    return Array.from(map.entries()).map(([code, info]) => ({ code, desc: info.desc, group: info.group }));
+  }, [rawBomData]);
 
   // สร้าง lookup map จาก materialMaster
   const materialNameMap: Record<string, string> = React.useMemo(() => {
@@ -398,6 +490,18 @@ export default function BomTab() {
         >
           {bomLoading ? "กำลังโหลด..." : "ดึงข้อมูล BOM"}
         </Button>
+
+        {/* ─── เปลี่ยน Service Code ─── */}
+        {selectedServiceCode && serviceCodeOptions.length > 0 && rawBomData && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => showServiceCodeSwal(serviceCodeOptions, rawBomData)}
+            sx={{ maxWidth: 340, textTransform: "none", fontWeight: 600, borderRadius: "10px" }}
+          >
+            เปลี่ยนรหัสบริการ ({selectedServiceCode})
+          </Button>
+        )}
       </MotionBox>
 
       {/* ─── Empty ─── */}
@@ -412,7 +516,11 @@ export default function BomTab() {
             sx={{ p: 5, textAlign: "center", color: "text.secondary" }}
           >
             <InventoryIcon sx={{ fontSize: 48, color: "#cbd5e1", mb: 1 }} />
-            <Typography variant="body2">เลือกประเภทการซ่อมแล้วกดดึงข้อมูล BOM</Typography>
+            <Typography variant="body2">
+              {rawBomData && serviceCodeOptions.length > 1
+                ? "กรุณาเลือกรหัสบริการ (Service Code) ด้านบน"
+                : "เลือกประเภทการซ่อมแล้วกดดึงข้อมูล BOM"}
+            </Typography>
           </MotionBox>
         )}
       </AnimatePresence>
@@ -680,6 +788,7 @@ export default function BomTab() {
           <Button variant="contained" disabled={!addNo} onClick={handleAdd} sx={{ fontWeight: 700, bgcolor: "#2563eb", "&:hover": { bgcolor: "#1d4ed8" } }}>เพิ่ม</Button>
         </DialogActions>
       </Dialog>
+
     </Box>
   );
 }

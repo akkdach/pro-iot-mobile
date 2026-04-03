@@ -136,7 +136,7 @@ interface WorkContextType {
   bomData: any;
   setBomData: React.Dispatch<React.SetStateAction<any>>;
   bomLoading: boolean;
-  fetchBom: (orderType: string, serviceObjectGroup: string, mimj: string) => Promise<void>;
+  fetchBom: (orderType: string, serviceObjectGroup: string, mimj: string) => Promise<any>;
 }
 
 const WorkContext = createContext<WorkContextType | null>(null);
@@ -186,10 +186,13 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       const res = await callApi.get("/refulbish/Master/BomRefurbish", {
         params: { order_type: orderType, service_object_group: serviceObjectGroup, mimj },
       });
-      setBomData(res.data?.dataResult ?? res.data);
+      const result = res.data?.dataResult ?? res.data;
+      setBomData(result);
+      return result;
     } catch (err: any) {
       console.error("fetchBom Error:", err);
       setBomData(null);
+      return null;
     } finally {
       setBomLoading(false);
     }

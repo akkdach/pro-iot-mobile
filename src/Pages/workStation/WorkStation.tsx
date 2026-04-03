@@ -861,8 +861,6 @@ export default function WorkStation() {
   };
 
 
-
-
   const handleUploadAll = async () => {
     const filesToUpload = masterImages.filter(img => selectedFiles[`${img.key}-${img.seq}`]?.file);
 
