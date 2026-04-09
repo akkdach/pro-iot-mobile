@@ -47,6 +47,7 @@ interface Work {
 
   duratioN_NORMAL?: number;
   objecttype?: string;
+  pmacttype?: string;
 }
 
 interface Item_Component {
@@ -136,7 +137,7 @@ interface WorkContextType {
   bomData: any;
   setBomData: React.Dispatch<React.SetStateAction<any>>;
   bomLoading: boolean;
-  fetchBom: (orderType: string, serviceObjectGroup: string, mimj: string) => Promise<any>;
+  fetchBom: (orderType: string, serviceObjectGroup: string, mimj: string, orderid?: string) => Promise<any>;
 }
 
 const WorkContext = createContext<WorkContextType | null>(null);
@@ -183,8 +184,9 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchBom = async (orderType: string, serviceObjectGroup: string, mimj: string) => {
     setBomLoading(true);
     try {
+
       const res = await callApi.get("/refulbish/Master/BomRefurbish", {
-        params: { order_type: orderType, service_object_group: serviceObjectGroup, mimj },
+        params: { order_type: orderType, service_object_group: serviceObjectGroup, mimj, orderid: work?.orderid },
       });
       const result = res.data?.dataResult ?? res.data;
       setBomData(result);
@@ -494,34 +496,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      // 🌟 ขั้นตอนใหม่: เลือก PMACTTYPE
-      const pmactOptions = {
-        "MJ1": "Major A1 (MJ1)",
-        "MJ2": "Major A2 (MJ2)",
-        "MJ3": "Major A3 (MJ3)",
-        "MN1": "Minor A1 (MN1)",
-        "MN2": "Minor A2 (MN2)",
-        "MN3": "Minor A3 (MN3)",
-      };
-
-      const pmactPick = await Swal.fire({
-        title: "PM ACT TYPE",
-        text: "กรุณาเลือกประเภทการซ่อมบำรุง",
-        icon: "info",
-        input: "select",
-        inputOptions: pmactOptions,
-        inputPlaceholder: "เลือกข้อมูล...",
-        showCancelButton: true,
-        confirmButtonText: "ถัดไป",
-        cancelButtonText: "ยกเลิก",
-        inputValidator: (v) => (!v ? "กรุณาเลือก PMACTTYPE" : undefined),
-      });
-
-      if (!pmactPick.isConfirmed) return;
-
-      const selectedPmactCode = String(pmactPick.value);
-      const selectedPmactLabel = pmactOptions[selectedPmactCode as keyof typeof pmactOptions];
-
       // ดึงเหตุผลจาก API
       let selectedReasonCode = "";
       let selectedReasonLabel = "";
@@ -582,7 +556,7 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       <div><b>WorkOrder:</b> ${newCloseType_not_normal.workOrder}</div>
       <div><b>Close Type:</b> ${newCloseType_not_normal.closeType}</div>
       <div><b>รายการ:</b> ${selected?.label ?? "-"}</div>
-      <div><b>PMACTTYPE:</b> ${selectedPmactLabel}</div>
+
       <div><b>เหตุผล:</b> ${selectedReasonLabel || "-"}</div>
     </div>
   `,
@@ -604,16 +578,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       const _data = _res.data;
       console.log("Completed Work : ", _data);
 
-      // Save Change Type (PMACTTYPE)
-      try {
-        const pmactRes = await callApi.post(
-          `/WorkOrderList/SaveChangeType/${work.orderid}`,
-          { major_code: selectedPmactCode, major_label: selectedPmactLabel }
-        );
-        console.log("Save PMACTTYPE : ", pmactRes.data);
-      } catch (err) {
-        console.error("Save PMACTTYPE failed: ", err);
-      }
 
       setCheckOutCloseType(newCloseType_not_normal);
 

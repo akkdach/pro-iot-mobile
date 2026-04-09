@@ -58,7 +58,7 @@ const SectionTitle = ({ icon, title }: { icon: React.ReactNode; title: string })
 );
 
 export default function WorkOrderDetailTab() {
-  const { workOrderDetail: data, workOrderDetailLoading: loading } = useWork();
+  const { workOrderDetail: data, workOrderDetailLoading: loading, work } = useWork();
 
   if (loading)
     return (
@@ -112,6 +112,7 @@ export default function WorkOrderDetailTab() {
           <InfoRow label="ชื่อลูกค้า" value={header.customerName} />
           <InfoRow label="Segment" value={header.customerSegment} />
           <InfoRow label="Object Type" value={header.objectType} />
+          <InfoRow label="Main Activity Type" value={work?.pmacttype} />
           <InfoRow label="Service Item" value={header.serviceItemNo} />
           <InfoRow label="Close Type" value={header.closeType} />
 

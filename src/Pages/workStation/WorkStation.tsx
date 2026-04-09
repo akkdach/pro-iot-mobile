@@ -455,6 +455,7 @@ export default function WorkStation() {
       slA_START_TIME: item.slA_START_TIME ?? item.SLA_START_TIME,
       duratioN_NORMAL: item.duratioN_NORMAL ?? item.DURATION_NORMAL ?? 0,
       objecttype: item.objecttype ?? item.OBJECTTYPE ?? "",
+      pmacttype: item.pmacttype ?? item.PMACTTYPE ?? "",
     }));
 
     // เก็บ mN_WK_CTR ไว้ใน localStorage เพื่อใช้ในหน้า TableSparePart

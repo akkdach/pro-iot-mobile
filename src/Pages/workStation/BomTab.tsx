@@ -26,7 +26,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import { useWork } from "../../Context/WorkStationContext";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import callApi from "../../Services/callApi";
 import Swal from "sweetalert2";
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,9 +47,9 @@ const repairTypeCodeMap: Record<string, string> = {
   "Major A1": "MJ1",
   "Major A2": "MJ2",
   "Major A3": "MJ3",
-  "Minor A1": "MN1",
-  "Minor A2": "MN2",
-  "Minor A3": "MN3",
+  "Minor A1": "MI1",
+  "Minor A2": "MI2",
+  "Minor A3": "MI3",
 };
 
 const headerLabels: Record<string, string> = {
@@ -66,6 +66,7 @@ let _lastRepairType = "";
 export default function BomTab() {
   const { bomData, setBomData, bomLoading, fetchBom, workOrderDetail, work } = useWork();
   const { orderId } = useParams();
+  const navigate = useNavigate();
   const [selectedRepairType, setSelectedRepairType] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -112,7 +113,9 @@ export default function BomTab() {
     setRawBomData(null);
     _lastRepairType = selectedRepairType;
 
-    const result = await fetchBom(orderType, objectType, selectedRepairType);
+    const oid = orderId ?? work?.orderid ?? "";
+    // alert(`DEBUG orderId: "${oid}" | useParams: "${orderId}" | work?.orderid: "${work?.orderid}"`);
+    const result = await fetchBom(orderType, objectType, selectedRepairType, oid);
     fetchMaterialMaster();
 
     if (!Array.isArray(result) || result.length === 0) {
@@ -337,79 +340,121 @@ export default function BomTab() {
               if (toRes.data.isSuccess) {
                 console.log("✅ TO Create Response:", JSON.stringify(toRes.data, null, 2));
 
-                // ดึง res_id จาก ApproveTO_data
+                // ── 🆕 เช็ค Repair Cost % ก่อน approve ──
+                let shouldApprove = false;
+                let repairPercent: number | null = null;
+
+                console.log("📊 [1/3] เรียก /WorkOrderList/Price/" + currentOrderId);
                 try {
-                  const approveDataRes = await callApi.get(`/WorkOrderList/ApproveTO_data/${currentOrderId}`);
-                  console.log("📋 ApproveTO_data Response:", JSON.stringify(approveDataRes.data, null, 2));
+                  const priceRes = await callApi.get(`/WorkOrderList/Price/${currentOrderId}`);
+                  const priceData = priceRes.data?.dataResult ?? priceRes.data;
+                  console.log("📊 [2/3] Price API raw response:", JSON.stringify(priceData));
+                  const priceItem = Array.isArray(priceData) ? priceData[0] : priceData;
+                  repairPercent = priceItem?.repair_cost_percent ?? null;
+                  console.log("📊 [3/3] repair_cost_percent =", repairPercent, "| repair_cost =", priceItem?.repair_cost);
 
-                  const rawResult = approveDataRes.data?.dataResult;
-                  console.log("📋 ApproveTO_data rawResult:", rawResult, "| type:", typeof rawResult);
+                  if (repairPercent !== null && repairPercent > 50) {
+                    shouldApprove = true;
+                    console.log(`📊 ✅ Repair Cost ${repairPercent}% > 50% → จะ approve`);
+                  } else {
+                    shouldApprove = false;
+                    console.log(`📊 ⏭ Repair Cost ${repairPercent}% ≤ 50% → ข้าม approve`);
+                  }
+                } catch (priceErr: any) {
+                  console.error("❌ Fetch Price Error:", priceErr);
+                  // ถาม user ว่าจะ approve ไหม
+                  const askResult = await Swal.fire({
+                    icon: "question",
+                    title: "ไม่สามารถดึง Repair Cost ได้",
+                    html: "ต้องการ Approve Transfer Order หรือไม่?",
+                    showCancelButton: true,
+                    confirmButtonText: "Approve",
+                    cancelButtonText: "ข้าม",
+                    confirmButtonColor: "#2563EB",
+                  });
+                  shouldApprove = askResult.isConfirmed;
+                  console.log("📊 ❓ User เลือก:", shouldApprove ? "Approve" : "ข้าม");
+                }
 
-                  // รองรับทั้ง array, object เดี่ยว, หรือ null
-                  const approveList: any[] = Array.isArray(rawResult)
-                    ? rawResult
-                    : rawResult && typeof rawResult === "object"
-                      ? [rawResult]
-                      : [];
-                  console.log("📋 ApproveTO_data List:", approveList);
+                console.log("📊 === สรุป: shouldApprove =", shouldApprove, "| repairPercent =", repairPercent, "===");
+                if (shouldApprove) {
+                  console.log("📋 เริ่ม approve flow...");
+                  try {
+                    const approveDataRes = await callApi.get(`/WorkOrderList/ApproveTO_data/${currentOrderId}`);
+                    console.log("📋 ApproveTO_data Response:", JSON.stringify(approveDataRes.data, null, 2));
 
-                  // กรองเฉพาะที่ยังไม่ approve (isApprove === "N")
-                  const pendingList = approveList.filter((item: any) => item.isApprove === "N");
-                  console.log("📋 Pending Approve:", pendingList);
+                    const rawResult = approveDataRes.data?.dataResult;
+                    const approveList: any[] = Array.isArray(rawResult)
+                      ? rawResult
+                      : rawResult && typeof rawResult === "object"
+                        ? [rawResult]
+                        : [];
 
-                  if (pendingList.length > 0) {
-                    let approveSuccess = 0;
-                    let approveFail = 0;
+                    const pendingList = approveList.filter((item: any) => item.isApprove === "N");
+                    console.log("📋 Pending Approve:", pendingList);
 
-                    for (const item of pendingList) {
-                      const resId = item.reS_ID ?? item.res_id ?? item.resId;
-                      console.log(`🔄 Approving TO resId: ${resId}`);
-                      try {
-                        const approveRes = await callApi.post(`/Mobile/ReservationRequest_approve/${resId}`);
-                        console.log(`✅ Approve resId ${resId}:`, approveRes.data);
-                        if (approveRes.data.isSuccess) {
-                          approveSuccess++;
-                        } else {
+                    if (pendingList.length > 0) {
+                      let approveSuccess = 0;
+                      let approveFail = 0;
+
+                      for (const item of pendingList) {
+                        const resId = item.reS_ID ?? item.res_id ?? item.resId;
+                        console.log(`🔄 Approving TO resId: ${resId}`);
+                        try {
+                          const approveRes = await callApi.post(`/Mobile/ReservationRequest_approve/${resId}`);
+                          console.log(`📋 Approve response resId ${resId}:`, JSON.stringify(approveRes.data));
+                          if (approveRes.data.isSuccess) {
+                            approveSuccess++;
+                          } else {
+                            approveFail++;
+                            console.warn(`⚠️ Approve failed for resId ${resId}:`, approveRes.data.message);
+                          }
+                        } catch (approveErr: any) {
                           approveFail++;
-                          console.warn(`⚠️ Approve failed for resId ${resId}:`, approveRes.data.message);
+                          console.error(`❌ Approve error for resId ${resId}:`, approveErr);
                         }
-                      } catch (approveErr: any) {
-                        approveFail++;
-                        console.error(`❌ Approve error for resId ${resId}:`, approveErr);
                       }
-                    }
 
-                    if (approveFail === 0) {
+                      if (approveFail === 0) {
+                        await Swal.fire({
+                          icon: "success",
+                          title: "สร้างและอนุมัติ TO สำเร็จ",
+                          html: `อนุมัติ ${approveSuccess} รายการ<br/>Repair Cost: ${repairPercent?.toFixed(2) ?? "-"}%`,
+                          timer: 2500,
+                          showConfirmButton: false,
+                        });
+                      } else {
+                        await Swal.fire({
+                          icon: "warning",
+                          title: "อนุมัติบางส่วน",
+                          text: `สำเร็จ ${approveSuccess} / ไม่สำเร็จ ${approveFail}`,
+                        });
+                      }
+                    } else {
                       await Swal.fire({
                         icon: "success",
-                        title: "สร้างและอนุมัติ TO สำเร็จ",
-                        text: `อนุมัติ ${approveSuccess} รายการเรียบร้อย`,
+                        title: "สร้าง TO สำเร็จ",
+                        text: `ไม่มี TO ที่รอ approve`,
                         timer: 2000,
                         showConfirmButton: false,
                       });
-                    } else {
-                      await Swal.fire({
-                        icon: "warning",
-                        title: "อนุมัติบางส่วน",
-                        text: `สำเร็จ ${approveSuccess} / ไม่สำเร็จ ${approveFail}`,
-                      });
                     }
-                  } else {
-                    console.log("📋 ไม่มี TO ที่รอ approve");
+                  } catch (approveDataErr: any) {
+                    console.error("❌ ApproveTO_data Error:", approveDataErr);
                     await Swal.fire({
-                      icon: "success",
-                      title: "สร้าง TO สำเร็จ",
-                      text: `สร้าง Transfer Order เรียบร้อย (${toItems.length} รายการ)`,
-                      timer: 2000,
-                      showConfirmButton: false,
+                      icon: "warning",
+                      title: "สร้าง TO สำเร็จ แต่อนุมัติไม่สำเร็จ",
+                      text: "กรุณาไปอนุมัติที่หน้า TO History",
                     });
                   }
-                } catch (approveDataErr: any) {
-                  console.error("❌ ApproveTO_data Error:", approveDataErr);
+                } else {
+                  console.log("📊 ⏭ ข้าม approve ทั้งหมด — ไม่เรียก ApproveTO_data / ReservationRequest_approve");
                   await Swal.fire({
-                    icon: "warning",
-                    title: "สร้าง TO สำเร็จ แต่อนุมัติไม่สำเร็จ",
-                    text: "ไม่สามารถดึงข้อมูล approve ได้ กรุณาไปอนุมัติที่หน้า TO History",
+                    icon: "info",
+                    title: "สร้าง TO สำเร็จ (ไม่ Approve)",
+                    html: `Repair Cost: <b>${repairPercent?.toFixed(2) ?? "-"}%</b> (≤ 50%)<br/>ไม่ต้อง Approve อัตโนมัติ`,
+                    timer: 2500,
+                    showConfirmButton: false,
                   });
                 }
               } else {
@@ -475,21 +520,37 @@ export default function BomTab() {
             {repairTypes.map((rt) => (<MenuItem key={rt} value={rt}>{rt}</MenuItem>))}
           </Select>
         </FormControl>
-        <Button
-          fullWidth variant="contained"
-          startIcon={bomLoading ? <CircularProgress size={18} color="inherit" /> : <DownloadIcon />}
-          disabled={bomLoading || !selectedRepairType}
-          onClick={handleFetchBom}
-          sx={{
-            maxWidth: 340, background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)",
-            borderRadius: "14px", height: 52, fontSize: 16, fontWeight: 700, textTransform: "none",
-            boxShadow: "0 4px 14px rgba(37,99,235,0.35)",
-            "&:hover": { background: "linear-gradient(135deg, #1d4ed8 0%, #4338ca 100%)" },
-            "&:active": { transform: "scale(0.97)" },
-          }}
-        >
-          {bomLoading ? "กำลังโหลด..." : "ดึงข้อมูล BOM"}
-        </Button>
+        {/* ─── Row: ดึง BOM + ประวัติ TO ─── */}
+        <Box sx={{ display: "flex", gap: 1.5, width: "100%", maxWidth: 340 }}>
+          <Button
+            fullWidth variant="contained"
+            startIcon={bomLoading ? <CircularProgress size={18} color="inherit" /> : <DownloadIcon />}
+            disabled={bomLoading || !selectedRepairType}
+            onClick={handleFetchBom}
+            sx={{
+              flex: 1, background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)",
+              borderRadius: "14px", height: 52, fontSize: 14, fontWeight: 700, textTransform: "none",
+              boxShadow: "0 4px 14px rgba(37,99,235,0.35)",
+              "&:hover": { background: "linear-gradient(135deg, #1d4ed8 0%, #4338ca 100%)" },
+              "&:active": { transform: "scale(0.97)" },
+            }}
+          >
+            {bomLoading ? "โหลด..." : "ดึง BOM"}
+          </Button>
+          <Button
+            fullWidth variant="contained"
+            onClick={() => navigate(`/TransferOrderHistory/${orderId ?? work?.orderid ?? ""}`)}
+            sx={{
+              flex: 1, background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
+              borderRadius: "14px", height: 52, fontSize: 14, fontWeight: 700, textTransform: "none",
+              boxShadow: "0 4px 14px rgba(139,92,246,0.35)",
+              "&:hover": { background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)" },
+              "&:active": { transform: "scale(0.97)" },
+            }}
+          >
+            📦 TO History
+          </Button>
+        </Box>
 
         {/* ─── เปลี่ยน Service Code ─── */}
         {selectedServiceCode && serviceCodeOptions.length > 0 && rawBomData && (
