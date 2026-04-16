@@ -1010,54 +1010,54 @@ export default function WorkStation() {
               label="Work Order"
               {...a11yProps(0)}
               sx={{
-                fontSize: "1.1rem",
-                padding: "12px 24px",
-                minHeight: 60,
+                fontSize: { xs: "0.85rem", lg: "1.1rem" },
+                padding: { xs: "8px 14px", lg: "12px 24px" },
+                minHeight: { xs: 44, lg: 60 },
               }}
             />
             <Tab
               label="Employee"
               {...a11yProps(1)}
               sx={{
-                fontSize: "1.1rem",
-                padding: "12px 24px",
-                minHeight: 60,
+                fontSize: { xs: "0.85rem", lg: "1.1rem" },
+                padding: { xs: "8px 14px", lg: "12px 24px" },
+                minHeight: { xs: 44, lg: 60 },
               }}
             />
             <Tab
               label="Sparepart"
               {...a11yProps(2)}
               sx={{
-                fontSize: "1.1rem",
-                padding: "12px 24px",
-                minHeight: 60,
+                fontSize: { xs: "0.85rem", lg: "1.1rem" },
+                padding: { xs: "8px 14px", lg: "12px 24px" },
+                minHeight: { xs: 44, lg: 60 },
               }}
             />
             <Tab
               label="Upload Image"
               {...a11yProps(3)}
               sx={{
-                fontSize: "1.1rem",
-                padding: "12px 24px",
-                minHeight: 60,
+                fontSize: { xs: "0.85rem", lg: "1.1rem" },
+                padding: { xs: "8px 14px", lg: "12px 24px" },
+                minHeight: { xs: 44, lg: 60 },
               }}
             />
             <Tab
               label="Detail"
               {...a11yProps(4)}
               sx={{
-                fontSize: "1.1rem",
-                padding: "12px 24px",
-                minHeight: 60,
+                fontSize: { xs: "0.85rem", lg: "1.1rem" },
+                padding: { xs: "8px 14px", lg: "12px 24px" },
+                minHeight: { xs: 44, lg: 60 },
               }}
             />
             <Tab
               label="BOM"
               {...a11yProps(5)}
               sx={{
-                fontSize: "1.1rem",
-                padding: "12px 24px",
-                minHeight: 60,
+                fontSize: { xs: "0.85rem", lg: "1.1rem" },
+                padding: { xs: "8px 14px", lg: "12px 24px" },
+                minHeight: { xs: 44, lg: 60 },
                 display: normalizedOp === "0030" ? "inline-flex" : "none",
               }}
             />
@@ -1075,12 +1075,12 @@ export default function WorkStation() {
                 width: "100%",
                 flexWrap: "wrap",
                 gap: 2,
-                padding: 3,
+                padding: { xs: 1.5, lg: 3 },
                 borderRadius: 5,
               }}
             >
 
-              <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", p: 3 }}>
+              <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", p: { xs: 1.5, lg: 3 } }}>
                 {visibleItems.map((item) => {
                   const checked = checkedCodes.includes(item.code);
 
@@ -1175,8 +1175,8 @@ export default function WorkStation() {
               <Paper
                 elevation={6}
                 sx={{
-                  mb: 2,
-                  p: { xs: 2, sm: 2.5 },
+                  mb: { xs: 1, lg: 2 },
+                  p: { xs: 1.5, lg: 2.5 },
                   display: "flex",
                   alignItems: "stretch",
                   background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
@@ -1219,7 +1219,7 @@ export default function WorkStation() {
                       WebkitBackgroundClip: "text",
                       WebkitTextFillColor: "transparent",
                       fontFamily: "'Roboto Mono', monospace",
-                      fontSize: { xs: "1.5rem", sm: "1.8rem", md: "2.2rem" },
+                      fontSize: { xs: "1.2rem", sm: "1.5rem", lg: "2.2rem" },
                       letterSpacing: -0.5,
                       lineHeight: 1.1,
                     }}
@@ -1251,7 +1251,7 @@ export default function WorkStation() {
               </Paper>
 
 
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, width: "100%" }}>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: { xs: 1, lg: 2 }, width: "100%" }}>
                 <List sx={{ flex: 1 }}>
                   <ListItem
                     sx={{ display: "flex", justifyContent: "space-between" }}
@@ -1346,10 +1346,10 @@ export default function WorkStation() {
           </div>
 
           {/* ── ACTION BUTTONS ── */}
-          <Box sx={{ px: 2, pb: 3, pt: 1 }}>
+          <Box sx={{ px: { xs: 1, lg: 2 }, pb: { xs: 1.5, lg: 3 }, pt: { xs: 0.5, lg: 1 } }}>
 
             {/* ─── PRIMARY: Start / Finish ─── */}
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 2.5 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", gap: { xs: 1, lg: 2 }, mb: { xs: 1.5, lg: 2.5 } }}>
               {!isWorking && !hasFinished && (
                 <Button
                   onClick={() => setOpenEmpModal(true)}
@@ -1358,9 +1358,9 @@ export default function WorkStation() {
                   sx={{
                     background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
                     borderRadius: "14px",
-                    minWidth: 200,
-                    height: 64,
-                    fontSize: 18,
+                    minWidth: { xs: 150, lg: 200 },
+                    height: { xs: 48, lg: 64 },
+                    fontSize: { xs: 15, lg: 18 },
                     fontWeight: 700,
                     color: "#fff",
                     textTransform: "none",
@@ -1393,9 +1393,9 @@ export default function WorkStation() {
                   sx={{
                     background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
                     borderRadius: "14px",
-                    minWidth: 200,
-                    height: 64,
-                    fontSize: 18,
+                    minWidth: { xs: 150, lg: 200 },
+                    height: { xs: 48, lg: 64 },
+                    fontSize: { xs: 15, lg: 18 },
                     fontWeight: 700,
                     color: "#fff",
                     textTransform: "none",
@@ -1427,9 +1427,9 @@ export default function WorkStation() {
                   startIcon={<FactCheckIcon />}
                   sx={{
                     borderRadius: "12px",
-                    minWidth: 150,
-                    height: 48,
-                    fontSize: 15,
+                    minWidth: { xs: 120, lg: 150 },
+                    height: { xs: 40, lg: 48 },
+                    fontSize: { xs: 13, lg: 15 },
                     fontWeight: 600,
                     textTransform: "none",
                     borderColor: "#3b82f6",
@@ -1453,9 +1453,9 @@ export default function WorkStation() {
                   startIcon={<AssignmentTurnedInIcon />}
                   sx={{
                     borderRadius: "12px",
-                    minWidth: 150,
-                    height: 48,
-                    fontSize: 15,
+                    minWidth: { xs: 120, lg: 150 },
+                    height: { xs: 40, lg: 48 },
+                    fontSize: { xs: 13, lg: 15 },
                     fontWeight: 600,
                     textTransform: "none",
                     borderColor: "#8b5cf6",
@@ -1478,9 +1478,9 @@ export default function WorkStation() {
                 startIcon={<StickyNote2OutlinedIcon />}
                 sx={{
                   borderRadius: "12px",
-                  minWidth: 150,
-                  height: 48,
-                  fontSize: 15,
+                  minWidth: { xs: 120, lg: 150 },
+                  height: { xs: 40, lg: 48 },
+                  fontSize: { xs: 13, lg: 15 },
                   fontWeight: 600,
                   textTransform: "none",
                   borderColor: "#64748b",
@@ -1505,9 +1505,9 @@ export default function WorkStation() {
                 startIcon={<ReplayIcon />}
                 sx={{
                   borderRadius: "12px",
-                  minWidth: 150,
-                  height: 44,
-                  fontSize: 14,
+                  minWidth: { xs: 120, lg: 150 },
+                  height: { xs: 36, lg: 44 },
+                  fontSize: { xs: 12, lg: 14 },
                   fontWeight: 600,
                   textTransform: "none",
                   borderColor: "#ef4444",
@@ -1529,9 +1529,9 @@ export default function WorkStation() {
                 startIcon={<UndoIcon />}
                 sx={{
                   borderRadius: "12px",
-                  minWidth: 150,
-                  height: 44,
-                  fontSize: 14,
+                  minWidth: { xs: 120, lg: 150 },
+                  height: { xs: 36, lg: 44 },
+                  fontSize: { xs: 12, lg: 14 },
                   fontWeight: 600,
                   textTransform: "none",
                   borderColor: "#ef4444",
@@ -1558,7 +1558,7 @@ export default function WorkStation() {
         </CustomTabPanel>
 
         <CustomTabPanel value={value} index={2}>
-          <Paper sx={{ height: 740, width: "100%" }}>
+          <Paper sx={{ height: { xs: 500, lg: 740 }, width: "100%" }}>
             <Box
               sx={{
                 display: "flex",
@@ -1903,7 +1903,7 @@ export default function WorkStation() {
           <DialogContent sx={{ p: 0 }}>
             {(() => {
               const bearerToken = localStorage.getItem('token') ?? '';
-              const authParam = bearerToken ? `&token=${encodeURIComponent(bearerToken)}` : '';
+              const authParam = bearerToken ? `&auth=${encodeURIComponent(bearerToken)}` : '';
               const oid = encodeURIComponent(orderId ?? '');
 
               return normalizedOp === "0020" ? (

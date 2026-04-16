@@ -18,7 +18,7 @@ export default function ChecklistEmbed() {
     const [searchParams] = useSearchParams();
     const station = searchParams.get("station");
     const orderId = searchParams.get("orderId") ?? undefined;
-    const token = searchParams.get("token");
+    const token = searchParams.get("auth");
 
     const [ready, setReady] = useState(false);
 
@@ -47,7 +47,7 @@ export default function ChecklistEmbed() {
                     ❌ กรุณาระบุ token ใน query parameter
                 </Typography>
                 <Typography color="text.secondary" sx={{ mt: 1, fontSize: "0.85rem" }}>
-                    ตัวอย่าง: /checklist/embed?station=0010&orderId=WO-001&<b>token=eyJhbG...</b>
+                    ตัวอย่าง: /checklist/embed?station=0010&orderId=WO-001&<b>auth=eyJhbG...</b>
                 </Typography>
             </Box>
         );
@@ -61,7 +61,7 @@ export default function ChecklistEmbed() {
                     ❌ กรุณาระบุ station ใน query parameter
                 </Typography>
                 <Typography color="text.secondary" sx={{ mt: 1, fontSize: "0.85rem" }}>
-                    ตัวอย่าง: /checklist/embed?<b>station=0010</b>&orderId=WO-001&token=...
+                    ตัวอย่าง: /checklist/embed?<b>station=0010</b>&orderId=WO-001&auth=...
                 </Typography>
             </Box>
         );

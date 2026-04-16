@@ -63,15 +63,15 @@ export default function SetupAndRefurbish() {
       flexWrap="wrap"
       flexDirection="column"
       alignItems="center"
-      mx={5}
+      mx={{ xs: 3.5, lg: 5 }}
       onClick={() => navigate("/DashboardRefurbish", { state: step })}
     >
 
       <Box
         className="clip-hex"
         sx={{
-          width: "8rem",
-          height: "8rem",
+          width: { xs: "7rem", lg: "8rem" },
+          height: { xs: "7rem", lg: "8rem" },
           background: "linear-gradient(135deg, #ddeaffff, #b8c9ffff)",
           border: "1px solid transparent",
           overflow: "hidden", // ทำให้รูปไม่หลุดออกนอก hex
@@ -117,7 +117,7 @@ export default function SetupAndRefurbish() {
         </Box> */}
       </Box>
 
-      <Box mt={1} textAlign="center" width="8rem" fontSize="0.875rem">
+      <Box mt={1} textAlign="center" width={{ xs: "7rem", lg: "8rem" }} fontSize={{ xs: "0.8rem", lg: "0.875rem" }}>
         {step.title}
       </Box>
     </Box>
@@ -152,25 +152,25 @@ export default function SetupAndRefurbish() {
       <AppHeader title={"SETUP / REFURBISH"} icon={<HomeWorkIcon />} />
       <Box
         sx={{
-          padding: 4,
+          padding: { xs: 3, lg: 4 },
           backgroundColor: "#f9f9ff",
           minHeight: "100vh",
           marginLeft: "63px",
           transition: "margin-left 0.3s ease",
-          paddingTop: 10,
+          paddingTop: { xs: 8, lg: 10 },
         }}
       >
         <Paper
           sx={{
-            padding: 3,
-            marginBottom: 2,
+            padding: { xs: 1.5, lg: 3 },
+            marginBottom: { xs: 1, lg: 2 },
             alignItems: "right",
             mx: "auto",
-            maxWidth: 1200,
+            maxWidth: { xs: 960, lg: 1200 },
           }}
         >
-          <Box display="flex" flexDirection="column" alignItems="center" p={1}>
-            <Box textAlign="center" mb={2}>
+          <Box display="flex" flexDirection="column" alignItems="center" p={{ xs: 0.5, lg: 1 }}>
+            <Box textAlign="center" mb={{ xs: 1, lg: 2 }}>
               <h1 className="text-3xl font-bold text-blue-600 mb-1">
                 SETUP / REFURBISH
               </h1>
@@ -182,7 +182,7 @@ export default function SetupAndRefurbish() {
               display="flex"
               flexWrap="wrap"
               justifyContent="center"
-              ml={-10}
+              ml={{ xs: -5, lg: -10 }}
             >
               {topRow.map((step, index) => (
                 <Hex key={index} step={step} index={index} />
@@ -190,7 +190,7 @@ export default function SetupAndRefurbish() {
             </Box>
 
             {/* Bottom Row (เลื่อนครึ่งช่อง) */}
-            <Box display="flex" justifyContent="center" mt={-6} ml={18} >
+            <Box display="flex" justifyContent="center" mt={{ xs: -5, lg: -6 }} ml={{ xs: 14, lg: 18 }} >
               {bottomRow.map((step, index) => (
                 <Hex key={index} step={step} index={index} />
               ))}

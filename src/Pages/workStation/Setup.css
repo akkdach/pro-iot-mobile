@@ -66,3 +66,15 @@
   }
 }
 
+/* ── Fit 1024×768 screens ── */
+@media (max-width: 1024px), (max-height: 768px) {
+  .scrollable-div {
+    max-height: calc(100vh - 70px);
+    min-height: auto;
+  }
+  .bigBox {
+    margin-top: 45px;
+    gap: 4px;
+  }
+}
+
