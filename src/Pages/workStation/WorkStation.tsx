@@ -717,7 +717,7 @@ export default function WorkStation() {
                 e.stopPropagation();
                 // Prepare edit item
                 setEditItem({
-                  material: params.row.reS_ITEM ?? "", // Use displayed item no or material
+                  material: params.row.material ?? params.row.reS_ITEM ?? "", // Use displayed item no or material
                   materialDescription: params.row.matL_DESC ?? "",
                   qty: String(params.row.actuaL_QUANTITY ?? 0),
                   workOrderComponentId: params.row.worK_ORDER_COMPONENT_ID
@@ -746,6 +746,7 @@ export default function WorkStation() {
     },
     { field: "reS_ITEM", headerName: "No", width: 130 },
     { field: "reserV_NO", headerName: "Item No", width: 130 },
+    { field: "material", headerName: "Material", width: 150 },
     { field: "matL_DESC", headerName: "Item Des", width: 300 },
     { field: "actuaL_QUANTITY", headerName: "QTY", width: 130 },
     { field: "actuaL_QUANTITY_UNIT", headerName: "QTV SHIP", width: 130 },
@@ -1074,13 +1075,13 @@ export default function WorkStation() {
                 alignItems: "center",
                 width: "100%",
                 flexWrap: "wrap",
-                gap: 2,
-                padding: { xs: 1.5, lg: 3 },
+                gap: 1,
+                padding: { xs: "4px 12px", lg: "12px 24px" },
                 borderRadius: 5,
               }}
             >
 
-              <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", p: { xs: 1.5, lg: 3 } }}>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", p: { xs: "4px", lg: "12px 24px" } }}>
                 {visibleItems.map((item) => {
                   const checked = checkedCodes.includes(item.code);
 
@@ -1106,8 +1107,8 @@ export default function WorkStation() {
                       label={`${item.label}`}
                       sx={{
                         m: 0,
-                        p: 1,
-                        px: 2,
+                        py: 0.25,
+                        px: 1.5,
                         borderRadius: "8px",
                         border: "1px solid #e0e0e0",
                         backgroundColor: "#fafafa",
@@ -1345,32 +1346,31 @@ export default function WorkStation() {
             </Box>
           </div>
 
-          {/* ── ACTION BUTTONS ── */}
-          <Box sx={{ px: { xs: 1, lg: 2 }, pb: { xs: 1.5, lg: 3 }, pt: { xs: 0.5, lg: 1 } }}>
+          {/* ── ACTION BUTTONS (single row) ── */}
+          <Box sx={{ px: { xs: 1, lg: 2 }, pb: { xs: 1, lg: 2 }, pt: { xs: 0.5, lg: 1 } }}>
+            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
 
-            {/* ─── PRIMARY: Start / Finish ─── */}
-            <Box sx={{ display: "flex", justifyContent: "center", gap: { xs: 1, lg: 2 }, mb: { xs: 1.5, lg: 2.5 } }}>
+              {/* ─── Start / Finish ─── */}
               {!isWorking && !hasFinished && (
                 <Button
                   onClick={() => setOpenEmpModal(true)}
                   variant="contained"
-                  startIcon={<PlayArrowRoundedIcon />}
+                  startIcon={<PlayArrowRoundedIcon sx={{ fontSize: { xs: 18, lg: 22 } }} />}
                   sx={{
                     background: "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
-                    borderRadius: "14px",
-                    minWidth: { xs: 150, lg: 200 },
-                    height: { xs: 48, lg: 64 },
-                    fontSize: { xs: 15, lg: 18 },
+                    borderRadius: "10px",
+                    minWidth: { xs: 100, lg: 140 },
+                    height: { xs: 38, lg: 44 },
+                    fontSize: { xs: 13, lg: 15 },
                     fontWeight: 700,
                     color: "#fff",
                     textTransform: "none",
-                    letterSpacing: 0.5,
-                    boxShadow: "0 4px 14px rgba(34,197,94,0.4)",
+                    boxShadow: "0 2px 8px rgba(34,197,94,0.35)",
                     transition: "all 0.2s ease",
                     "&:hover": {
                       background: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 6px 20px rgba(34,197,94,0.5)",
+                      transform: "translateY(-1px)",
+                      boxShadow: "0 4px 14px rgba(34,197,94,0.45)",
                     },
                     "&:active": { transform: "scale(0.97)" },
                   }}
@@ -1389,23 +1389,22 @@ export default function WorkStation() {
                     if (isSuccess) { navigate(-1); }
                   }}
                   variant="contained"
-                  startIcon={<CheckCircleOutlineIcon />}
+                  startIcon={<CheckCircleOutlineIcon sx={{ fontSize: { xs: 18, lg: 22 } }} />}
                   sx={{
                     background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-                    borderRadius: "14px",
-                    minWidth: { xs: 150, lg: 200 },
-                    height: { xs: 48, lg: 64 },
-                    fontSize: { xs: 15, lg: 18 },
+                    borderRadius: "10px",
+                    minWidth: { xs: 100, lg: 140 },
+                    height: { xs: 38, lg: 44 },
+                    fontSize: { xs: 13, lg: 15 },
                     fontWeight: 700,
                     color: "#fff",
                     textTransform: "none",
-                    letterSpacing: 0.5,
-                    boxShadow: "0 4px 14px rgba(59,130,246,0.4)",
+                    boxShadow: "0 2px 8px rgba(59,130,246,0.35)",
                     transition: "all 0.2s ease",
                     "&:hover": {
                       background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 6px 20px rgba(59,130,246,0.5)",
+                      transform: "translateY(-1px)",
+                      boxShadow: "0 4px 14px rgba(59,130,246,0.45)",
                     },
                     "&:active": { transform: "scale(0.97)" },
                   }}
@@ -1413,23 +1412,18 @@ export default function WorkStation() {
                   Finish
                 </Button>
               )}
-            </Box>
 
-            {/* ─── Divider ─── */}
-            <Divider sx={{ mb: 2, borderColor: "rgba(0,0,0,0.06)" }} />
-
-            {/* ─── SECONDARY: Check List, Completed, Remark ─── */}
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5, mb: 2, flexWrap: "wrap" }}>
+              {/* ─── Check List ─── */}
               {["0020", "0040", "0080"].includes(normalizedOp ?? "") && (
                 <Button
                   onClick={() => setOpenChecklist(true)}
                   variant="outlined"
-                  startIcon={<FactCheckIcon />}
+                  startIcon={<FactCheckIcon sx={{ fontSize: { xs: 16, lg: 20 } }} />}
                   sx={{
-                    borderRadius: "12px",
-                    minWidth: { xs: 120, lg: 150 },
-                    height: { xs: 40, lg: 48 },
-                    fontSize: { xs: 13, lg: 15 },
+                    borderRadius: "10px",
+                    minWidth: { xs: 90, lg: 130 },
+                    height: { xs: 38, lg: 44 },
+                    fontSize: { xs: 12, lg: 14 },
                     fontWeight: 600,
                     textTransform: "none",
                     borderColor: "#3b82f6",
@@ -1446,16 +1440,17 @@ export default function WorkStation() {
                 </Button>
               )}
 
+              {/* ─── Completed ─── */}
               {["0020", "0090"].includes(normalizedOp ?? "") && (
                 <Button
                   onClick={completed}
                   variant="outlined"
-                  startIcon={<AssignmentTurnedInIcon />}
+                  startIcon={<AssignmentTurnedInIcon sx={{ fontSize: { xs: 16, lg: 20 } }} />}
                   sx={{
-                    borderRadius: "12px",
-                    minWidth: { xs: 120, lg: 150 },
-                    height: { xs: 40, lg: 48 },
-                    fontSize: { xs: 13, lg: 15 },
+                    borderRadius: "10px",
+                    minWidth: { xs: 90, lg: 130 },
+                    height: { xs: 38, lg: 44 },
+                    fontSize: { xs: 12, lg: 14 },
                     fontWeight: 600,
                     textTransform: "none",
                     borderColor: "#8b5cf6",
@@ -1472,15 +1467,16 @@ export default function WorkStation() {
                 </Button>
               )}
 
+              {/* ─── Remark ─── */}
               <Button
                 onClick={() => setOpenRemark(true)}
                 variant="outlined"
-                startIcon={<StickyNote2OutlinedIcon />}
+                startIcon={<StickyNote2OutlinedIcon sx={{ fontSize: { xs: 16, lg: 20 } }} />}
                 sx={{
-                  borderRadius: "12px",
-                  minWidth: { xs: 120, lg: 150 },
-                  height: { xs: 40, lg: 48 },
-                  fontSize: { xs: 13, lg: 15 },
+                  borderRadius: "10px",
+                  minWidth: { xs: 90, lg: 130 },
+                  height: { xs: 38, lg: 44 },
+                  fontSize: { xs: 12, lg: 14 },
                   fontWeight: 600,
                   textTransform: "none",
                   borderColor: "#64748b",
@@ -1495,18 +1491,16 @@ export default function WorkStation() {
               >
                 Remark
               </Button>
-            </Box>
 
-            {/* ─── DANGER: Return, Qc Return ─── */}
-            <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5, flexWrap: "wrap" }}>
+              {/* ─── Return ─── */}
               <Button
                 onClick={returnWork}
                 variant="outlined"
-                startIcon={<ReplayIcon />}
+                startIcon={<ReplayIcon sx={{ fontSize: { xs: 16, lg: 20 } }} />}
                 sx={{
-                  borderRadius: "12px",
-                  minWidth: { xs: 120, lg: 150 },
-                  height: { xs: 36, lg: 44 },
+                  borderRadius: "10px",
+                  minWidth: { xs: 80, lg: 120 },
+                  height: { xs: 38, lg: 44 },
                   fontSize: { xs: 12, lg: 14 },
                   fontWeight: 600,
                   textTransform: "none",
@@ -1523,14 +1517,15 @@ export default function WorkStation() {
                 Return
               </Button>
 
+              {/* ─── QC Return ─── */}
               <Button
                 onClick={qcReturnWork}
                 variant="outlined"
-                startIcon={<UndoIcon />}
+                startIcon={<UndoIcon sx={{ fontSize: { xs: 16, lg: 20 } }} />}
                 sx={{
-                  borderRadius: "12px",
-                  minWidth: { xs: 120, lg: 150 },
-                  height: { xs: 36, lg: 44 },
+                  borderRadius: "10px",
+                  minWidth: { xs: 80, lg: 120 },
+                  height: { xs: 38, lg: 44 },
                   fontSize: { xs: 12, lg: 14 },
                   fontWeight: 600,
                   textTransform: "none",
@@ -1546,8 +1541,8 @@ export default function WorkStation() {
               >
                 QC Return
               </Button>
-            </Box>
 
+            </Box>
           </Box>
         </CustomTabPanel>
 
@@ -1558,12 +1553,19 @@ export default function WorkStation() {
         </CustomTabPanel>
 
         <CustomTabPanel value={value} index={2}>
-          <Paper sx={{ height: { xs: 500, lg: 740 }, width: "100%" }}>
+          <Paper sx={{
+            height: "calc(100vh - 130px)",
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}>
             <Box
               sx={{
                 display: "flex",
                 justifyContent: "flex-end",
-                mb: 1.5,
+                p: 1,
+                flexShrink: 0,
               }}
             >
               <Button
@@ -1589,7 +1591,7 @@ export default function WorkStation() {
               }}
               pageSizeOptions={[30]}
               checkboxSelection={false}
-              sx={{ border: 0 }}
+              sx={{ border: 0, flex: 1 }}
               getRowId={(row) => row.worK_ORDER_COMPONENT_ID}
             />
           </Paper>

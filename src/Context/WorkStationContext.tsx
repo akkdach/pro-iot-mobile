@@ -421,11 +421,29 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
         const _data = _res.data;
         console.log("Completed Work : ", _data);
 
+        if (!_data.isSuccess) {
+          await Swal.fire({
+            title: "Failed",
+            text: _data.Message ?? "Cannot complete this work order",
+            icon: "error",
+          });
+          return;
+        }
+
         setCheckOutCloseType(newCloseType);
         console.log("CheckOutCloseType: ", newCloseType);
         const send_close_type = await callApi.post("/Mobile/SetCheckOutCloseType", newCloseType);
         const data_close_normal = send_close_type.data;
         console.log("Send Close Type Normal: ", data_close_normal);
+
+        if (!data_close_normal.isSuccess) {
+          await Swal.fire({
+            title: "Failed",
+            text: data_close_normal.Message ?? "Cannot save close type",
+            icon: "error",
+          });
+          return;
+        }
 
         // TODO: เอา data ไปทำ swal select ต่อ
         await Swal.fire({
@@ -578,6 +596,14 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
       const _data = _res.data;
       console.log("Completed Work : ", _data);
 
+      if (!_data.isSuccess) {
+        await Swal.fire({
+          title: "Failed",
+          text: _data.Message ?? "Cannot complete this work order",
+          icon: "error",
+        });
+        return;
+      }
 
       setCheckOutCloseType(newCloseType_not_normal);
 
@@ -596,6 +622,15 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
 
         const data_close_not_normal = send_close_not_normal.data;
         console.log("Send Close Type Not Normal: ", data_close_not_normal);
+
+        if (!data_close_not_normal.isSuccess) {
+          await Swal.fire({
+            title: "Failed",
+            text: data_close_not_normal?.Message ?? "Cannot save close type",
+            icon: "error",
+          });
+          return;
+        }
 
         await Swal.fire({
           title: "ส่งสำเร็จ",

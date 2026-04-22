@@ -35,14 +35,21 @@ function parseTimeToHms(time?: string | null): { hh: number; mm: number; ss: num
 function buildTargetMs(dateStr?: string | null, timeStr?: string | null): number | null {
     if (!dateStr) return null;
 
-    const base = new Date(dateStr); // ไม่มี Z => parse เป็นเวลา local
-    if (!Number.isFinite(base.getTime())) return null;
+    // ดึงเฉพาะส่วนของวันที่ (YYYY-MM-DD) ออกมาเพื่อกันปัญหาเวลาผิดเพี้ยน
+    const dateMatch = dateStr.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (!dateMatch) return null;
+    const ymd = dateMatch[1]; // yyyy-mm-dd
 
     const hms = parseTimeToHms(timeStr);
     if (!hms) return null;
 
-    base.setHours(hms.hh, hms.mm, hms.ss, 0);
-    return base.getTime();
+    // บังคับให้เป็นเวลาของประเทศไทย (+07:00) แน่นอนเสมอ (ไม่ต้องสน Timezone ของเครื่องประมวลผล)
+    const isoString = `${ymd}T${pad2(hms.hh)}:${pad2(hms.mm)}:${pad2(hms.ss)}+07:00`;
+    
+    const targetMs = Date.parse(isoString);
+    if (Number.isNaN(targetMs)) return null;
+
+    return targetMs;
 }
 
 function formatDayTime(ms: number) {
@@ -114,9 +121,9 @@ export const SlaTimer: React.FC<SlaTimerProps> = ({
                 ? { bg: "#fff8e1", fg: "#f9a825" }
                 : { bg: "#ffebee", fg: "#d32f2f" };
 
-    const label = isOverdue
-        ? `เลย SLA +${formatDayTime(remainingMs)}`
-        : `เหลือ ${formatDayTime(remainingMs)}`;
+    // ถ้านับถอยหลังต่ำกว่า 0 ให้หยุดเวลาไว้ ไม่ให้นับเลย SLA ไปเรื่อยๆ
+    const clampedRemainingMs = Math.max(0, remainingMs);
+    const label = `เหลือ ${formatDayTime(clampedRemainingMs)}`;
 
     return (
         <Box
