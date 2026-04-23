@@ -744,9 +744,9 @@ export default function WorkStation() {
         );
       },
     },
-    { field: "reS_ITEM", headerName: "No", width: 130 },
-    { field: "reserV_NO", headerName: "Item No", width: 130 },
-    { field: "material", headerName: "Material", width: 150 },
+    { field: "reS_ITEM", headerName: "Res Item", width: 130 },
+    // { field: "reserV_NO", headerName: "Item No", width: 130 },
+    { field: "material", headerName: "Item No", width: 150 },
     { field: "matL_DESC", headerName: "Item Des", width: 300 },
     { field: "actuaL_QUANTITY", headerName: "QTY", width: 130 },
     { field: "actuaL_QUANTITY_UNIT", headerName: "QTV SHIP", width: 130 },
