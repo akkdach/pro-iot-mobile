@@ -384,14 +384,6 @@ export const WorkProvider = ({ children }: { children: React.ReactNode }) => {
           code: "",
         };
 
-        const res = await callApi.post(
-          `/Mobile/SetCheckOutCloseType`,
-          newCloseType
-        );
-        const data = res.data.dataResult;
-        console.log("Normal API data:", data);
-
-
         const confirmSend = await Swal.fire({
           title: "ยืนยันข้อมูล",
           html: `
