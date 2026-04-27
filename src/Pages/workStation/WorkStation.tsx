@@ -789,7 +789,7 @@ export default function WorkStation() {
           value === index && <Box sx={{ p: 3 }}>{children}</Box>
         )}
       </div>
-    );
+    )
   }
 
   function a11yProps(index: number) {
