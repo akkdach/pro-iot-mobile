@@ -340,45 +340,49 @@ export default function BomTab() {
               if (toRes.data.isSuccess) {
                 console.log("✅ TO Create Response:", JSON.stringify(toRes.data, null, 2));
 
-                // ── 🆕 เช็ค Repair Cost % ก่อน approve ──
-                let shouldApprove = false;
+                // ── ดึง Repair Cost % เพื่อตัดสินใจ Approve ──
                 let repairPercent: number | null = null;
 
-                console.log("📊 [1/3] เรียก /WorkOrderList/Price/" + currentOrderId);
+                console.log("📊 [1/2] เรียก /WorkOrderList/Price/" + currentOrderId);
                 try {
                   const priceRes = await callApi.get(`/WorkOrderList/Price/${currentOrderId}`);
                   const priceData = priceRes.data?.dataResult ?? priceRes.data;
-                  console.log("📊 [2/3] Price API raw response:", JSON.stringify(priceData));
+                  console.log("📊 [2/2] Price API raw response:", JSON.stringify(priceData));
                   const priceItem = Array.isArray(priceData) ? priceData[0] : priceData;
                   repairPercent = priceItem?.repair_cost_percent ?? null;
-                  console.log("📊 [3/3] repair_cost_percent =", repairPercent, "| repair_cost =", priceItem?.repair_cost);
-
-                  if (repairPercent !== null && repairPercent > 50) {
-                    shouldApprove = true;
-                    console.log(`📊 ✅ Repair Cost ${repairPercent}% > 50% → จะ approve`);
-                  } else {
-                    shouldApprove = false;
-                    console.log(`📊 ⏭ Repair Cost ${repairPercent}% ≤ 50% → ข้าม approve`);
-                  }
+                  console.log("📊 repair_cost_percent =", repairPercent, "| repair_cost =", priceItem?.repair_cost);
                 } catch (priceErr: any) {
                   console.error("❌ Fetch Price Error:", priceErr);
-                  // ถาม user ว่าจะ approve ไหม
-                  const askResult = await Swal.fire({
-                    icon: "question",
-                    title: "ไม่สามารถดึง Repair Cost ได้",
-                    html: "ต้องการ Approve Transfer Order หรือไม่?",
-                    showCancelButton: true,
-                    confirmButtonText: "Approve",
-                    cancelButtonText: "ข้าม",
-                    confirmButtonColor: "#2563EB",
-                  });
-                  shouldApprove = askResult.isConfirmed;
-                  console.log("📊 ❓ User เลือก:", shouldApprove ? "Approve" : "ข้าม");
                 }
 
-                console.log("📊 === สรุป: shouldApprove =", shouldApprove, "| repairPercent =", repairPercent, "===");
-                if (shouldApprove) {
-                  console.log("📋 เริ่ม approve flow...");
+                // ── ถ้า > 50% → ดึงข้อมูล TO แต่ไม่ auto approve (รอ Approve manual) ──
+                if (repairPercent !== null && repairPercent > 50) {
+                  console.log(`📊 ⏭ Repair Cost ${repairPercent}% > 50% → ข้าม auto approve, รอ approve manual`);
+
+                  let pendingCount = 0;
+                  try {
+                    const approveDataRes = await callApi.get(`/WorkOrderList/ApproveTO_data/${currentOrderId}`);
+                    console.log("📋 ApproveTO_data Response (> 50%):", JSON.stringify(approveDataRes.data, null, 2));
+                    const rawResult = approveDataRes.data?.dataResult;
+                    const approveList: any[] = Array.isArray(rawResult)
+                      ? rawResult
+                      : rawResult && typeof rawResult === "object"
+                        ? [rawResult]
+                        : [];
+                    pendingCount = approveList.filter((item: any) => item.isApprove === "N").length;
+                  } catch (err) {
+                    console.error("❌ ApproveTO_data Error (> 50%):", err);
+                  }
+
+                  await Swal.fire({
+                    icon: "success",
+                    title: "สร้าง TO สำเร็จ รอ Approve",
+                    html: `Repair Cost: <b>${repairPercent.toFixed(2)}%</b> (> 50%)<br/>TO รอ Approve: <b>${pendingCount}</b> รายการ<br/>กรุณาไป Approve ที่หน้า TO History`,
+                    confirmButtonColor: "#2563EB",
+                  });
+                } else {
+                  // ── ≤ 50% → Approve อัตโนมัติ ──
+                  console.log(`📊 ✅ Repair Cost ${repairPercent ?? "-"}% ≤ 50% → auto approve`);
                   try {
                     const approveDataRes = await callApi.get(`/WorkOrderList/ApproveTO_data/${currentOrderId}`);
                     console.log("📋 ApproveTO_data Response:", JSON.stringify(approveDataRes.data, null, 2));
@@ -447,15 +451,6 @@ export default function BomTab() {
                       text: "กรุณาไปอนุมัติที่หน้า TO History",
                     });
                   }
-                } else {
-                  console.log("📊 ⏭ ข้าม approve ทั้งหมด — ไม่เรียก ApproveTO_data / ReservationRequest_approve");
-                  await Swal.fire({
-                    icon: "info",
-                    title: "สร้าง TO สำเร็จ (ไม่ Approve)",
-                    html: `Repair Cost: <b>${repairPercent?.toFixed(2) ?? "-"}%</b> (≤ 50%)<br/>ไม่ต้อง Approve อัตโนมัติ`,
-                    timer: 2500,
-                    showConfirmButton: false,
-                  });
                 }
               } else {
                 await Swal.fire({
