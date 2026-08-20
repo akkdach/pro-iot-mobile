@@ -30,6 +30,8 @@ const ProfileCard = () => {
       if (result.isConfirmed) {
         localStorage.removeItem('token');
         localStorage.removeItem('profile');
+        // กัน Microsoft auto-SSO ดึงกลับทันทีหลัง logout (flag ล้างเมื่อตั้งใจ login ใหม่)
+        localStorage.setItem('sso_logout', '1');
         Swal.fire('ออกจากระบบแล้ว!', '', 'success');
         window.location.replace('/');
         //ทำสิ่งที่ต้องการหลังจากยืนยัน

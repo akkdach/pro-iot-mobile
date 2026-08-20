@@ -26,11 +26,19 @@ interface LoginResponse {
     token: string;
 }
 
+// Service Management API — verify Microsoft Entra idToken ฝั่ง server แล้วออก
+// BevPro-compatible token (ใช้กับ /Mobile/profile ได้เหมือน token ปกติ)
+const SM_API =
+    process.env.REACT_APP_SM_API_BASE_URL ||
+    'https://servicemanagement-eqg3bkfec8f5asg3.southeastasia-01.azurewebsites.net/api/v1';
+
 
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    // Microsoft Entra SSO: idToken ที่ verify แล้วแต่ email ยังไม่ผูกกับ user ในระบบ
+    const [linkIdToken, setLinkIdToken] = useState<string | null>(null);
 
     const {
         register,
@@ -38,11 +46,41 @@ export default function LoginPage() {
         formState: { errors },
     } = useForm<FormData>();
 
+    // เก็บ token + ดึง profile แล้วเข้าหน้าหลัก (ใช้ร่วมทั้ง login ปกติและ SSO)
+    const completeLogin = async (accessToken: string) => {
+        localStorage.setItem('token', accessToken);
+        localStorage.removeItem('sso_logout');
+        const resultProfile = await callApi.get('/Mobile/profile');
+        if (resultProfile.data?.dataResult) {
+            localStorage.setItem('profile', JSON.stringify(resultProfile.data?.dataResult));
+            window.location.replace('/');
+        } else {
+            localStorage.removeItem('token');
+            Swal.fire('Error', 'User not found.');
+        }
+    };
+
     const onSubmit = async (data: FormData) => {
         setIsLoading(true);
         try {
+            // link mode: ผูกบัญชี Microsoft ครั้งแรก — ยืนยัน username/password หนึ่งครั้ง
+            if (linkIdToken) {
+                const res = await fetch(`${SM_API}/auth/azure-link`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken: linkIdToken, ...data }),
+                });
+                const linkData = await res.json().catch(() => null);
+                if (linkData?.IsSuccess && linkData?.DataResult?.token) {
+                    await completeLogin(linkData.DataResult.token);
+                } else {
+                    Swal.fire('Error', linkData?.Message || 'ผูกบัญชี Microsoft ไม่สำเร็จ');
+                }
+                return;
+            }
+
             const result = await callApi.post('/Authen/token', data);
-            if (result.data.dataResult.access_token) {
+            if (result.data?.dataResult?.access_token) {
                 await Swal.fire({
                     icon: 'success',
                     title: 'เข้าสู่ระบบสำเร็จ',
@@ -50,17 +88,9 @@ export default function LoginPage() {
                     timer: 1500,
                     showConfirmButton: false,
                 });
-
-                localStorage.setItem('token', result.data.dataResult.access_token);
-                const resultProfile = await callApi.get('/Mobile/profile');
-                if (resultProfile.data?.dataResult) {
-                    localStorage.setItem('profile', JSON.stringify(resultProfile.data?.dataResult));
-                    window.location.replace('/');
-                } else {
-                    Swal.fire('Error', 'User not found.');
-                }
+                await completeLogin(result.data.dataResult.access_token);
             } else {
-                Swal.fire('Error', 'Username Or Password Incorrect!');
+                Swal.fire('Error', result.data?.message || 'Username Or Password Incorrect!');
             }
         } catch (error) {
             Swal.fire('Error', 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
@@ -68,6 +98,66 @@ export default function LoginPage() {
             setIsLoading(false);
         }
     };
+
+    // ── Microsoft Entra ID SSO (ผ่าน Service Management azure-login) ──
+    const processEntraIdToken = async (idToken: string): Promise<void> => {
+        setIsLoading(true);
+        try {
+            const res = await fetch(`${SM_API}/auth/azure-login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken }),
+            });
+            const data = await res.json().catch(() => null);
+            if (data?.IsSuccess && data?.DataResult?.token) {
+                await completeLogin(data.DataResult.token);
+                return;
+            }
+            if (data?.RequireLink) {
+                setLinkIdToken(idToken);
+                Swal.fire({
+                    icon: 'info',
+                    title: 'ผูกบัญชี Microsoft',
+                    text: data?.Message || 'กรุณายืนยัน Username และ Password หนึ่งครั้งเพื่อผูกบัญชี Microsoft',
+                });
+                return;
+            }
+            Swal.fire('Error', data?.Message || 'Microsoft login ไม่สำเร็จ');
+        } catch (error) {
+            Swal.fire('Error', 'Microsoft login ไม่สำเร็จ');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleMicrosoftLogin = async () => {
+        localStorage.removeItem('sso_logout'); // ตั้งใจ login ใหม่ — ปลดล็อก auto SSO
+        setIsLoading(true);
+        const { loginWithMicrosoft } = await import('../../Services/msal');
+        await loginWithMicrosoft(); // full page redirect
+    };
+
+    useEffect(() => {
+        // รับผล MSAL redirect + auto SSO จาก Microsoft session เดิม
+        (async () => {
+            try {
+                const { handleMsalRedirect, acquireSsoSilent } = await import('../../Services/msal');
+                const redirectResult = await handleMsalRedirect();
+                if (redirectResult?.idToken) {
+                    await processEntraIdToken(redirectResult.idToken);
+                    return;
+                }
+                // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง)
+                if (localStorage.getItem('sso_logout') !== '1') {
+                    const silent = await acquireSsoSilent();
+                    if (silent?.idToken) await processEntraIdToken(silent.idToken);
+                }
+            } catch {
+                // MSAL ล้มเหลว = แสดงหน้า login ปกติ
+            }
+        })();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         document.body.style.overflow = 'hidden';
@@ -291,9 +381,44 @@ export default function LoginPage() {
                         >
                             {isLoading ? (
                                 <CircularProgress size={24} sx={{ color: 'white' }} />
+                            ) : linkIdToken ? (
+                                'ยืนยันและผูกบัญชี Microsoft'
                             ) : (
                                 'เข้าสู่ระบบ'
                             )}
+                        </Button>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, my: 2 }}>
+                            <Box sx={{ flex: 1, height: '1px', bgcolor: '#E2E8F0' }} />
+                            <Typography variant="caption" sx={{ color: '#94A3B8' }}>หรือ</Typography>
+                            <Box sx={{ flex: 1, height: '1px', bgcolor: '#E2E8F0' }} />
+                        </Box>
+
+                        <Button
+                            fullWidth
+                            variant="outlined"
+                            disabled={isLoading}
+                            onClick={handleMicrosoftLogin}
+                            sx={{
+                                py: 1.4,
+                                borderRadius: 2,
+                                textTransform: 'none',
+                                fontSize: '0.95rem',
+                                fontWeight: 700,
+                                color: '#334155',
+                                borderColor: '#CBD5E1',
+                                display: 'flex',
+                                gap: 1.2,
+                                '&:hover': { borderColor: '#94A3B8', bgcolor: 'rgba(148,163,184,0.08)' },
+                            }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 21 21" aria-hidden="true">
+                                <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+                                <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+                                <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+                                <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+                            </svg>
+                            Sign in with Microsoft
                         </Button>
                     </form>
                 </Paper>
