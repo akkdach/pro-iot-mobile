@@ -54,6 +54,35 @@ const token = localStorage.getItem('token');
 // ── ตรวจว่ากำลังอยู่ใน embed mode หรือเปล่า ──
 const isEmbedRoute = window.location.pathname.startsWith('/checklist/embed');
 
+// ── Access check: super admin เตะ/ระงับจากหน้า Login Management (Service Management)
+// SPA ไม่มี server ของตัวเอง → เช็คเป็นรอบ ๆ ทุก 60 วิ / โดนเตะ = ล้าง session เด้งออก
+// fail-open: SM ล่มหรือ network พัง → ไม่ทำอะไร (อย่าเตะคนเพราะระบบเช็คล่ม)
+const SM_API =
+  process.env.REACT_APP_SM_API_BASE_URL ||
+  'https://servicemanagement-eqg3bkfec8f5asg3.southeastasia-01.azurewebsites.net/api/v1';
+
+function startAccessCheck() {
+  const check = async () => {
+    const t = localStorage.getItem('token');
+    if (!t) return;
+    try {
+      const res = await fetch(`${SM_API}/auth/access-check`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${t}` },
+      });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('profile');
+        localStorage.setItem('sso_logout', '1'); // กัน auto-SSO ดึงกลับทันที
+        window.location.replace('/login');
+      }
+    } catch { /* fail-open */ }
+  };
+  check();
+  setInterval(check, 60_000);
+}
+if (!isEmbedRoute && token) startAccessCheck();
+
 function App() {
   // ── Embed mode: render เฉพาะ ChecklistEmbed โดยไม่มี Layout / auth ──
   if (isEmbedRoute) {
