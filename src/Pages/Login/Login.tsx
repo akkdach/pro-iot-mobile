@@ -68,7 +68,7 @@ export default function LoginPage() {
                 const res = await fetch(`${SM_API}/auth/azure-link`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idToken: linkIdToken, ...data }),
+                    body: JSON.stringify({ idToken: linkIdToken, app: 'iot-mobile', ...data }),
                 });
                 const linkData = await res.json().catch(() => null);
                 if (linkData?.IsSuccess && linkData?.DataResult?.token) {
@@ -81,6 +81,16 @@ export default function LoginPage() {
 
             const result = await callApi.post('/Authen/token', data);
             if (result.data?.dataResult?.access_token) {
+                // login audit — แจ้ง Service Management (fire-and-forget, keepalive กันโดน cancel ตอน redirect)
+                fetch(`${SM_API}/auth/login-log`, {
+                    method: 'POST',
+                    keepalive: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${result.data.dataResult.access_token}`,
+                    },
+                    body: JSON.stringify({ provider: 'password', app: 'iot-mobile' }),
+                }).catch(() => { /* ไม่กระทบ login */ });
                 await Swal.fire({
                     icon: 'success',
                     title: 'เข้าสู่ระบบสำเร็จ',
@@ -106,7 +116,7 @@ export default function LoginPage() {
             const res = await fetch(`${SM_API}/auth/azure-login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ idToken }),
+                body: JSON.stringify({ idToken, app: 'iot-mobile' }),
             });
             const data = await res.json().catch(() => null);
             if (data?.IsSuccess && data?.DataResult?.token) {
