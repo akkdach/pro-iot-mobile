@@ -46,6 +46,20 @@ export default function LoginPage() {
         formState: { errors },
     } = useForm<FormData>();
 
+    // .NET ตอบ 400 เปล่าทั้ง "รหัสผิด" และ "ถูกระงับ" — ถาม SM เพื่อเลือกข้อความ error
+    const passwordFailMessage = async (username: string, fallback: string): Promise<string> => {
+        try {
+            const res = await fetch(`${SM_API}/auth/blocked-check`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username }),
+            });
+            const json = await res.json();
+            if (json?.Blocked === true) return 'บัญชีนี้ถูกระงับการใช้งานโดยผู้ดูแลระบบ กรุณาติดต่อ Admin';
+        } catch { /* ignore */ }
+        return fallback;
+    };
+
     // เก็บ token + ดึง profile แล้วเข้าหน้าหลัก (ใช้ร่วมทั้ง login ปกติและ SSO)
     const completeLogin = async (accessToken: string) => {
         localStorage.setItem('token', accessToken);
@@ -100,10 +114,10 @@ export default function LoginPage() {
                 });
                 await completeLogin(result.data.dataResult.access_token);
             } else {
-                Swal.fire('Error', result.data?.message || 'Username Or Password Incorrect!');
+                Swal.fire('Error', await passwordFailMessage(data.username, result.data?.message || 'Username Or Password Incorrect!'));
             }
         } catch (error) {
-            Swal.fire('Error', 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
+            Swal.fire('Error', await passwordFailMessage(data.username, 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'));
         } finally {
             setIsLoading(false);
         }
