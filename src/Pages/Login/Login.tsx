@@ -165,6 +165,10 @@ export default function LoginPage() {
     };
 
     useEffect(() => {
+        // ?hub=1 = เปิดจาก Portal → กดปุ่ม Microsoft ใช้บัญชีเดิม ไม่ต้องเลือก
+        if (new URLSearchParams(window.location.search).get('hub') === '1') {
+            sessionStorage.setItem('sso_hub', '1');
+        }
         // รับผล MSAL redirect + auto SSO จาก Microsoft session เดิม
         (async () => {
             try {
