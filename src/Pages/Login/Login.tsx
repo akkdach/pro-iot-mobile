@@ -124,7 +124,9 @@ export default function LoginPage() {
     };
 
     // ── Microsoft Entra ID SSO (ผ่าน Service Management azure-login) ──
-    const processEntraIdToken = async (idToken: string): Promise<void> => {
+    // explicit: เข้าโหมดผูก + เด้ง error ได้เฉพาะตอนผู้ใช้กดปุ่ม Microsoft เอง
+    // auto ssoSilent (explicit=false) → ไม่เด้งโหมดผูก/ไม่เด้ง error แค่แสดงหน้า login ปกติ
+    const processEntraIdToken = async (idToken: string, explicit: boolean): Promise<void> => {
         setIsLoading(true);
         try {
             const res = await fetch(`${SM_API}/auth/azure-login`, {
@@ -138,6 +140,7 @@ export default function LoginPage() {
                 return;
             }
             if (data?.RequireLink) {
+                if (!explicit) return; // silent: ไม่เข้าโหมดผูก
                 setLinkIdToken(idToken);
                 Swal.fire({
                     icon: 'info',
@@ -146,9 +149,9 @@ export default function LoginPage() {
                 });
                 return;
             }
-            Swal.fire('Error', data?.Message || 'Microsoft login ไม่สำเร็จ');
+            if (explicit) Swal.fire('Error', data?.Message || 'Microsoft login ไม่สำเร็จ');
         } catch (error) {
-            Swal.fire('Error', 'Microsoft login ไม่สำเร็จ');
+            if (explicit) Swal.fire('Error', 'Microsoft login ไม่สำเร็จ');
         } finally {
             setIsLoading(false);
         }
@@ -168,13 +171,13 @@ export default function LoginPage() {
                 const { handleMsalRedirect, acquireSsoSilent } = await import('../../Services/msal');
                 const redirectResult = await handleMsalRedirect();
                 if (redirectResult?.idToken) {
-                    await processEntraIdToken(redirectResult.idToken);
+                    await processEntraIdToken(redirectResult.idToken, true); // explicit: มาจากปุ่ม Microsoft
                     return;
                 }
                 // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง)
                 if (localStorage.getItem('sso_logout') !== '1') {
                     const silent = await acquireSsoSilent();
-                    if (silent?.idToken) await processEntraIdToken(silent.idToken);
+                    if (silent?.idToken) await processEntraIdToken(silent.idToken, false); // auto silent
                 }
             } catch {
                 // MSAL ล้มเหลว = แสดงหน้า login ปกติ
