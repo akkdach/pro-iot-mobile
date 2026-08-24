@@ -39,6 +39,8 @@ export default function LoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     // Microsoft Entra SSO: idToken ที่ verify แล้วแต่ email ยังไม่ผูกกับ user ในระบบ
     const [linkIdToken, setLinkIdToken] = useState<string | null>(null);
+    // เหตุผลที่ auto sign-in ไม่สำเร็จ — แสดงใต้ปุ่ม Microsoft ให้ดูได้โดยไม่ต้องเปิด DevTools
+    const [ssoNote, setSsoNote] = useState<string | null>(null);
 
     const {
         register,
@@ -159,34 +161,72 @@ export default function LoginPage() {
 
     const handleMicrosoftLogin = async () => {
         localStorage.removeItem('sso_logout'); // ตั้งใจ login ใหม่ — ปลดล็อก auto SSO
+        sessionStorage.removeItem('sso_np_pending'); // กดปุ่มเอง — รอบหน้าไม่ใช่ auto redirect
         setIsLoading(true);
         const { loginWithMicrosoft } = await import('../../Services/msal');
         await loginWithMicrosoft(); // full page redirect
     };
 
     useEffect(() => {
+        // หน้านี้ถูกโหลดใน hidden iframe ของ ssoSilent ด้วย (redirectUri = /login ซึ่ง route '*'
+        // ก็เรนเดอร์หน้านี้) — ในกรอบนั้นห้ามทำ SSO/redirect ซ้อน ปล่อยให้หน้าแม่รับผลเอง
+        if (window.self !== window.top) return;
         // เปิดจาก Portal → hub=1 + login_hint (email). param อาจอยู่ใน query ตรง ๆ
         const _sp = new URLSearchParams(window.location.search);
-        if (_sp.get('hub') === '1') sessionStorage.setItem('sso_hub', '1');
+        const _hub = _sp.get('hub');
+        if (_hub === '1') {
+            sessionStorage.setItem('sso_hub', '1');
+            // เปิดจาก Portal ทั้งที่ยัง login SM อยู่ = เจตนาเข้าระบบ → ปลดล็อก flag จาก Sign Out เดิม
+            // ไม่ปลดตรงนี้ คนที่เข้าด้วย Microsoft อย่างเดียวจะติด flag ค้างถาวรตั้งแต่กด Sign Out ครั้งแรก
+            if (_sp.get('logout') !== '1') localStorage.removeItem('sso_logout');
+        }
         const _hint = _sp.get('login_hint');
         if (_hint) sessionStorage.setItem('sso_hint', _hint);
         const ssoHint = _hint || sessionStorage.getItem('sso_hint') || undefined;
+        // sso_hub ต้องอ่านจาก sessionStorage ด้วย เพราะ prompt=none เด้งกลับมาที่ /login โดยไม่มี query เดิม
+        const fromHub = _hub === '1' || sessionStorage.getItem('sso_hub') === '1';
+        // รอบนี้กลับมาจาก prompt=none redirect (อัตโนมัติ) ไม่ใช่ผู้ใช้กดปุ่ม Microsoft เอง
+        const wasAutoRedirect = sessionStorage.getItem('sso_np_pending') === '1';
         // รับผล MSAL redirect + auto SSO จาก Microsoft session เดิม
         (async () => {
             try {
-                const { handleMsalRedirect, acquireSsoSilent } = await import('../../Services/msal');
+                const { handleMsalRedirect, acquireSsoSilent, ssoRedirectSilent, getLastSsoError } = await import('../../Services/msal');
                 const redirectResult = await handleMsalRedirect();
                 if (redirectResult?.idToken) {
-                    await processEntraIdToken(redirectResult.idToken, true); // explicit: มาจากปุ่ม Microsoft
+                    sessionStorage.removeItem('sso_np_pending');
+                    // มาแบบ auto (prompt=none) → explicit=false: บัญชีที่ยังไม่ผูกจะได้เห็นฟอร์ม login ปกติ
+                    // ไม่ใช่โหมดผูกบัญชีที่ผู้ใช้ไม่ได้ร้องขอ
+                    await processEntraIdToken(redirectResult.idToken, !wasAutoRedirect);
                     return;
                 }
-                // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง)
+                // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง/เปิดจาก Portal)
                 if (localStorage.getItem('sso_logout') !== '1') {
                     const silent = await acquireSsoSilent(ssoHint);
-                    if (silent?.idToken) await processEntraIdToken(silent.idToken, false); // auto silent
+                    if (silent?.idToken) {
+                        await processEntraIdToken(silent.idToken, false); // auto silent
+                        return;
+                    }
+                    // silent iframe ไม่ผ่าน (เบราว์เซอร์บล็อก third-party cookie ของ login.microsoftonline.com)
+                    // แต่เปิดมาจาก Portal = แทบแน่ว่ามี MS session อยู่ → ลอง full-page redirect prompt=none
+                    // กันวนซ้ำด้วย "เวลา" ไม่ใช่ one-shot ต่อแท็บ — refresh แล้วต้องลองใหม่ได้
+                    // (redirect loop จริงเกิดภายในไม่กี่วินาที ส่วนคนกดเทสซ้ำห่างกันเกินนั้นเสมอ)
+                    const lastTry = Number(sessionStorage.getItem('sso_np_at') || 0);
+                    if (fromHub && ssoHint && (!lastTry || Date.now() - lastTry > 60_000)) {
+                        sessionStorage.setItem('sso_np_at', String(Date.now()));
+                        sessionStorage.setItem('sso_np_pending', '1'); // บอกรอบหน้าว่าเป็น auto ไม่ใช่กดปุ่มเอง
+                        setIsLoading(true);
+                        await ssoRedirectSilent(ssoHint);
+                        return;
+                    }
+                    if (fromHub) setSsoNote(`Auto sign-in ไม่สำเร็จ: ${getLastSsoError() || 'ไม่พบ Microsoft session'}`);
                 }
-            } catch {
-                // MSAL ล้มเหลว = แสดงหน้า login ปกติ
+            } catch (e) {
+                // prompt=none ที่ไม่มี session จะเด้งกลับมาเป็น interaction_required ตรงนี้ → แสดงฟอร์มปกติ
+                sessionStorage.removeItem('sso_np_pending');
+                setIsLoading(false);
+                const code = (e as { errorCode?: string; message?: string })?.errorCode
+                    || (e as { message?: string })?.message || String(e);
+                if (fromHub) setSsoNote(`Auto sign-in ไม่สำเร็จ: ${code}`);
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -453,6 +493,21 @@ export default function LoginPage() {
                             </svg>
                             Sign in with Microsoft
                         </Button>
+
+                        {ssoNote && (
+                            <Typography
+                                variant="caption"
+                                sx={{
+                                    display: 'block',
+                                    mt: 1.2,
+                                    textAlign: 'center',
+                                    color: '#94A3B8',
+                                    wordBreak: 'break-word',
+                                }}
+                            >
+                                {ssoNote}
+                            </Typography>
+                        )}
                     </form>
                 </Paper>
             </Fade>
