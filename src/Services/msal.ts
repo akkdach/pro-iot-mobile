@@ -37,7 +37,7 @@ export async function handleMsalRedirect(): Promise<AuthenticationResult | null>
 /** Start Microsoft login via full-page redirect */
 export async function loginWithMicrosoft(): Promise<void> {
     const instance = await getMsalInstance();
-    await instance.loginRedirect({ scopes: ['openid', 'profile', 'email'] });
+    await instance.loginRedirect({ scopes: ['openid', 'profile', 'email'], prompt: 'select_account' });
 }
 
 /**
