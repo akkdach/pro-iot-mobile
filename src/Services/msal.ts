@@ -45,7 +45,7 @@ export async function loginWithMicrosoft(): Promise<void> {
  * Silent SSO: get an idToken from the existing Microsoft session.
  * Returns null on failure — never throws.
  */
-export async function acquireSsoSilent(): Promise<AuthenticationResult | null> {
+export async function acquireSsoSilent(loginHint?: string): Promise<AuthenticationResult | null> {
     try {
         const instance = await getMsalInstance();
         const scopes = ['openid', 'profile', 'email'];
@@ -53,7 +53,8 @@ export async function acquireSsoSilent(): Promise<AuthenticationResult | null> {
         if (accounts.length > 0) {
             return await instance.acquireTokenSilent({ scopes, account: accounts[0] });
         }
-        return await instance.ssoSilent({ scopes });
+        if (!loginHint) return null;
+            return await instance.ssoSilent({ scopes, loginHint });
     } catch {
         return null;
     }

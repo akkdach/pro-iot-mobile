@@ -165,10 +165,12 @@ export default function LoginPage() {
     };
 
     useEffect(() => {
-        // ?hub=1 = เปิดจาก Portal → กดปุ่ม Microsoft ใช้บัญชีเดิม ไม่ต้องเลือก
-        if (new URLSearchParams(window.location.search).get('hub') === '1') {
-            sessionStorage.setItem('sso_hub', '1');
-        }
+        // เปิดจาก Portal → hub=1 + login_hint (email). param อาจอยู่ใน query ตรง ๆ
+        const _sp = new URLSearchParams(window.location.search);
+        if (_sp.get('hub') === '1') sessionStorage.setItem('sso_hub', '1');
+        const _hint = _sp.get('login_hint');
+        if (_hint) sessionStorage.setItem('sso_hint', _hint);
+        const ssoHint = _hint || sessionStorage.getItem('sso_hint') || undefined;
         // รับผล MSAL redirect + auto SSO จาก Microsoft session เดิม
         (async () => {
             try {
@@ -180,7 +182,7 @@ export default function LoginPage() {
                 }
                 // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง)
                 if (localStorage.getItem('sso_logout') !== '1') {
-                    const silent = await acquireSsoSilent();
+                    const silent = await acquireSsoSilent(ssoHint);
                     if (silent?.idToken) await processEntraIdToken(silent.idToken, false); // auto silent
                 }
             } catch {
