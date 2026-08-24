@@ -53,6 +53,34 @@ export function getLastSsoError(): string {
     return lastSsoError;
 }
 
+/**
+ * idToken ยังไม่หมดอายุจริงไหม
+ *
+ * acquireTokenSilent ตัดสินใจจากอายุ access token เป็นหลัก — ถ้า access token ยังดีอยู่
+ * มันคืน idToken ตัวเก่าจาก cache กลับมาเลย แม้ idToken นั้นหมดอายุไปแล้ว ส่งต่อไปที่
+ * server แล้ว verify จะไม่ผ่าน → ผู้ใช้เห็น "Microsoft token ไม่ถูกต้องหรือหมดอายุ"
+ * ทั้งที่ session Microsoft ยังใช้ได้ปกติ
+ */
+function idTokenFresh(idToken?: string, skewSec = 60): boolean {
+    if (!idToken) return false;
+    try {
+        const part = idToken.split('.')[1] || '';
+        const b64 = part.replace(/-/g, '+').replace(/_/g, '/');
+        const pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
+        // atob คืน binary string — แปลงกลับเป็น UTF-8 ก่อน ไม่งั้น claim ภาษาไทยทำ JSON.parse พัง
+        const bin = atob(b64 + pad);
+        const json = decodeURIComponent(
+            Array.prototype.map
+                .call(bin, (c: string) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        const exp = JSON.parse(json)?.exp;
+        return typeof exp === 'number' && exp * 1000 > Date.now() + skewSec * 1000;
+    } catch {
+        return false;
+    }
+}
+
 const SSO_SCOPES = ['openid', 'profile', 'email'];
 
 /**
@@ -73,7 +101,15 @@ export async function acquireSsoSilent(loginHint?: string): Promise<Authenticati
             : accounts[0];
         if (account) {
             try {
-                return await instance.acquireTokenSilent({ scopes: SSO_SCOPES, account });
+                let r = await instance.acquireTokenSilent({ scopes: SSO_SCOPES, account });
+                if (!idTokenFresh(r?.idToken)) {
+                    // cache คืน idToken ที่หมดอายุ → บังคับต่ออายุด้วย refresh token
+                    r = await instance.acquireTokenSilent({ scopes: SSO_SCOPES, account, forceRefresh: true });
+                }
+                if (idTokenFresh(r?.idToken)) return r;
+                // ยังเก่าอยู่แม้ forceRefresh → อย่าส่งไป server ให้ตกไปใช้ ssoSilent/redirect ต่อ
+                lastSsoError = 'stale_id_token';
+                console.warn('⚠️ [SSO] idToken หมดอายุแม้ forceRefresh แล้ว — ข้ามไปวิธีถัดไป');
             } catch (e) {
                 // refresh token หมด/cache ค้าง → ตกไปลอง ssoSilent ต่อ ไม่จบที่นี่
                 lastSsoError = ssoErr(e);
@@ -81,7 +117,14 @@ export async function acquireSsoSilent(loginHint?: string): Promise<Authenticati
             }
         }
         if (!loginHint) return null;
-        return await instance.ssoSilent({ scopes: SSO_SCOPES, loginHint });
+        const silent = await instance.ssoSilent({ scopes: SSO_SCOPES, loginHint });
+        // ปกติ ssoSilent คืนของใหม่เสมอ แต่กันไว้ — token เก่าถูกปฏิเสธที่ server อยู่ดี
+        // คืน null ดีกว่า เพราะหน้า login จะไป fallback prompt=none ที่ได้ token สดแน่นอน
+        if (!idTokenFresh(silent?.idToken)) {
+            lastSsoError = 'stale_id_token';
+            return null;
+        }
+        return silent;
     } catch (e) {
         lastSsoError = ssoErr(e);
         console.warn('⚠️ [SSO] ssoSilent failed:', lastSsoError);
