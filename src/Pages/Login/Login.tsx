@@ -32,6 +32,12 @@ const SM_API =
     process.env.REACT_APP_SM_API_BASE_URL ||
     'https://servicemanagement-eqg3bkfec8f5asg3.southeastasia-01.azurewebsites.net/api/v1';
 
+// benign errorCode = "ไม่มี MS session ให้ auto login" ตามปกติ → แสดงฟอร์ม login เงียบ ๆ ได้
+// error อื่น (บัญชีถูกระงับ, 500, HTML error page) เป็นของจริง ต้องโชว์เสมอ ไม่ว่ามาจาก hub หรือกดปุ่มเอง
+const BENIGN_SSO_ERRORS = ['interaction_required', 'login_required', 'consent_required'];
+const isBenignSsoError = (code: string): boolean =>
+    BENIGN_SSO_ERRORS.some((b) => code.includes(b));
+
 
 
 export default function LoginPage() {
@@ -142,7 +148,12 @@ export default function LoginPage() {
                 return;
             }
             if (data?.RequireLink) {
-                if (!explicit) return; // silent: ไม่เข้าโหมดผูก
+                if (!explicit) {
+                    // silent: ยังไม่เข้าโหมดผูก แต่ต้องบอกว่าทำไม auto sign-in ถึงพาเข้าไม่ได้
+                    // ไม่งั้น (บัญชียังไม่ผูก) หน้าจอเงียบสนิทจนแยกไม่ออกจาก "ระบบพัง"
+                    setSsoNote('บัญชี Microsoft นี้ยังไม่ได้ผูก — กด Sign in with Microsoft เพื่อผูกครั้งแรก');
+                    return; // silent: ไม่เข้าโหมดผูก
+                }
                 setLinkIdToken(idToken);
                 Swal.fire({
                     icon: 'info',
@@ -151,9 +162,17 @@ export default function LoginPage() {
                 });
                 return;
             }
-            if (explicit) Swal.fire('Error', data?.Message || 'Microsoft login ไม่สำเร็จ');
+            // non-success ที่ไม่ใช่ RequireLink = error จริงเสมอ (token เสีย/บัญชีถูกระงับ/500/HTML)
+            // explicit → Swal ให้เห็นชัด, silent → ใส่ note ไม่ให้เงียบหาย
+            const failMsg = data?.Message || 'Microsoft login ไม่สำเร็จ';
+            if (explicit) Swal.fire('Error', failMsg);
+            else setSsoNote(failMsg);
         } catch (error) {
+            const code = (error as { errorCode?: string; message?: string })?.errorCode
+                || (error as { message?: string })?.message || String(error);
+            // explicit โชว์เสมอ; silent โชว์เฉพาะ error จริง (ข้าม benign ที่แปลว่าไม่มี session เฉย ๆ)
             if (explicit) Swal.fire('Error', 'Microsoft login ไม่สำเร็จ');
+            else if (!isBenignSsoError(code)) setSsoNote(`Microsoft login ไม่สำเร็จ: ${code}`);
         } finally {
             setIsLoading(false);
         }
@@ -161,10 +180,19 @@ export default function LoginPage() {
 
     const handleMicrosoftLogin = async () => {
         localStorage.removeItem('sso_logout'); // ตั้งใจ login ใหม่ — ปลดล็อก auto SSO
+        localStorage.removeItem('forced_logout_at'); // ตั้งใจ login เอง — ปลด circuit breaker จาก 401
         sessionStorage.removeItem('sso_np_pending'); // กดปุ่มเอง — รอบหน้าไม่ใช่ auto redirect
         setIsLoading(true);
-        const { loginWithMicrosoft } = await import('../../Services/msal');
-        await loginWithMicrosoft(); // full page redirect
+        try {
+            const { loginWithMicrosoft } = await import('../../Services/msal');
+            await loginWithMicrosoft(); // full page redirect
+        } catch (e) {
+            // MSAL init/redirect ล้ม → ถ้าไม่ปลด loading ปุ่มจะค้างหมุนถาวร + ต้องบอก error ให้เห็น
+            setIsLoading(false);
+            const code = (e as { errorCode?: string; message?: string })?.errorCode
+                || (e as { message?: string })?.message || String(e);
+            setSsoNote(`เริ่ม Microsoft login ไม่สำเร็จ: ${code}`);
+        }
     };
 
     useEffect(() => {
@@ -201,10 +229,15 @@ export default function LoginPage() {
                 }
                 // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง/เปิดจาก Portal)
                 const ssoBlocked = localStorage.getItem('sso_logout') === '1';
+                // circuit breaker: เพิ่งโดน 401 เตะออก (forced logout) ภายใน 10 วิ → อย่าเพิ่ง auto-SSO
+                // ไม่งั้นจะดึง token ใหม่แล้วโดน 401 ซ้ำทันทีเป็นวงวน
+                const forcedAt = Number(localStorage.getItem('forced_logout_at') || 0);
+                const recentlyForced = forcedAt > 0 && Date.now() - forcedAt < 10_000;
                 // เคยกด Sign Out (หรือถูกตัด session) → auto SSO ถูกปิดไว้ ต้องบอกว่าปิดอยู่
                 // ไม่งั้นหน้าจอเงียบสนิทจนแยกไม่ออกจาก "ระบบพัง" และไม่รู้ว่าต้องกดปุ่มเอง
                 if (ssoBlocked) setSsoNote('ปิด auto sign-in ไว้ตั้งแต่ออกจากระบบครั้งล่าสุด — กด "Sign in with Microsoft" เพื่อเข้าใหม่');
-                if (!ssoBlocked) {
+                else if (recentlyForced) setSsoNote('เพิ่งออกจากระบบเพราะเซสชันหมดอายุ — กด "Sign in with Microsoft" เพื่อเข้าใหม่');
+                if (!ssoBlocked && !recentlyForced) {
                     // ssoSilent วิ่งผ่าน hidden iframe ใช้เวลาหลายวินาที — ระหว่างนั้นต้องมีอะไรบอก
                     // ไม่งั้นหน้าจอว่างเปล่าแยกไม่ออกจาก "auto sign-in ไม่ทำงาน" (ข้อความจะถูกทับด้วยผลจริงทีหลัง)
                     if (fromHub) setSsoNote('กำลังเข้าสู่ระบบอัตโนมัติด้วยบัญชี Microsoft…');
@@ -233,7 +266,9 @@ export default function LoginPage() {
                 setIsLoading(false);
                 const code = (e as { errorCode?: string; message?: string })?.errorCode
                     || (e as { message?: string })?.message || String(e);
-                if (fromHub) setSsoNote(`Auto sign-in ไม่สำเร็จ: ${code}`);
+                // benign = ไม่มี MS session ตามปกติ → เงียบได้ถ้าไม่ได้มาจาก hub
+                // error จริง (บัญชีถูกระงับ/500/HTML) ต้องโชว์เสมอ ไม่ว่ามาจาก hub หรือไม่
+                if (fromHub || !isBenignSsoError(code)) setSsoNote(`Auto sign-in ไม่สำเร็จ: ${code}`);
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps

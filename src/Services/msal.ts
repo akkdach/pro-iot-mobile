@@ -24,7 +24,15 @@ async function getMsalInstance(): Promise<PublicClientApplication> {
         msalInstance = new PublicClientApplication(MSAL_CONFIG);
         initPromise = msalInstance.initialize();
     }
-    await initPromise;
+    try {
+        await initPromise;
+    } catch (e) {
+        // init ล้ม → ถ้าปล่อยไว้ cache จะค้างเป็น instance + promise ที่ reject ตลอด
+        // ครั้งถัดไปจะ await promise เดิมแล้ว reject ซ้ำไม่มีวันหาย — ล้างทั้งคู่ให้ re-init ใหม่ได้
+        msalInstance = null;
+        initPromise = null;
+        throw e;
+    }
     return msalInstance;
 }
 
