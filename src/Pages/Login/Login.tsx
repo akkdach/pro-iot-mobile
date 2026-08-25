@@ -201,6 +201,9 @@ export default function LoginPage() {
                 }
                 // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง/เปิดจาก Portal)
                 if (localStorage.getItem('sso_logout') !== '1') {
+                    // ssoSilent วิ่งผ่าน hidden iframe ใช้เวลาหลายวินาที — ระหว่างนั้นต้องมีอะไรบอก
+                    // ไม่งั้นหน้าจอว่างเปล่าแยกไม่ออกจาก "auto sign-in ไม่ทำงาน" (ข้อความจะถูกทับด้วยผลจริงทีหลัง)
+                    if (fromHub) setSsoNote('กำลังเข้าสู่ระบบอัตโนมัติด้วยบัญชี Microsoft…');
                     const silent = await acquireSsoSilent(ssoHint);
                     if (silent?.idToken) {
                         await processEntraIdToken(silent.idToken, false); // auto silent
