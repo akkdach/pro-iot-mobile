@@ -200,7 +200,11 @@ export default function LoginPage() {
                     return;
                 }
                 // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง/เปิดจาก Portal)
-                if (localStorage.getItem('sso_logout') !== '1') {
+                const ssoBlocked = localStorage.getItem('sso_logout') === '1';
+                // เคยกด Sign Out (หรือถูกตัด session) → auto SSO ถูกปิดไว้ ต้องบอกว่าปิดอยู่
+                // ไม่งั้นหน้าจอเงียบสนิทจนแยกไม่ออกจาก "ระบบพัง" และไม่รู้ว่าต้องกดปุ่มเอง
+                if (ssoBlocked) setSsoNote('ปิด auto sign-in ไว้ตั้งแต่ออกจากระบบครั้งล่าสุด — กด "Sign in with Microsoft" เพื่อเข้าใหม่');
+                if (!ssoBlocked) {
                     // ssoSilent วิ่งผ่าน hidden iframe ใช้เวลาหลายวินาที — ระหว่างนั้นต้องมีอะไรบอก
                     // ไม่งั้นหน้าจอว่างเปล่าแยกไม่ออกจาก "auto sign-in ไม่ทำงาน" (ข้อความจะถูกทับด้วยผลจริงทีหลัง)
                     if (fromHub) setSsoNote('กำลังเข้าสู่ระบบอัตโนมัติด้วยบัญชี Microsoft…');
