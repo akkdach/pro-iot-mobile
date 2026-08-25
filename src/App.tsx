@@ -49,6 +49,60 @@ import DashboardQuiz from './Pages/Quiz/DashboardQuiz';
 import NespressReceiveMachine from './Pages/Nespresso/NespressReceiveMachine';
 import ChecklistEmbed from './Pages/workStation/ChecklistEmbed';
 
+// ── Hub account switch: เปิดจาก Portal = ระบุตัวคนที่กำลังใช้เครื่องอยู่ตอนนี้ ──
+// hub=1 + login_hint ไม่ตรงกับ email ของ session เดิม → session ของคนอื่นต้องไม่เงียบ ๆ
+// พาเข้าเป็นคนผิด — ล้างเฉพาะ token/profile ให้ auto-SSO พาเข้าเป็นคนตาม hint แทน
+// (ห้ามตั้ง sso_logout — flag นั้นบล็อก auto-SSO; ไม่แน่ใจว่า email ใคร = ไม่ล้าง fail-open)
+(() => {
+  try {
+    const sp = new URLSearchParams(window.location.search);
+    let hub = sp.get('hub');
+    let hint = sp.get('login_hint');
+    // param อาจถูกดันเข้า redirectTo ตอน redirect → อ่านทั้งสองที่ (เหมือนหน้า Login ของ hub)
+    const rt = sp.get('redirectTo');
+    if ((!hub || !hint) && rt && rt.includes('?')) {
+      const rp = new URLSearchParams(rt.slice(rt.indexOf('?') + 1));
+      hub = hub || rp.get('hub');
+      hint = hint || rp.get('login_hint');
+    }
+    const t = localStorage.getItem('token');
+    if (hub !== '1' || !hint || !t) return;
+    // email ของ session เดิม: claim ใน token (azure-login ใส่ email มาให้) → สำรองจาก profile
+    // decode payload อย่างเดียว ไม่ verify signature (ฝั่ง client ทำไม่ได้และไม่ต้อง)
+    // รับเฉพาะค่าที่มี @ — username เฉย ๆ ไม่ใช่ email เอามาเทียบแล้วจะเตะคนผิด
+    let email = '';
+    try {
+      const part = t.split('.')[1] || '';
+      const b64 = part.replace(/-/g, '+').replace(/_/g, '/');
+      const pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
+      // atob คืน binary string — แปลงกลับเป็น UTF-8 ก่อน ไม่งั้น claim ภาษาไทยทำ JSON.parse พัง
+      const bin = atob(b64 + pad);
+      const json = decodeURIComponent(
+        Array.prototype.map
+          .call(bin, (c: string) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      const claims = JSON.parse(json) || {};
+      email = [claims.email, claims.preferred_username, claims.upn]
+        .map((v: unknown) => (typeof v === 'string' ? v : ''))
+        .find((v: string) => v.includes('@')) || '';
+    } catch { /* decode ไม่ได้ = ไม่รู้ email */ }
+    if (!email) {
+      try {
+        const p = JSON.parse(localStorage.getItem('profile') || '{}');
+        const pe = p?.email || p?.Email;
+        if (typeof pe === 'string' && pe.includes('@')) email = pe;
+      } catch { /* ignore */ }
+    }
+    if (!email) return; // ไม่รู้ email ของ session เดิม → ปล่อยผ่าน (อย่าเตะคนเพราะความไม่แน่ใจ)
+    if (email.trim().toLowerCase() !== hint.trim().toLowerCase()) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('profile');
+      // ไม่แตะ sso_hub/sso_hint — หน้า Login จะอ่าน hub/hint จาก query แล้ว auto-SSO ต่อเอง
+    }
+  } catch { /* fail-open */ }
+})();
+
 const token = localStorage.getItem('token');
 
 // ── ตรวจว่ากำลังอยู่ใน embed mode หรือเปล่า ──
