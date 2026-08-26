@@ -38,6 +38,11 @@ const BENIGN_SSO_ERRORS = ['interaction_required', 'login_required', 'consent_re
 const isBenignSsoError = (code: string): boolean =>
     BENIGN_SSO_ERRORS.some((b) => code.includes(b));
 
+// ข้อความหลักบน overlay เต็มจอระหว่าง Microsoft sign-in — แยก auto (จาก hub/prompt=none)
+// กับกดปุ่มเอง เพื่อให้คนที่ถูกพามาจาก Portal รู้ว่าระบบกำลังพาเข้า ไม่ใช่หน้าค้าง
+const SSO_AUTO_MSG = 'กำลังเข้าสู่ระบบอัตโนมัติด้วยบัญชี Microsoft…';
+const SSO_MANUAL_MSG = 'กำลังเชื่อมต่อ Microsoft…';
+
 
 
 export default function LoginPage() {
@@ -47,6 +52,10 @@ export default function LoginPage() {
     const [linkIdToken, setLinkIdToken] = useState<string | null>(null);
     // เหตุผลที่ auto sign-in ไม่สำเร็จ — แสดงใต้ปุ่ม Microsoft ให้ดูได้โดยไม่ต้องเปิด DevTools
     const [ssoNote, setSsoNote] = useState<string | null>(null);
+    // ข้อความหลักของ overlay เต็มจอ — null = flow ที่ไม่ใช่ Microsoft (เช่น password) ไม่ต้องมี overlay
+    const [ssoOverlayText, setSsoOverlayText] = useState<string | null>(null);
+    // overlay เกาะกับ isLoading ตัวเดิม — ทุกทางที่ปิด loading อยู่แล้วจะพับ overlay ให้เอง ไม่มี state ค้างแยกต่างหาก
+    const showSsoOverlay = isLoading && ssoOverlayText !== null;
 
     const {
         register,
@@ -84,6 +93,7 @@ export default function LoginPage() {
 
     const onSubmit = async (data: FormData) => {
         setIsLoading(true);
+        setSsoOverlayText(null); // submit ฟอร์มใช้ spinner บนปุ่มพอ — กันข้อความ MS รอบก่อนค้างแล้วโผล่คลุมฟอร์ม
         try {
             // link mode: ผูกบัญชี Microsoft ครั้งแรก — ยืนยัน username/password หนึ่งครั้ง
             if (linkIdToken) {
@@ -136,6 +146,8 @@ export default function LoginPage() {
     // auto ssoSilent (explicit=false) → ไม่เด้งโหมดผูก/ไม่เด้ง error แค่แสดงหน้า login ปกติ
     const processEntraIdToken = async (idToken: string, explicit: boolean): Promise<void> => {
         setIsLoading(true);
+        // ระหว่างแลก idToken เป็น token ระบบ ผู้ใช้ต้องเห็นว่ากำลังพาเข้า ไม่ใช่ฟอร์มเปล่า
+        setSsoOverlayText(explicit ? SSO_MANUAL_MSG : SSO_AUTO_MSG);
         try {
             const res = await fetch(`${SM_API}/auth/azure-login`, {
                 method: 'POST',
@@ -183,6 +195,7 @@ export default function LoginPage() {
         localStorage.removeItem('forced_logout_at'); // ตั้งใจ login เอง — ปลด circuit breaker จาก 401
         sessionStorage.removeItem('sso_np_pending'); // กดปุ่มเอง — รอบหน้าไม่ใช่ auto redirect
         setIsLoading(true);
+        setSsoOverlayText(SSO_MANUAL_MSG); // คลุมจอช่วง init MSAL จนหลุดไปหน้า Microsoft
         try {
             const { loginWithMicrosoft } = await import('../../Services/msal');
             await loginWithMicrosoft(); // full page redirect
@@ -215,6 +228,12 @@ export default function LoginPage() {
         const fromHub = _hub === '1' || sessionStorage.getItem('sso_hub') === '1';
         // รอบนี้กลับมาจาก prompt=none redirect (อัตโนมัติ) ไม่ใช่ผู้ใช้กดปุ่ม Microsoft เอง
         const wasAutoRedirect = sessionStorage.getItem('sso_np_pending') === '1';
+        // มาจาก hub หรือกำลังรับผล prompt=none = auto sign-in กำลังจะวิ่ง → คลุมจอตั้งแต่ต้น
+        // ไม่ให้เห็นฟอร์มเปล่าก่อนแล้วค่อยเด้ง (ทุกทางออกข้างล่างปิด loading หรือ navigate เสมอ)
+        if (fromHub || wasAutoRedirect) {
+            setSsoOverlayText(SSO_AUTO_MSG);
+            setIsLoading(true);
+        }
         // รับผล MSAL redirect + auto SSO จาก Microsoft session เดิม
         (async () => {
             try {
@@ -237,10 +256,12 @@ export default function LoginPage() {
                 // ไม่งั้นหน้าจอเงียบสนิทจนแยกไม่ออกจาก "ระบบพัง" และไม่รู้ว่าต้องกดปุ่มเอง
                 if (ssoBlocked) setSsoNote('ปิด auto sign-in ไว้ตั้งแต่ออกจากระบบครั้งล่าสุด — กด "Sign in with Microsoft" เพื่อเข้าใหม่');
                 else if (recentlyForced) setSsoNote('เพิ่งออกจากระบบเพราะเซสชันหมดอายุ — กด "Sign in with Microsoft" เพื่อเข้าใหม่');
+                // overlay อาจเปิดไว้ตั้งแต่ต้น effect — ทางที่ไม่ลอง SSO ต่อต้องปิดเอง ไม่งั้นคลุมจอถาวร
+                if (ssoBlocked || recentlyForced) setIsLoading(false);
                 if (!ssoBlocked && !recentlyForced) {
                     // ssoSilent วิ่งผ่าน hidden iframe ใช้เวลาหลายวินาที — ระหว่างนั้นต้องมีอะไรบอก
                     // ไม่งั้นหน้าจอว่างเปล่าแยกไม่ออกจาก "auto sign-in ไม่ทำงาน" (ข้อความจะถูกทับด้วยผลจริงทีหลัง)
-                    if (fromHub) setSsoNote('กำลังเข้าสู่ระบบอัตโนมัติด้วยบัญชี Microsoft…');
+                    if (fromHub) setSsoNote(SSO_AUTO_MSG);
                     const silent = await acquireSsoSilent(ssoHint);
                     if (silent?.idToken) {
                         await processEntraIdToken(silent.idToken, false); // auto silent
@@ -258,6 +279,8 @@ export default function LoginPage() {
                         await ssoRedirectSilent(ssoHint);
                         return;
                     }
+                    // silent ไม่ผ่านและไม่ได้ redirect ต่อ — ปิด overlay คืนฟอร์มพร้อมเหตุผลด้านล่าง
+                    setIsLoading(false);
                     if (fromHub) setSsoNote(`Auto sign-in ไม่สำเร็จ: ${getLastSsoError() || 'ไม่พบ Microsoft session'}`);
                 }
             } catch (e) {
@@ -336,6 +359,37 @@ export default function LoginPage() {
                     animation: 'float 8s ease-in-out infinite',
                 }}
             />
+
+            {/* overlay เต็มจอระหว่าง Microsoft sign-in — คนที่ถูกพามาจาก hub เห็นว่าระบบกำลังทำงาน
+                ไม่ใช่ฟอร์มเปล่า; เกาะ isLoading เดิมจึงหายเองทุกครั้งที่ flow จบ (สำเร็จ→navigate, ล้ม→ฟอร์ม+เหตุผล) */}
+            {showSsoOverlay && (
+                <Box
+                    sx={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 3000,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 2,
+                        px: 3,
+                        textAlign: 'center',
+                        bgcolor: 'rgba(10, 15, 26, 0.93)',
+                    }}
+                >
+                    <CircularProgress size={48} sx={{ color: '#3b82f6' }} />
+                    <Typography sx={{ color: '#E2E8F0', fontWeight: 600 }}>
+                        {ssoOverlayText}
+                    </Typography>
+                    {/* สถานะรายขั้นตัวเดิม (ssoNote) ต้องยังอ่านได้ระหว่าง overlay คลุมจอ — ซ่อนเฉพาะตอนซ้ำกับบรรทัดหลัก */}
+                    {ssoNote && ssoNote !== ssoOverlayText && (
+                        <Typography variant="caption" sx={{ color: '#94A3B8', wordBreak: 'break-word' }}>
+                            {ssoNote}
+                        </Typography>
+                    )}
+                </Box>
+            )}
 
             <Fade in timeout={800}>
                 <Paper
