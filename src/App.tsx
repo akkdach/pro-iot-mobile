@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { Route, Routes } from 'react-router-dom';
@@ -49,16 +49,16 @@ import DashboardQuiz from './Pages/Quiz/DashboardQuiz';
 import NespressReceiveMachine from './Pages/Nespresso/NespressReceiveMachine';
 import ChecklistEmbed from './Pages/workStation/ChecklistEmbed';
 
-// ── Hub account switch: เปิดจาก Portal = ระบุตัวคนที่กำลังใช้เครื่องอยู่ตอนนี้ ──
-// hub=1 + login_hint ไม่ตรงกับ email ของ session เดิม → session ของคนอื่นต้องไม่เงียบ ๆ
-// พาเข้าเป็นคนผิด — ล้างเฉพาะ token/profile ให้ auto-SSO พาเข้าเป็นคนตาม hint แทน
-// (ห้ามตั้ง sso_logout — flag นั้นบล็อก auto-SSO; ไม่แน่ใจว่า email ใคร = ไม่ล้าง fail-open)
+// â”€â”€ Hub account switch: à¹€à¸›à¸´à¸”à¸ˆà¸²à¸ Portal = à¸£à¸°à¸šà¸¸à¸•à¸±à¸§à¸„à¸™à¸—à¸µà¹ˆà¸à¸³à¸¥à¸±à¸‡à¹ƒà¸Šà¹‰à¹€à¸„à¸£à¸·à¹ˆà¸­à¸‡à¸­à¸¢à¸¹à¹ˆà¸•à¸­à¸™à¸™à¸µà¹‰ â”€â”€
+// hub=1 + login_hint à¹„à¸¡à¹ˆà¸•à¸£à¸‡à¸à¸±à¸š email à¸‚à¸­à¸‡ session à¹€à¸”à¸´à¸¡ â†’ session à¸‚à¸­à¸‡à¸„à¸™à¸­à¸·à¹ˆà¸™à¸•à¹‰à¸­à¸‡à¹„à¸¡à¹ˆà¹€à¸‡à¸µà¸¢à¸š à¹†
+// à¸žà¸²à¹€à¸‚à¹‰à¸²à¹€à¸›à¹‡à¸™à¸„à¸™à¸œà¸´à¸” â€” à¸¥à¹‰à¸²à¸‡à¹€à¸‰à¸žà¸²à¸° token/profile à¹ƒà¸«à¹‰ auto-SSO à¸žà¸²à¹€à¸‚à¹‰à¸²à¹€à¸›à¹‡à¸™à¸„à¸™à¸•à¸²à¸¡ hint à¹à¸—à¸™
+// (à¸«à¹‰à¸²à¸¡à¸•à¸±à¹‰à¸‡ sso_logout â€” flag à¸™à¸±à¹‰à¸™à¸šà¸¥à¹‡à¸­à¸ auto-SSO; à¹„à¸¡à¹ˆà¹à¸™à¹ˆà¹ƒà¸ˆà¸§à¹ˆà¸² email à¹ƒà¸„à¸£ = à¹„à¸¡à¹ˆà¸¥à¹‰à¸²à¸‡ fail-open)
 (() => {
   try {
     const sp = new URLSearchParams(window.location.search);
     let hub = sp.get('hub');
     let hint = sp.get('login_hint');
-    // param อาจถูกดันเข้า redirectTo ตอน redirect → อ่านทั้งสองที่ (เหมือนหน้า Login ของ hub)
+    // param à¸­à¸²à¸ˆà¸–à¸¹à¸à¸”à¸±à¸™à¹€à¸‚à¹‰à¸² redirectTo à¸•à¸­à¸™ redirect â†’ à¸­à¹ˆà¸²à¸™à¸—à¸±à¹‰à¸‡à¸ªà¸­à¸‡à¸—à¸µà¹ˆ (à¹€à¸«à¸¡à¸·à¸­à¸™à¸«à¸™à¹‰à¸² Login à¸‚à¸­à¸‡ hub)
     const rt = sp.get('redirectTo');
     if ((!hub || !hint) && rt && rt.includes('?')) {
       const rp = new URLSearchParams(rt.slice(rt.indexOf('?') + 1));
@@ -67,15 +67,15 @@ import ChecklistEmbed from './Pages/workStation/ChecklistEmbed';
     }
     const t = localStorage.getItem('token');
     if (hub !== '1' || !hint || !t) return;
-    // email ของ session เดิม: claim ใน token (azure-login ใส่ email มาให้) → สำรองจาก profile
-    // decode payload อย่างเดียว ไม่ verify signature (ฝั่ง client ทำไม่ได้และไม่ต้อง)
-    // รับเฉพาะค่าที่มี @ — username เฉย ๆ ไม่ใช่ email เอามาเทียบแล้วจะเตะคนผิด
+    // email à¸‚à¸­à¸‡ session à¹€à¸”à¸´à¸¡: claim à¹ƒà¸™ token (azure-login à¹ƒà¸ªà¹ˆ email à¸¡à¸²à¹ƒà¸«à¹‰) â†’ à¸ªà¸³à¸£à¸­à¸‡à¸ˆà¸²à¸ profile
+    // decode payload à¸­à¸¢à¹ˆà¸²à¸‡à¹€à¸”à¸µà¸¢à¸§ à¹„à¸¡à¹ˆ verify signature (à¸à¸±à¹ˆà¸‡ client à¸—à¸³à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¹à¸¥à¸°à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡)
+    // à¸£à¸±à¸šà¹€à¸‰à¸žà¸²à¸°à¸„à¹ˆà¸²à¸—à¸µà¹ˆà¸¡à¸µ @ â€” username à¹€à¸‰à¸¢ à¹† à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆ email à¹€à¸­à¸²à¸¡à¸²à¹€à¸—à¸µà¸¢à¸šà¹à¸¥à¹‰à¸§à¸ˆà¸°à¹€à¸•à¸°à¸„à¸™à¸œà¸´à¸”
     let email = '';
     try {
       const part = t.split('.')[1] || '';
       const b64 = part.replace(/-/g, '+').replace(/_/g, '/');
       const pad = b64.length % 4 ? '='.repeat(4 - (b64.length % 4)) : '';
-      // atob คืน binary string — แปลงกลับเป็น UTF-8 ก่อน ไม่งั้น claim ภาษาไทยทำ JSON.parse พัง
+      // atob à¸„à¸·à¸™ binary string â€” à¹à¸›à¸¥à¸‡à¸à¸¥à¸±à¸šà¹€à¸›à¹‡à¸™ UTF-8 à¸à¹ˆà¸­à¸™ à¹„à¸¡à¹ˆà¸‡à¸±à¹‰à¸™ claim à¸ à¸²à¸©à¸²à¹„à¸—à¸¢à¸—à¸³ JSON.parse à¸žà¸±à¸‡
       const bin = atob(b64 + pad);
       const json = decodeURIComponent(
         Array.prototype.map
@@ -86,7 +86,7 @@ import ChecklistEmbed from './Pages/workStation/ChecklistEmbed';
       email = [claims.email, claims.preferred_username, claims.upn]
         .map((v: unknown) => (typeof v === 'string' ? v : ''))
         .find((v: string) => v.includes('@')) || '';
-    } catch { /* decode ไม่ได้ = ไม่รู้ email */ }
+    } catch { /* decode à¹„à¸¡à¹ˆà¹„à¸”à¹‰ = à¹„à¸¡à¹ˆà¸£à¸¹à¹‰ email */ }
     if (!email) {
       try {
         const p = JSON.parse(localStorage.getItem('profile') || '{}');
@@ -94,26 +94,26 @@ import ChecklistEmbed from './Pages/workStation/ChecklistEmbed';
         if (typeof pe === 'string' && pe.includes('@')) email = pe;
       } catch { /* ignore */ }
     }
-    if (!email) return; // ไม่รู้ email ของ session เดิม → ปล่อยผ่าน (อย่าเตะคนเพราะความไม่แน่ใจ)
+    if (!email) return; // à¹„à¸¡à¹ˆà¸£à¸¹à¹‰ email à¸‚à¸­à¸‡ session à¹€à¸”à¸´à¸¡ â†’ à¸›à¸¥à¹ˆà¸­à¸¢à¸œà¹ˆà¸²à¸™ (à¸­à¸¢à¹ˆà¸²à¹€à¸•à¸°à¸„à¸™à¹€à¸žà¸£à¸²à¸°à¸„à¸§à¸²à¸¡à¹„à¸¡à¹ˆà¹à¸™à¹ˆà¹ƒà¸ˆ)
     if (email.trim().toLowerCase() !== hint.trim().toLowerCase()) {
       localStorage.removeItem('token');
       localStorage.removeItem('profile');
-      // ไม่แตะ sso_hub/sso_hint — หน้า Login จะอ่าน hub/hint จาก query แล้ว auto-SSO ต่อเอง
+      // à¹„à¸¡à¹ˆà¹à¸•à¸° sso_hub/sso_hint â€” à¸«à¸™à¹‰à¸² Login à¸ˆà¸°à¸­à¹ˆà¸²à¸™ hub/hint à¸ˆà¸²à¸ query à¹à¸¥à¹‰à¸§ auto-SSO à¸•à¹ˆà¸­à¹€à¸­à¸‡
     }
   } catch { /* fail-open */ }
 })();
 
 const token = localStorage.getItem('token');
 
-// ── ตรวจว่ากำลังอยู่ใน embed mode หรือเปล่า ──
+// â”€â”€ à¸•à¸£à¸§à¸ˆà¸§à¹ˆà¸²à¸à¸³à¸¥à¸±à¸‡à¸­à¸¢à¸¹à¹ˆà¹ƒà¸™ embed mode à¸«à¸£à¸·à¸­à¹€à¸›à¸¥à¹ˆà¸² â”€â”€
 const isEmbedRoute = window.location.pathname.startsWith('/checklist/embed');
 
-// ── Access check: super admin เตะ/ระงับจากหน้า Login Management (Service Management)
-// SPA ไม่มี server ของตัวเอง → เช็คเป็นรอบ ๆ ทุก 60 วิ / โดนเตะ = ล้าง session เด้งออก
-// fail-open: SM ล่มหรือ network พัง → ไม่ทำอะไร (อย่าเตะคนเพราะระบบเช็คล่ม)
+// â”€â”€ Access check: super admin à¹€à¸•à¸°/à¸£à¸°à¸‡à¸±à¸šà¸ˆà¸²à¸à¸«à¸™à¹‰à¸² Login Management (Service Management)
+// SPA à¹„à¸¡à¹ˆà¸¡à¸µ server à¸‚à¸­à¸‡à¸•à¸±à¸§à¹€à¸­à¸‡ â†’ à¹€à¸Šà¹‡à¸„à¹€à¸›à¹‡à¸™à¸£à¸­à¸š à¹† à¸—à¸¸à¸ 60 à¸§à¸´ / à¹‚à¸”à¸™à¹€à¸•à¸° = à¸¥à¹‰à¸²à¸‡ session à¹€à¸”à¹‰à¸‡à¸­à¸­à¸
+// fail-open: SM à¸¥à¹ˆà¸¡à¸«à¸£à¸·à¸­ network à¸žà¸±à¸‡ â†’ à¹„à¸¡à¹ˆà¸—à¸³à¸­à¸°à¹„à¸£ (à¸­à¸¢à¹ˆà¸²à¹€à¸•à¸°à¸„à¸™à¹€à¸žà¸£à¸²à¸°à¸£à¸°à¸šà¸šà¹€à¸Šà¹‡à¸„à¸¥à¹ˆà¸¡)
 const SM_API =
   process.env.REACT_APP_SM_API_BASE_URL ||
-  'https://servicemanagement-eqg3bkfec8f5asg3.southeastasia-01.azurewebsites.net/api/v1';
+  'https://bevprogateway.southeastasia.cloudapp.azure.com/svc/api/v1';
 
 function startAccessCheck() {
   const check = async () => {
@@ -127,7 +127,7 @@ function startAccessCheck() {
       if (res.status === 401 || res.status === 403) {
         localStorage.removeItem('token');
         localStorage.removeItem('profile');
-        localStorage.setItem('sso_logout', '1'); // กัน auto-SSO ดึงกลับทันที
+        localStorage.setItem('sso_logout', '1'); // à¸à¸±à¸™ auto-SSO à¸”à¸¶à¸‡à¸à¸¥à¸±à¸šà¸—à¸±à¸™à¸—à¸µ
         window.location.replace('/login');
       }
     } catch { /* fail-open */ }
@@ -138,7 +138,7 @@ function startAccessCheck() {
 if (!isEmbedRoute && token) startAccessCheck();
 
 function App() {
-  // ── Embed mode: render เฉพาะ ChecklistEmbed โดยไม่มี Layout / auth ──
+  // â”€â”€ Embed mode: render à¹€à¸‰à¸žà¸²à¸° ChecklistEmbed à¹‚à¸”à¸¢à¹„à¸¡à¹ˆà¸¡à¸µ Layout / auth â”€â”€
   if (isEmbedRoute) {
     return (
       <div className="App">

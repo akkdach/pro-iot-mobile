@@ -1,4 +1,4 @@
-// Login.tsx
+﻿// Login.tsx
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -26,35 +26,35 @@ interface LoginResponse {
     token: string;
 }
 
-// Service Management API — verify Microsoft Entra idToken ฝั่ง server แล้วออก
-// BevPro-compatible token (ใช้กับ /Mobile/profile ได้เหมือน token ปกติ)
+// Service Management API â€” verify Microsoft Entra idToken à¸à¸±à¹ˆà¸‡ server à¹à¸¥à¹‰à¸§à¸­à¸­à¸
+// BevPro-compatible token (à¹ƒà¸Šà¹‰à¸à¸±à¸š /Mobile/profile à¹„à¸”à¹‰à¹€à¸«à¸¡à¸·à¸­à¸™ token à¸›à¸à¸•à¸´)
 const SM_API =
     process.env.REACT_APP_SM_API_BASE_URL ||
-    'https://servicemanagement-eqg3bkfec8f5asg3.southeastasia-01.azurewebsites.net/api/v1';
+    'https://bevprogateway.southeastasia.cloudapp.azure.com/svc/api/v1';
 
-// benign errorCode = "ไม่มี MS session ให้ auto login" ตามปกติ → แสดงฟอร์ม login เงียบ ๆ ได้
-// error อื่น (บัญชีถูกระงับ, 500, HTML error page) เป็นของจริง ต้องโชว์เสมอ ไม่ว่ามาจาก hub หรือกดปุ่มเอง
+// benign errorCode = "à¹„à¸¡à¹ˆà¸¡à¸µ MS session à¹ƒà¸«à¹‰ auto login" à¸•à¸²à¸¡à¸›à¸à¸•à¸´ â†’ à¹à¸ªà¸”à¸‡à¸Ÿà¸­à¸£à¹Œà¸¡ login à¹€à¸‡à¸µà¸¢à¸š à¹† à¹„à¸”à¹‰
+// error à¸­à¸·à¹ˆà¸™ (à¸šà¸±à¸à¸Šà¸µà¸–à¸¹à¸à¸£à¸°à¸‡à¸±à¸š, 500, HTML error page) à¹€à¸›à¹‡à¸™à¸‚à¸­à¸‡à¸ˆà¸£à¸´à¸‡ à¸•à¹‰à¸­à¸‡à¹‚à¸Šà¸§à¹Œà¹€à¸ªà¸¡à¸­ à¹„à¸¡à¹ˆà¸§à¹ˆà¸²à¸¡à¸²à¸ˆà¸²à¸ hub à¸«à¸£à¸·à¸­à¸à¸”à¸›à¸¸à¹ˆà¸¡à¹€à¸­à¸‡
 const BENIGN_SSO_ERRORS = ['interaction_required', 'login_required', 'consent_required'];
 const isBenignSsoError = (code: string): boolean =>
     BENIGN_SSO_ERRORS.some((b) => code.includes(b));
 
-// ข้อความหลักบน overlay เต็มจอระหว่าง Microsoft sign-in — แยก auto (จาก hub/prompt=none)
-// กับกดปุ่มเอง เพื่อให้คนที่ถูกพามาจาก Portal รู้ว่าระบบกำลังพาเข้า ไม่ใช่หน้าค้าง
-const SSO_AUTO_MSG = 'กำลังเข้าสู่ระบบอัตโนมัติด้วยบัญชี Microsoft…';
-const SSO_MANUAL_MSG = 'กำลังเชื่อมต่อ Microsoft…';
+// à¸‚à¹‰à¸­à¸„à¸§à¸²à¸¡à¸«à¸¥à¸±à¸à¸šà¸™ overlay à¹€à¸•à¹‡à¸¡à¸ˆà¸­à¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡ Microsoft sign-in â€” à¹à¸¢à¸ auto (à¸ˆà¸²à¸ hub/prompt=none)
+// à¸à¸±à¸šà¸à¸”à¸›à¸¸à¹ˆà¸¡à¹€à¸­à¸‡ à¹€à¸žà¸·à¹ˆà¸­à¹ƒà¸«à¹‰à¸„à¸™à¸—à¸µà¹ˆà¸–à¸¹à¸à¸žà¸²à¸¡à¸²à¸ˆà¸²à¸ Portal à¸£à¸¹à¹‰à¸§à¹ˆà¸²à¸£à¸°à¸šà¸šà¸à¸³à¸¥à¸±à¸‡à¸žà¸²à¹€à¸‚à¹‰à¸² à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆà¸«à¸™à¹‰à¸²à¸„à¹‰à¸²à¸‡
+const SSO_AUTO_MSG = 'à¸à¸³à¸¥à¸±à¸‡à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´à¸”à¹‰à¸§à¸¢à¸šà¸±à¸à¸Šà¸µ Microsoftâ€¦';
+const SSO_MANUAL_MSG = 'à¸à¸³à¸¥à¸±à¸‡à¹€à¸Šà¸·à¹ˆà¸­à¸¡à¸•à¹ˆà¸­ Microsoftâ€¦';
 
 
 
 export default function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    // Microsoft Entra SSO: idToken ที่ verify แล้วแต่ email ยังไม่ผูกกับ user ในระบบ
+    // Microsoft Entra SSO: idToken à¸—à¸µà¹ˆ verify à¹à¸¥à¹‰à¸§à¹à¸•à¹ˆ email à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸œà¸¹à¸à¸à¸±à¸š user à¹ƒà¸™à¸£à¸°à¸šà¸š
     const [linkIdToken, setLinkIdToken] = useState<string | null>(null);
-    // เหตุผลที่ auto sign-in ไม่สำเร็จ — แสดงใต้ปุ่ม Microsoft ให้ดูได้โดยไม่ต้องเปิด DevTools
+    // à¹€à¸«à¸•à¸¸à¸œà¸¥à¸—à¸µà¹ˆ auto sign-in à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ â€” à¹à¸ªà¸”à¸‡à¹ƒà¸•à¹‰à¸›à¸¸à¹ˆà¸¡ Microsoft à¹ƒà¸«à¹‰à¸”à¸¹à¹„à¸”à¹‰à¹‚à¸”à¸¢à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¹€à¸›à¸´à¸” DevTools
     const [ssoNote, setSsoNote] = useState<string | null>(null);
-    // ข้อความหลักของ overlay เต็มจอ — null = flow ที่ไม่ใช่ Microsoft (เช่น password) ไม่ต้องมี overlay
+    // à¸‚à¹‰à¸­à¸„à¸§à¸²à¸¡à¸«à¸¥à¸±à¸à¸‚à¸­à¸‡ overlay à¹€à¸•à¹‡à¸¡à¸ˆà¸­ â€” null = flow à¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆ Microsoft (à¹€à¸Šà¹ˆà¸™ password) à¹„à¸¡à¹ˆà¸•à¹‰à¸­à¸‡à¸¡à¸µ overlay
     const [ssoOverlayText, setSsoOverlayText] = useState<string | null>(null);
-    // overlay เกาะกับ isLoading ตัวเดิม — ทุกทางที่ปิด loading อยู่แล้วจะพับ overlay ให้เอง ไม่มี state ค้างแยกต่างหาก
+    // overlay à¹€à¸à¸²à¸°à¸à¸±à¸š isLoading à¸•à¸±à¸§à¹€à¸”à¸´à¸¡ â€” à¸—à¸¸à¸à¸—à¸²à¸‡à¸—à¸µà¹ˆà¸›à¸´à¸” loading à¸­à¸¢à¸¹à¹ˆà¹à¸¥à¹‰à¸§à¸ˆà¸°à¸žà¸±à¸š overlay à¹ƒà¸«à¹‰à¹€à¸­à¸‡ à¹„à¸¡à¹ˆà¸¡à¸µ state à¸„à¹‰à¸²à¸‡à¹à¸¢à¸à¸•à¹ˆà¸²à¸‡à¸«à¸²à¸
     const showSsoOverlay = isLoading && ssoOverlayText !== null;
 
     const {
@@ -63,7 +63,7 @@ export default function LoginPage() {
         formState: { errors },
     } = useForm<FormData>();
 
-    // .NET ตอบ 400 เปล่าทั้ง "รหัสผิด" และ "ถูกระงับ" — ถาม SM เพื่อเลือกข้อความ error
+    // .NET à¸•à¸­à¸š 400 à¹€à¸›à¸¥à¹ˆà¸²à¸—à¸±à¹‰à¸‡ "à¸£à¸«à¸±à¸ªà¸œà¸´à¸”" à¹à¸¥à¸° "à¸–à¸¹à¸à¸£à¸°à¸‡à¸±à¸š" â€” à¸–à¸²à¸¡ SM à¹€à¸žà¸·à¹ˆà¸­à¹€à¸¥à¸·à¸­à¸à¸‚à¹‰à¸­à¸„à¸§à¸²à¸¡ error
     const passwordFailMessage = async (username: string, fallback: string): Promise<string> => {
         try {
             const res = await fetch(`${SM_API}/auth/blocked-check`, {
@@ -72,12 +72,12 @@ export default function LoginPage() {
                 body: JSON.stringify({ username }),
             });
             const json = await res.json();
-            if (json?.Blocked === true) return 'บัญชีนี้ถูกระงับการใช้งานโดยผู้ดูแลระบบ กรุณาติดต่อ Admin';
+            if (json?.Blocked === true) return 'à¸šà¸±à¸à¸Šà¸µà¸™à¸µà¹‰à¸–à¸¹à¸à¸£à¸°à¸‡à¸±à¸šà¸à¸²à¸£à¹ƒà¸Šà¹‰à¸‡à¸²à¸™à¹‚à¸”à¸¢à¸œà¸¹à¹‰à¸”à¸¹à¹à¸¥à¸£à¸°à¸šà¸š à¸à¸£à¸¸à¸“à¸²à¸•à¸´à¸”à¸•à¹ˆà¸­ Admin';
         } catch { /* ignore */ }
         return fallback;
     };
 
-    // เก็บ token + ดึง profile แล้วเข้าหน้าหลัก (ใช้ร่วมทั้ง login ปกติและ SSO)
+    // à¹€à¸à¹‡à¸š token + à¸”à¸¶à¸‡ profile à¹à¸¥à¹‰à¸§à¹€à¸‚à¹‰à¸²à¸«à¸™à¹‰à¸²à¸«à¸¥à¸±à¸ (à¹ƒà¸Šà¹‰à¸£à¹ˆà¸§à¸¡à¸—à¸±à¹‰à¸‡ login à¸›à¸à¸•à¸´à¹à¸¥à¸° SSO)
     const completeLogin = async (accessToken: string) => {
         localStorage.setItem('token', accessToken);
         localStorage.removeItem('sso_logout');
@@ -93,9 +93,9 @@ export default function LoginPage() {
 
     const onSubmit = async (data: FormData) => {
         setIsLoading(true);
-        setSsoOverlayText(null); // submit ฟอร์มใช้ spinner บนปุ่มพอ — กันข้อความ MS รอบก่อนค้างแล้วโผล่คลุมฟอร์ม
+        setSsoOverlayText(null); // submit à¸Ÿà¸­à¸£à¹Œà¸¡à¹ƒà¸Šà¹‰ spinner à¸šà¸™à¸›à¸¸à¹ˆà¸¡à¸žà¸­ â€” à¸à¸±à¸™à¸‚à¹‰à¸­à¸„à¸§à¸²à¸¡ MS à¸£à¸­à¸šà¸à¹ˆà¸­à¸™à¸„à¹‰à¸²à¸‡à¹à¸¥à¹‰à¸§à¹‚à¸œà¸¥à¹ˆà¸„à¸¥à¸¸à¸¡à¸Ÿà¸­à¸£à¹Œà¸¡
         try {
-            // link mode: ผูกบัญชี Microsoft ครั้งแรก — ยืนยัน username/password หนึ่งครั้ง
+            // link mode: à¸œà¸¹à¸à¸šà¸±à¸à¸Šà¸µ Microsoft à¸„à¸£à¸±à¹‰à¸‡à¹à¸£à¸ â€” à¸¢à¸·à¸™à¸¢à¸±à¸™ username/password à¸«à¸™à¸¶à¹ˆà¸‡à¸„à¸£à¸±à¹‰à¸‡
             if (linkIdToken) {
                 const res = await fetch(`${SM_API}/auth/azure-link`, {
                     method: 'POST',
@@ -106,14 +106,14 @@ export default function LoginPage() {
                 if (linkData?.IsSuccess && linkData?.DataResult?.token) {
                     await completeLogin(linkData.DataResult.token);
                 } else {
-                    Swal.fire('Error', linkData?.Message || 'ผูกบัญชี Microsoft ไม่สำเร็จ');
+                    Swal.fire('Error', linkData?.Message || 'à¸œà¸¹à¸à¸šà¸±à¸à¸Šà¸µ Microsoft à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ');
                 }
                 return;
             }
 
             const result = await callApi.post('/Authen/token', data);
             if (result.data?.dataResult?.access_token) {
-                // login audit — แจ้ง Service Management (fire-and-forget, keepalive กันโดน cancel ตอน redirect)
+                // login audit â€” à¹à¸ˆà¹‰à¸‡ Service Management (fire-and-forget, keepalive à¸à¸±à¸™à¹‚à¸”à¸™ cancel à¸•à¸­à¸™ redirect)
                 fetch(`${SM_API}/auth/login-log`, {
                     method: 'POST',
                     keepalive: true,
@@ -122,11 +122,11 @@ export default function LoginPage() {
                         Authorization: `Bearer ${result.data.dataResult.access_token}`,
                     },
                     body: JSON.stringify({ provider: 'password', app: 'iot-mobile' }),
-                }).catch(() => { /* ไม่กระทบ login */ });
+                }).catch(() => { /* à¹„à¸¡à¹ˆà¸à¸£à¸°à¸—à¸š login */ });
                 await Swal.fire({
                     icon: 'success',
-                    title: 'เข้าสู่ระบบสำเร็จ',
-                    text: 'กำลังเข้าสู่หน้าหลัก...',
+                    title: 'à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¸ªà¸³à¹€à¸£à¹‡à¸ˆ',
+                    text: 'à¸à¸³à¸¥à¸±à¸‡à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸«à¸™à¹‰à¸²à¸«à¸¥à¸±à¸...',
                     timer: 1500,
                     showConfirmButton: false,
                 });
@@ -135,18 +135,18 @@ export default function LoginPage() {
                 Swal.fire('Error', await passwordFailMessage(data.username, result.data?.message || 'Username Or Password Incorrect!'));
             }
         } catch (error) {
-            Swal.fire('Error', await passwordFailMessage(data.username, 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'));
+            Swal.fire('Error', await passwordFailMessage(data.username, 'à¹€à¸à¸´à¸”à¸‚à¹‰à¸­à¸œà¸´à¸”à¸žà¸¥à¸²à¸”à¹ƒà¸™à¸à¸²à¸£à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š'));
         } finally {
             setIsLoading(false);
         }
     };
 
-    // ── Microsoft Entra ID SSO (ผ่าน Service Management azure-login) ──
-    // explicit: เข้าโหมดผูก + เด้ง error ได้เฉพาะตอนผู้ใช้กดปุ่ม Microsoft เอง
-    // auto ssoSilent (explicit=false) → ไม่เด้งโหมดผูก/ไม่เด้ง error แค่แสดงหน้า login ปกติ
+    // â”€â”€ Microsoft Entra ID SSO (à¸œà¹ˆà¸²à¸™ Service Management azure-login) â”€â”€
+    // explicit: à¹€à¸‚à¹‰à¸²à¹‚à¸«à¸¡à¸”à¸œà¸¹à¸ + à¹€à¸”à¹‰à¸‡ error à¹„à¸”à¹‰à¹€à¸‰à¸žà¸²à¸°à¸•à¸­à¸™à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸à¸”à¸›à¸¸à¹ˆà¸¡ Microsoft à¹€à¸­à¸‡
+    // auto ssoSilent (explicit=false) â†’ à¹„à¸¡à¹ˆà¹€à¸”à¹‰à¸‡à¹‚à¸«à¸¡à¸”à¸œà¸¹à¸/à¹„à¸¡à¹ˆà¹€à¸”à¹‰à¸‡ error à¹à¸„à¹ˆà¹à¸ªà¸”à¸‡à¸«à¸™à¹‰à¸² login à¸›à¸à¸•à¸´
     const processEntraIdToken = async (idToken: string, explicit: boolean): Promise<void> => {
         setIsLoading(true);
-        // ระหว่างแลก idToken เป็น token ระบบ ผู้ใช้ต้องเห็นว่ากำลังพาเข้า ไม่ใช่ฟอร์มเปล่า
+        // à¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡à¹à¸¥à¸ idToken à¹€à¸›à¹‡à¸™ token à¸£à¸°à¸šà¸š à¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸•à¹‰à¸­à¸‡à¹€à¸«à¹‡à¸™à¸§à¹ˆà¸²à¸à¸³à¸¥à¸±à¸‡à¸žà¸²à¹€à¸‚à¹‰à¸² à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆà¸Ÿà¸­à¸£à¹Œà¸¡à¹€à¸›à¸¥à¹ˆà¸²
         setSsoOverlayText(explicit ? SSO_MANUAL_MSG : SSO_AUTO_MSG);
         try {
             const res = await fetch(`${SM_API}/auth/azure-login`, {
@@ -161,137 +161,137 @@ export default function LoginPage() {
             }
             if (data?.RequireLink) {
                 if (!explicit) {
-                    // silent: ยังไม่เข้าโหมดผูก แต่ต้องบอกว่าทำไม auto sign-in ถึงพาเข้าไม่ได้
-                    // ไม่งั้น (บัญชียังไม่ผูก) หน้าจอเงียบสนิทจนแยกไม่ออกจาก "ระบบพัง"
-                    setSsoNote('บัญชี Microsoft นี้ยังไม่ได้ผูก — กด Sign in with Microsoft เพื่อผูกครั้งแรก');
-                    return; // silent: ไม่เข้าโหมดผูก
+                    // silent: à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹€à¸‚à¹‰à¸²à¹‚à¸«à¸¡à¸”à¸œà¸¹à¸ à¹à¸•à¹ˆà¸•à¹‰à¸­à¸‡à¸šà¸­à¸à¸§à¹ˆà¸²à¸—à¸³à¹„à¸¡ auto sign-in à¸–à¸¶à¸‡à¸žà¸²à¹€à¸‚à¹‰à¸²à¹„à¸¡à¹ˆà¹„à¸”à¹‰
+                    // à¹„à¸¡à¹ˆà¸‡à¸±à¹‰à¸™ (à¸šà¸±à¸à¸Šà¸µà¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸œà¸¹à¸) à¸«à¸™à¹‰à¸²à¸ˆà¸­à¹€à¸‡à¸µà¸¢à¸šà¸ªà¸™à¸´à¸—à¸ˆà¸™à¹à¸¢à¸à¹„à¸¡à¹ˆà¸­à¸­à¸à¸ˆà¸²à¸ "à¸£à¸°à¸šà¸šà¸žà¸±à¸‡"
+                    setSsoNote('à¸šà¸±à¸à¸Šà¸µ Microsoft à¸™à¸µà¹‰à¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸œà¸¹à¸ â€” à¸à¸” Sign in with Microsoft à¹€à¸žà¸·à¹ˆà¸­à¸œà¸¹à¸à¸„à¸£à¸±à¹‰à¸‡à¹à¸£à¸');
+                    return; // silent: à¹„à¸¡à¹ˆà¹€à¸‚à¹‰à¸²à¹‚à¸«à¸¡à¸”à¸œà¸¹à¸
                 }
                 setLinkIdToken(idToken);
                 Swal.fire({
                     icon: 'info',
-                    title: 'ผูกบัญชี Microsoft',
-                    text: data?.Message || 'กรุณายืนยัน Username และ Password หนึ่งครั้งเพื่อผูกบัญชี Microsoft',
+                    title: 'à¸œà¸¹à¸à¸šà¸±à¸à¸Šà¸µ Microsoft',
+                    text: data?.Message || 'à¸à¸£à¸¸à¸“à¸²à¸¢à¸·à¸™à¸¢à¸±à¸™ Username à¹à¸¥à¸° Password à¸«à¸™à¸¶à¹ˆà¸‡à¸„à¸£à¸±à¹‰à¸‡à¹€à¸žà¸·à¹ˆà¸­à¸œà¸¹à¸à¸šà¸±à¸à¸Šà¸µ Microsoft',
                 });
                 return;
             }
-            // non-success ที่ไม่ใช่ RequireLink = error จริงเสมอ (token เสีย/บัญชีถูกระงับ/500/HTML)
-            // explicit → Swal ให้เห็นชัด, silent → ใส่ note ไม่ให้เงียบหาย
-            const failMsg = data?.Message || 'Microsoft login ไม่สำเร็จ';
+            // non-success à¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆ RequireLink = error à¸ˆà¸£à¸´à¸‡à¹€à¸ªà¸¡à¸­ (token à¹€à¸ªà¸µà¸¢/à¸šà¸±à¸à¸Šà¸µà¸–à¸¹à¸à¸£à¸°à¸‡à¸±à¸š/500/HTML)
+            // explicit â†’ Swal à¹ƒà¸«à¹‰à¹€à¸«à¹‡à¸™à¸Šà¸±à¸”, silent â†’ à¹ƒà¸ªà¹ˆ note à¹„à¸¡à¹ˆà¹ƒà¸«à¹‰à¹€à¸‡à¸µà¸¢à¸šà¸«à¸²à¸¢
+            const failMsg = data?.Message || 'Microsoft login à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ';
             if (explicit) Swal.fire('Error', failMsg);
             else setSsoNote(failMsg);
         } catch (error) {
             const code = (error as { errorCode?: string; message?: string })?.errorCode
                 || (error as { message?: string })?.message || String(error);
-            // explicit โชว์เสมอ; silent โชว์เฉพาะ error จริง (ข้าม benign ที่แปลว่าไม่มี session เฉย ๆ)
-            if (explicit) Swal.fire('Error', 'Microsoft login ไม่สำเร็จ');
-            else if (!isBenignSsoError(code)) setSsoNote(`Microsoft login ไม่สำเร็จ: ${code}`);
+            // explicit à¹‚à¸Šà¸§à¹Œà¹€à¸ªà¸¡à¸­; silent à¹‚à¸Šà¸§à¹Œà¹€à¸‰à¸žà¸²à¸° error à¸ˆà¸£à¸´à¸‡ (à¸‚à¹‰à¸²à¸¡ benign à¸—à¸µà¹ˆà¹à¸›à¸¥à¸§à¹ˆà¸²à¹„à¸¡à¹ˆà¸¡à¸µ session à¹€à¸‰à¸¢ à¹†)
+            if (explicit) Swal.fire('Error', 'Microsoft login à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ');
+            else if (!isBenignSsoError(code)) setSsoNote(`Microsoft login à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ: ${code}`);
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleMicrosoftLogin = async () => {
-        localStorage.removeItem('sso_logout'); // ตั้งใจ login ใหม่ — ปลดล็อก auto SSO
-        localStorage.removeItem('forced_logout_at'); // ตั้งใจ login เอง — ปลด circuit breaker จาก 401
-        sessionStorage.removeItem('sso_np_pending'); // กดปุ่มเอง — รอบหน้าไม่ใช่ auto redirect
+        localStorage.removeItem('sso_logout'); // à¸•à¸±à¹‰à¸‡à¹ƒà¸ˆ login à¹ƒà¸«à¸¡à¹ˆ â€” à¸›à¸¥à¸”à¸¥à¹‡à¸­à¸ auto SSO
+        localStorage.removeItem('forced_logout_at'); // à¸•à¸±à¹‰à¸‡à¹ƒà¸ˆ login à¹€à¸­à¸‡ â€” à¸›à¸¥à¸” circuit breaker à¸ˆà¸²à¸ 401
+        sessionStorage.removeItem('sso_np_pending'); // à¸à¸”à¸›à¸¸à¹ˆà¸¡à¹€à¸­à¸‡ â€” à¸£à¸­à¸šà¸«à¸™à¹‰à¸²à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆ auto redirect
         setIsLoading(true);
-        setSsoOverlayText(SSO_MANUAL_MSG); // คลุมจอช่วง init MSAL จนหลุดไปหน้า Microsoft
+        setSsoOverlayText(SSO_MANUAL_MSG); // à¸„à¸¥à¸¸à¸¡à¸ˆà¸­à¸Šà¹ˆà¸§à¸‡ init MSAL à¸ˆà¸™à¸«à¸¥à¸¸à¸”à¹„à¸›à¸«à¸™à¹‰à¸² Microsoft
         try {
             const { loginWithMicrosoft } = await import('../../Services/msal');
             await loginWithMicrosoft(); // full page redirect
         } catch (e) {
-            // MSAL init/redirect ล้ม → ถ้าไม่ปลด loading ปุ่มจะค้างหมุนถาวร + ต้องบอก error ให้เห็น
+            // MSAL init/redirect à¸¥à¹‰à¸¡ â†’ à¸–à¹‰à¸²à¹„à¸¡à¹ˆà¸›à¸¥à¸” loading à¸›à¸¸à¹ˆà¸¡à¸ˆà¸°à¸„à¹‰à¸²à¸‡à¸«à¸¡à¸¸à¸™à¸–à¸²à¸§à¸£ + à¸•à¹‰à¸­à¸‡à¸šà¸­à¸ error à¹ƒà¸«à¹‰à¹€à¸«à¹‡à¸™
             setIsLoading(false);
             const code = (e as { errorCode?: string; message?: string })?.errorCode
                 || (e as { message?: string })?.message || String(e);
-            setSsoNote(`เริ่ม Microsoft login ไม่สำเร็จ: ${code}`);
+            setSsoNote(`à¹€à¸£à¸´à¹ˆà¸¡ Microsoft login à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ: ${code}`);
         }
     };
 
     useEffect(() => {
-        // หน้านี้ถูกโหลดใน hidden iframe ของ ssoSilent ด้วย (redirectUri = /login ซึ่ง route '*'
-        // ก็เรนเดอร์หน้านี้) — ในกรอบนั้นห้ามทำ SSO/redirect ซ้อน ปล่อยให้หน้าแม่รับผลเอง
+        // à¸«à¸™à¹‰à¸²à¸™à¸µà¹‰à¸–à¸¹à¸à¹‚à¸«à¸¥à¸”à¹ƒà¸™ hidden iframe à¸‚à¸­à¸‡ ssoSilent à¸”à¹‰à¸§à¸¢ (redirectUri = /login à¸‹à¸¶à¹ˆà¸‡ route '*'
+        // à¸à¹‡à¹€à¸£à¸™à¹€à¸”à¸­à¸£à¹Œà¸«à¸™à¹‰à¸²à¸™à¸µà¹‰) â€” à¹ƒà¸™à¸à¸£à¸­à¸šà¸™à¸±à¹‰à¸™à¸«à¹‰à¸²à¸¡à¸—à¸³ SSO/redirect à¸‹à¹‰à¸­à¸™ à¸›à¸¥à¹ˆà¸­à¸¢à¹ƒà¸«à¹‰à¸«à¸™à¹‰à¸²à¹à¸¡à¹ˆà¸£à¸±à¸šà¸œà¸¥à¹€à¸­à¸‡
         if (window.self !== window.top) return;
-        // เปิดจาก Portal → hub=1 + login_hint (email). param อาจอยู่ใน query ตรง ๆ
+        // à¹€à¸›à¸´à¸”à¸ˆà¸²à¸ Portal â†’ hub=1 + login_hint (email). param à¸­à¸²à¸ˆà¸­à¸¢à¸¹à¹ˆà¹ƒà¸™ query à¸•à¸£à¸‡ à¹†
         const _sp = new URLSearchParams(window.location.search);
         const _hub = _sp.get('hub');
         if (_hub === '1') {
             sessionStorage.setItem('sso_hub', '1');
-            // เปิดจาก Portal ทั้งที่ยัง login SM อยู่ = เจตนาเข้าระบบ → ปลดล็อก flag จาก Sign Out เดิม
-            // ไม่ปลดตรงนี้ คนที่เข้าด้วย Microsoft อย่างเดียวจะติด flag ค้างถาวรตั้งแต่กด Sign Out ครั้งแรก
+            // à¹€à¸›à¸´à¸”à¸ˆà¸²à¸ Portal à¸—à¸±à¹‰à¸‡à¸—à¸µà¹ˆà¸¢à¸±à¸‡ login SM à¸­à¸¢à¸¹à¹ˆ = à¹€à¸ˆà¸•à¸™à¸²à¹€à¸‚à¹‰à¸²à¸£à¸°à¸šà¸š â†’ à¸›à¸¥à¸”à¸¥à¹‡à¸­à¸ flag à¸ˆà¸²à¸ Sign Out à¹€à¸”à¸´à¸¡
+            // à¹„à¸¡à¹ˆà¸›à¸¥à¸”à¸•à¸£à¸‡à¸™à¸µà¹‰ à¸„à¸™à¸—à¸µà¹ˆà¹€à¸‚à¹‰à¸²à¸”à¹‰à¸§à¸¢ Microsoft à¸­à¸¢à¹ˆà¸²à¸‡à¹€à¸”à¸µà¸¢à¸§à¸ˆà¸°à¸•à¸´à¸” flag à¸„à¹‰à¸²à¸‡à¸–à¸²à¸§à¸£à¸•à¸±à¹‰à¸‡à¹à¸•à¹ˆà¸à¸” Sign Out à¸„à¸£à¸±à¹‰à¸‡à¹à¸£à¸
             if (_sp.get('logout') !== '1') localStorage.removeItem('sso_logout');
         }
         const _hint = _sp.get('login_hint');
         if (_hint) sessionStorage.setItem('sso_hint', _hint);
         const ssoHint = _hint || sessionStorage.getItem('sso_hint') || undefined;
-        // sso_hub ต้องอ่านจาก sessionStorage ด้วย เพราะ prompt=none เด้งกลับมาที่ /login โดยไม่มี query เดิม
+        // sso_hub à¸•à¹‰à¸­à¸‡à¸­à¹ˆà¸²à¸™à¸ˆà¸²à¸ sessionStorage à¸”à¹‰à¸§à¸¢ à¹€à¸žà¸£à¸²à¸° prompt=none à¹€à¸”à¹‰à¸‡à¸à¸¥à¸±à¸šà¸¡à¸²à¸—à¸µà¹ˆ /login à¹‚à¸”à¸¢à¹„à¸¡à¹ˆà¸¡à¸µ query à¹€à¸”à¸´à¸¡
         const fromHub = _hub === '1' || sessionStorage.getItem('sso_hub') === '1';
-        // รอบนี้กลับมาจาก prompt=none redirect (อัตโนมัติ) ไม่ใช่ผู้ใช้กดปุ่ม Microsoft เอง
+        // à¸£à¸­à¸šà¸™à¸µà¹‰à¸à¸¥à¸±à¸šà¸¡à¸²à¸ˆà¸²à¸ prompt=none redirect (à¸­à¸±à¸•à¹‚à¸™à¸¡à¸±à¸•à¸´) à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¸à¸”à¸›à¸¸à¹ˆà¸¡ Microsoft à¹€à¸­à¸‡
         const wasAutoRedirect = sessionStorage.getItem('sso_np_pending') === '1';
-        // มาจาก hub หรือกำลังรับผล prompt=none = auto sign-in กำลังจะวิ่ง → คลุมจอตั้งแต่ต้น
-        // ไม่ให้เห็นฟอร์มเปล่าก่อนแล้วค่อยเด้ง (ทุกทางออกข้างล่างปิด loading หรือ navigate เสมอ)
+        // à¸¡à¸²à¸ˆà¸²à¸ hub à¸«à¸£à¸·à¸­à¸à¸³à¸¥à¸±à¸‡à¸£à¸±à¸šà¸œà¸¥ prompt=none = auto sign-in à¸à¸³à¸¥à¸±à¸‡à¸ˆà¸°à¸§à¸´à¹ˆà¸‡ â†’ à¸„à¸¥à¸¸à¸¡à¸ˆà¸­à¸•à¸±à¹‰à¸‡à¹à¸•à¹ˆà¸•à¹‰à¸™
+        // à¹„à¸¡à¹ˆà¹ƒà¸«à¹‰à¹€à¸«à¹‡à¸™à¸Ÿà¸­à¸£à¹Œà¸¡à¹€à¸›à¸¥à¹ˆà¸²à¸à¹ˆà¸­à¸™à¹à¸¥à¹‰à¸§à¸„à¹ˆà¸­à¸¢à¹€à¸”à¹‰à¸‡ (à¸—à¸¸à¸à¸—à¸²à¸‡à¸­à¸­à¸à¸‚à¹‰à¸²à¸‡à¸¥à¹ˆà¸²à¸‡à¸›à¸´à¸” loading à¸«à¸£à¸·à¸­ navigate à¹€à¸ªà¸¡à¸­)
         if (fromHub || wasAutoRedirect) {
             setSsoOverlayText(SSO_AUTO_MSG);
             setIsLoading(true);
         }
-        // รับผล MSAL redirect + auto SSO จาก Microsoft session เดิม
+        // à¸£à¸±à¸šà¸œà¸¥ MSAL redirect + auto SSO à¸ˆà¸²à¸ Microsoft session à¹€à¸”à¸´à¸¡
         (async () => {
             try {
                 const { handleMsalRedirect, acquireSsoSilent, ssoRedirectSilent, getLastSsoError } = await import('../../Services/msal');
                 const redirectResult = await handleMsalRedirect();
                 if (redirectResult?.idToken) {
                     sessionStorage.removeItem('sso_np_pending');
-                    // มาแบบ auto (prompt=none) → explicit=false: บัญชีที่ยังไม่ผูกจะได้เห็นฟอร์ม login ปกติ
-                    // ไม่ใช่โหมดผูกบัญชีที่ผู้ใช้ไม่ได้ร้องขอ
+                    // à¸¡à¸²à¹à¸šà¸š auto (prompt=none) â†’ explicit=false: à¸šà¸±à¸à¸Šà¸µà¸—à¸µà¹ˆà¸¢à¸±à¸‡à¹„à¸¡à¹ˆà¸œà¸¹à¸à¸ˆà¸°à¹„à¸”à¹‰à¹€à¸«à¹‡à¸™à¸Ÿà¸­à¸£à¹Œà¸¡ login à¸›à¸à¸•à¸´
+                    // à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆà¹‚à¸«à¸¡à¸”à¸œà¸¹à¸à¸šà¸±à¸à¸Šà¸µà¸—à¸µà¹ˆà¸œà¸¹à¹‰à¹ƒà¸Šà¹‰à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸£à¹‰à¸­à¸‡à¸‚à¸­
                     await processEntraIdToken(redirectResult.idToken, !wasAutoRedirect);
                     return;
                 }
-                // เพิ่งกด logout มา — ไม่ auto login กลับ (flag ล้างเมื่อ login สำเร็จ/กดปุ่ม MS เอง/เปิดจาก Portal)
+                // à¹€à¸žà¸´à¹ˆà¸‡à¸à¸” logout à¸¡à¸² â€” à¹„à¸¡à¹ˆ auto login à¸à¸¥à¸±à¸š (flag à¸¥à¹‰à¸²à¸‡à¹€à¸¡à¸·à¹ˆà¸­ login à¸ªà¸³à¹€à¸£à¹‡à¸ˆ/à¸à¸”à¸›à¸¸à¹ˆà¸¡ MS à¹€à¸­à¸‡/à¹€à¸›à¸´à¸”à¸ˆà¸²à¸ Portal)
                 const ssoBlocked = localStorage.getItem('sso_logout') === '1';
-                // circuit breaker: เพิ่งโดน 401 เตะออก (forced logout) ภายใน 10 วิ → อย่าเพิ่ง auto-SSO
-                // ไม่งั้นจะดึง token ใหม่แล้วโดน 401 ซ้ำทันทีเป็นวงวน
+                // circuit breaker: à¹€à¸žà¸´à¹ˆà¸‡à¹‚à¸”à¸™ 401 à¹€à¸•à¸°à¸­à¸­à¸ (forced logout) à¸ à¸²à¸¢à¹ƒà¸™ 10 à¸§à¸´ â†’ à¸­à¸¢à¹ˆà¸²à¹€à¸žà¸´à¹ˆà¸‡ auto-SSO
+                // à¹„à¸¡à¹ˆà¸‡à¸±à¹‰à¸™à¸ˆà¸°à¸”à¸¶à¸‡ token à¹ƒà¸«à¸¡à¹ˆà¹à¸¥à¹‰à¸§à¹‚à¸”à¸™ 401 à¸‹à¹‰à¸³à¸—à¸±à¸™à¸—à¸µà¹€à¸›à¹‡à¸™à¸§à¸‡à¸§à¸™
                 const forcedAt = Number(localStorage.getItem('forced_logout_at') || 0);
                 const recentlyForced = forcedAt > 0 && Date.now() - forcedAt < 10_000;
-                // เคยกด Sign Out (หรือถูกตัด session) → auto SSO ถูกปิดไว้ ต้องบอกว่าปิดอยู่
-                // ไม่งั้นหน้าจอเงียบสนิทจนแยกไม่ออกจาก "ระบบพัง" และไม่รู้ว่าต้องกดปุ่มเอง
-                if (ssoBlocked) setSsoNote('ปิด auto sign-in ไว้ตั้งแต่ออกจากระบบครั้งล่าสุด — กด "Sign in with Microsoft" เพื่อเข้าใหม่');
-                else if (recentlyForced) setSsoNote('เพิ่งออกจากระบบเพราะเซสชันหมดอายุ — กด "Sign in with Microsoft" เพื่อเข้าใหม่');
-                // overlay อาจเปิดไว้ตั้งแต่ต้น effect — ทางที่ไม่ลอง SSO ต่อต้องปิดเอง ไม่งั้นคลุมจอถาวร
+                // à¹€à¸„à¸¢à¸à¸” Sign Out (à¸«à¸£à¸·à¸­à¸–à¸¹à¸à¸•à¸±à¸” session) â†’ auto SSO à¸–à¸¹à¸à¸›à¸´à¸”à¹„à¸§à¹‰ à¸•à¹‰à¸­à¸‡à¸šà¸­à¸à¸§à¹ˆà¸²à¸›à¸´à¸”à¸­à¸¢à¸¹à¹ˆ
+                // à¹„à¸¡à¹ˆà¸‡à¸±à¹‰à¸™à¸«à¸™à¹‰à¸²à¸ˆà¸­à¹€à¸‡à¸µà¸¢à¸šà¸ªà¸™à¸´à¸—à¸ˆà¸™à¹à¸¢à¸à¹„à¸¡à¹ˆà¸­à¸­à¸à¸ˆà¸²à¸ "à¸£à¸°à¸šà¸šà¸žà¸±à¸‡" à¹à¸¥à¸°à¹„à¸¡à¹ˆà¸£à¸¹à¹‰à¸§à¹ˆà¸²à¸•à¹‰à¸­à¸‡à¸à¸”à¸›à¸¸à¹ˆà¸¡à¹€à¸­à¸‡
+                if (ssoBlocked) setSsoNote('à¸›à¸´à¸” auto sign-in à¹„à¸§à¹‰à¸•à¸±à¹‰à¸‡à¹à¸•à¹ˆà¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸šà¸„à¸£à¸±à¹‰à¸‡à¸¥à¹ˆà¸²à¸ªà¸¸à¸” â€” à¸à¸” "Sign in with Microsoft" à¹€à¸žà¸·à¹ˆà¸­à¹€à¸‚à¹‰à¸²à¹ƒà¸«à¸¡à¹ˆ');
+                else if (recentlyForced) setSsoNote('à¹€à¸žà¸´à¹ˆà¸‡à¸­à¸­à¸à¸ˆà¸²à¸à¸£à¸°à¸šà¸šà¹€à¸žà¸£à¸²à¸°à¹€à¸‹à¸ªà¸Šà¸±à¸™à¸«à¸¡à¸”à¸­à¸²à¸¢à¸¸ â€” à¸à¸” "Sign in with Microsoft" à¹€à¸žà¸·à¹ˆà¸­à¹€à¸‚à¹‰à¸²à¹ƒà¸«à¸¡à¹ˆ');
+                // overlay à¸­à¸²à¸ˆà¹€à¸›à¸´à¸”à¹„à¸§à¹‰à¸•à¸±à¹‰à¸‡à¹à¸•à¹ˆà¸•à¹‰à¸™ effect â€” à¸—à¸²à¸‡à¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¸¥à¸­à¸‡ SSO à¸•à¹ˆà¸­à¸•à¹‰à¸­à¸‡à¸›à¸´à¸”à¹€à¸­à¸‡ à¹„à¸¡à¹ˆà¸‡à¸±à¹‰à¸™à¸„à¸¥à¸¸à¸¡à¸ˆà¸­à¸–à¸²à¸§à¸£
                 if (ssoBlocked || recentlyForced) setIsLoading(false);
                 if (!ssoBlocked && !recentlyForced) {
-                    // ssoSilent วิ่งผ่าน hidden iframe ใช้เวลาหลายวินาที — ระหว่างนั้นต้องมีอะไรบอก
-                    // ไม่งั้นหน้าจอว่างเปล่าแยกไม่ออกจาก "auto sign-in ไม่ทำงาน" (ข้อความจะถูกทับด้วยผลจริงทีหลัง)
+                    // ssoSilent à¸§à¸´à¹ˆà¸‡à¸œà¹ˆà¸²à¸™ hidden iframe à¹ƒà¸Šà¹‰à¹€à¸§à¸¥à¸²à¸«à¸¥à¸²à¸¢à¸§à¸´à¸™à¸²à¸—à¸µ â€” à¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡à¸™à¸±à¹‰à¸™à¸•à¹‰à¸­à¸‡à¸¡à¸µà¸­à¸°à¹„à¸£à¸šà¸­à¸
+                    // à¹„à¸¡à¹ˆà¸‡à¸±à¹‰à¸™à¸«à¸™à¹‰à¸²à¸ˆà¸­à¸§à¹ˆà¸²à¸‡à¹€à¸›à¸¥à¹ˆà¸²à¹à¸¢à¸à¹„à¸¡à¹ˆà¸­à¸­à¸à¸ˆà¸²à¸ "auto sign-in à¹„à¸¡à¹ˆà¸—à¸³à¸‡à¸²à¸™" (à¸‚à¹‰à¸­à¸„à¸§à¸²à¸¡à¸ˆà¸°à¸–à¸¹à¸à¸—à¸±à¸šà¸”à¹‰à¸§à¸¢à¸œà¸¥à¸ˆà¸£à¸´à¸‡à¸—à¸µà¸«à¸¥à¸±à¸‡)
                     if (fromHub) setSsoNote(SSO_AUTO_MSG);
                     const silent = await acquireSsoSilent(ssoHint);
                     if (silent?.idToken) {
                         await processEntraIdToken(silent.idToken, false); // auto silent
                         return;
                     }
-                    // silent iframe ไม่ผ่าน (เบราว์เซอร์บล็อก third-party cookie ของ login.microsoftonline.com)
-                    // แต่เปิดมาจาก Portal = แทบแน่ว่ามี MS session อยู่ → ลอง full-page redirect prompt=none
-                    // กันวนซ้ำด้วย "เวลา" ไม่ใช่ one-shot ต่อแท็บ — refresh แล้วต้องลองใหม่ได้
-                    // (redirect loop จริงเกิดภายในไม่กี่วินาที ส่วนคนกดเทสซ้ำห่างกันเกินนั้นเสมอ)
+                    // silent iframe à¹„à¸¡à¹ˆà¸œà¹ˆà¸²à¸™ (à¹€à¸šà¸£à¸²à¸§à¹Œà¹€à¸‹à¸­à¸£à¹Œà¸šà¸¥à¹‡à¸­à¸ third-party cookie à¸‚à¸­à¸‡ login.microsoftonline.com)
+                    // à¹à¸•à¹ˆà¹€à¸›à¸´à¸”à¸¡à¸²à¸ˆà¸²à¸ Portal = à¹à¸—à¸šà¹à¸™à¹ˆà¸§à¹ˆà¸²à¸¡à¸µ MS session à¸­à¸¢à¸¹à¹ˆ â†’ à¸¥à¸­à¸‡ full-page redirect prompt=none
+                    // à¸à¸±à¸™à¸§à¸™à¸‹à¹‰à¸³à¸”à¹‰à¸§à¸¢ "à¹€à¸§à¸¥à¸²" à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆ one-shot à¸•à¹ˆà¸­à¹à¸—à¹‡à¸š â€” refresh à¹à¸¥à¹‰à¸§à¸•à¹‰à¸­à¸‡à¸¥à¸­à¸‡à¹ƒà¸«à¸¡à¹ˆà¹„à¸”à¹‰
+                    // (redirect loop à¸ˆà¸£à¸´à¸‡à¹€à¸à¸´à¸”à¸ à¸²à¸¢à¹ƒà¸™à¹„à¸¡à¹ˆà¸à¸µà¹ˆà¸§à¸´à¸™à¸²à¸—à¸µ à¸ªà¹ˆà¸§à¸™à¸„à¸™à¸à¸”à¹€à¸—à¸ªà¸‹à¹‰à¸³à¸«à¹ˆà¸²à¸‡à¸à¸±à¸™à¹€à¸à¸´à¸™à¸™à¸±à¹‰à¸™à¹€à¸ªà¸¡à¸­)
                     const lastTry = Number(sessionStorage.getItem('sso_np_at') || 0);
                     if (fromHub && ssoHint && (!lastTry || Date.now() - lastTry > 60_000)) {
                         sessionStorage.setItem('sso_np_at', String(Date.now()));
-                        sessionStorage.setItem('sso_np_pending', '1'); // บอกรอบหน้าว่าเป็น auto ไม่ใช่กดปุ่มเอง
+                        sessionStorage.setItem('sso_np_pending', '1'); // à¸šà¸­à¸à¸£à¸­à¸šà¸«à¸™à¹‰à¸²à¸§à¹ˆà¸²à¹€à¸›à¹‡à¸™ auto à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆà¸à¸”à¸›à¸¸à¹ˆà¸¡à¹€à¸­à¸‡
                         setIsLoading(true);
                         await ssoRedirectSilent(ssoHint);
                         return;
                     }
-                    // silent ไม่ผ่านและไม่ได้ redirect ต่อ — ปิด overlay คืนฟอร์มพร้อมเหตุผลด้านล่าง
+                    // silent à¹„à¸¡à¹ˆà¸œà¹ˆà¸²à¸™à¹à¸¥à¸°à¹„à¸¡à¹ˆà¹„à¸”à¹‰ redirect à¸•à¹ˆà¸­ â€” à¸›à¸´à¸” overlay à¸„à¸·à¸™à¸Ÿà¸­à¸£à¹Œà¸¡à¸žà¸£à¹‰à¸­à¸¡à¹€à¸«à¸•à¸¸à¸œà¸¥à¸”à¹‰à¸²à¸™à¸¥à¹ˆà¸²à¸‡
                     setIsLoading(false);
-                    if (fromHub) setSsoNote(`Auto sign-in ไม่สำเร็จ: ${getLastSsoError() || 'ไม่พบ Microsoft session'}`);
+                    if (fromHub) setSsoNote(`Auto sign-in à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ: ${getLastSsoError() || 'à¹„à¸¡à¹ˆà¸žà¸š Microsoft session'}`);
                 }
             } catch (e) {
-                // prompt=none ที่ไม่มี session จะเด้งกลับมาเป็น interaction_required ตรงนี้ → แสดงฟอร์มปกติ
+                // prompt=none à¸—à¸µà¹ˆà¹„à¸¡à¹ˆà¸¡à¸µ session à¸ˆà¸°à¹€à¸”à¹‰à¸‡à¸à¸¥à¸±à¸šà¸¡à¸²à¹€à¸›à¹‡à¸™ interaction_required à¸•à¸£à¸‡à¸™à¸µà¹‰ â†’ à¹à¸ªà¸”à¸‡à¸Ÿà¸­à¸£à¹Œà¸¡à¸›à¸à¸•à¸´
                 sessionStorage.removeItem('sso_np_pending');
                 setIsLoading(false);
                 const code = (e as { errorCode?: string; message?: string })?.errorCode
                     || (e as { message?: string })?.message || String(e);
-                // benign = ไม่มี MS session ตามปกติ → เงียบได้ถ้าไม่ได้มาจาก hub
-                // error จริง (บัญชีถูกระงับ/500/HTML) ต้องโชว์เสมอ ไม่ว่ามาจาก hub หรือไม่
-                if (fromHub || !isBenignSsoError(code)) setSsoNote(`Auto sign-in ไม่สำเร็จ: ${code}`);
+                // benign = à¹„à¸¡à¹ˆà¸¡à¸µ MS session à¸•à¸²à¸¡à¸›à¸à¸•à¸´ â†’ à¹€à¸‡à¸µà¸¢à¸šà¹„à¸”à¹‰à¸–à¹‰à¸²à¹„à¸¡à¹ˆà¹„à¸”à¹‰à¸¡à¸²à¸ˆà¸²à¸ hub
+                // error à¸ˆà¸£à¸´à¸‡ (à¸šà¸±à¸à¸Šà¸µà¸–à¸¹à¸à¸£à¸°à¸‡à¸±à¸š/500/HTML) à¸•à¹‰à¸­à¸‡à¹‚à¸Šà¸§à¹Œà¹€à¸ªà¸¡à¸­ à¹„à¸¡à¹ˆà¸§à¹ˆà¸²à¸¡à¸²à¸ˆà¸²à¸ hub à¸«à¸£à¸·à¸­à¹„à¸¡à¹ˆ
+                if (fromHub || !isBenignSsoError(code)) setSsoNote(`Auto sign-in à¹„à¸¡à¹ˆà¸ªà¸³à¹€à¸£à¹‡à¸ˆ: ${code}`);
             }
         })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -360,8 +360,8 @@ export default function LoginPage() {
                 }}
             />
 
-            {/* overlay เต็มจอระหว่าง Microsoft sign-in — คนที่ถูกพามาจาก hub เห็นว่าระบบกำลังทำงาน
-                ไม่ใช่ฟอร์มเปล่า; เกาะ isLoading เดิมจึงหายเองทุกครั้งที่ flow จบ (สำเร็จ→navigate, ล้ม→ฟอร์ม+เหตุผล) */}
+            {/* overlay à¹€à¸•à¹‡à¸¡à¸ˆà¸­à¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡ Microsoft sign-in â€” à¸„à¸™à¸—à¸µà¹ˆà¸–à¸¹à¸à¸žà¸²à¸¡à¸²à¸ˆà¸²à¸ hub à¹€à¸«à¹‡à¸™à¸§à¹ˆà¸²à¸£à¸°à¸šà¸šà¸à¸³à¸¥à¸±à¸‡à¸—à¸³à¸‡à¸²à¸™
+                à¹„à¸¡à¹ˆà¹ƒà¸Šà¹ˆà¸Ÿà¸­à¸£à¹Œà¸¡à¹€à¸›à¸¥à¹ˆà¸²; à¹€à¸à¸²à¸° isLoading à¹€à¸”à¸´à¸¡à¸ˆà¸¶à¸‡à¸«à¸²à¸¢à¹€à¸­à¸‡à¸—à¸¸à¸à¸„à¸£à¸±à¹‰à¸‡à¸—à¸µà¹ˆ flow à¸ˆà¸š (à¸ªà¸³à¹€à¸£à¹‡à¸ˆâ†’navigate, à¸¥à¹‰à¸¡â†’à¸Ÿà¸­à¸£à¹Œà¸¡+à¹€à¸«à¸•à¸¸à¸œà¸¥) */}
             {showSsoOverlay && (
                 <Box
                     sx={{
@@ -382,7 +382,7 @@ export default function LoginPage() {
                     <Typography sx={{ color: '#E2E8F0', fontWeight: 600 }}>
                         {ssoOverlayText}
                     </Typography>
-                    {/* สถานะรายขั้นตัวเดิม (ssoNote) ต้องยังอ่านได้ระหว่าง overlay คลุมจอ — ซ่อนเฉพาะตอนซ้ำกับบรรทัดหลัก */}
+                    {/* à¸ªà¸–à¸²à¸™à¸°à¸£à¸²à¸¢à¸‚à¸±à¹‰à¸™à¸•à¸±à¸§à¹€à¸”à¸´à¸¡ (ssoNote) à¸•à¹‰à¸­à¸‡à¸¢à¸±à¸‡à¸­à¹ˆà¸²à¸™à¹„à¸”à¹‰à¸£à¸°à¸«à¸§à¹ˆà¸²à¸‡ overlay à¸„à¸¥à¸¸à¸¡à¸ˆà¸­ â€” à¸‹à¹ˆà¸­à¸™à¹€à¸‰à¸žà¸²à¸°à¸•à¸­à¸™à¸‹à¹‰à¸³à¸à¸±à¸šà¸šà¸£à¸£à¸—à¸±à¸”à¸«à¸¥à¸±à¸ */}
                     {ssoNote && ssoNote !== ssoOverlayText && (
                         <Typography variant="caption" sx={{ color: '#94A3B8', wordBreak: 'break-word' }}>
                             {ssoNote}
@@ -439,7 +439,7 @@ export default function LoginPage() {
                             variant="body2"
                             sx={{ color: '#64748B', fontWeight: 500 }}
                         >
-                            เข้าสู่ระบบเพื่อดำเนินการต่อ
+                            à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸šà¹€à¸žà¸·à¹ˆà¸­à¸”à¸³à¹€à¸™à¸´à¸™à¸à¸²à¸£à¸•à¹ˆà¸­
                         </Typography>
                     </Box>
 
@@ -449,7 +449,7 @@ export default function LoginPage() {
                             fullWidth
                             margin="normal"
                             {...register('username', {
-                                required: 'กรุณากรอก Username',
+                                required: 'à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸ Username',
                             })}
                             error={!!errors.username}
                             helperText={errors.username?.message}
@@ -480,10 +480,10 @@ export default function LoginPage() {
                             fullWidth
                             margin="normal"
                             {...register('password', {
-                                required: 'กรุณากรอก Password',
+                                required: 'à¸à¸£à¸¸à¸“à¸²à¸à¸£à¸­à¸ Password',
                                 minLength: {
                                     value: 6,
-                                    message: 'Password ต้องมีอย่างน้อย 6 ตัวอักษร',
+                                    message: 'Password à¸•à¹‰à¸­à¸‡à¸¡à¸µà¸­à¸¢à¹ˆà¸²à¸‡à¸™à¹‰à¸­à¸¢ 6 à¸•à¸±à¸§à¸­à¸±à¸à¸©à¸£',
                                 },
                             })}
                             error={!!errors.password}
@@ -551,15 +551,15 @@ export default function LoginPage() {
                             {isLoading ? (
                                 <CircularProgress size={24} sx={{ color: 'white' }} />
                             ) : linkIdToken ? (
-                                'ยืนยันและผูกบัญชี Microsoft'
+                                'à¸¢à¸·à¸™à¸¢à¸±à¸™à¹à¸¥à¸°à¸œà¸¹à¸à¸šà¸±à¸à¸Šà¸µ Microsoft'
                             ) : (
-                                'เข้าสู่ระบบ'
+                                'à¹€à¸‚à¹‰à¸²à¸ªà¸¹à¹ˆà¸£à¸°à¸šà¸š'
                             )}
                         </Button>
 
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, my: 2 }}>
                             <Box sx={{ flex: 1, height: '1px', bgcolor: '#E2E8F0' }} />
-                            <Typography variant="caption" sx={{ color: '#94A3B8' }}>หรือ</Typography>
+                            <Typography variant="caption" sx={{ color: '#94A3B8' }}>à¸«à¸£à¸·à¸­</Typography>
                             <Box sx={{ flex: 1, height: '1px', bgcolor: '#E2E8F0' }} />
                         </Box>
 
