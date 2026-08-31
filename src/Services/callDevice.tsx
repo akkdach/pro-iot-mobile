@@ -1,5 +1,6 @@
 // api.ts
 import axios, { AxiosRequestConfig } from 'axios';
+import { attachAppName } from './appName';
 interface AxiosResponse<T = any> {
   data: T;
   status: number;
@@ -10,7 +11,8 @@ interface AxiosResponse<T = any> {
 }
 
 const callDevice = axios.create({
-  baseURL: 'https://iotservice.bevproasia.com/api/v1/Devices', // เปลี่ยนเป็น URL จริงของคุณ
+  // ผ่าน Kong gateway (route iot-v1: /iot/v1 -> iotservice.bevproasia.com/api/v1) — เดิมยิงตรง iotservice
+  baseURL: 'https://bevprogateway.southeastasia.cloudapp.azure.com/iot/v1/Devices',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -24,7 +26,7 @@ callDevice.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return attachAppName(config);
   },
   (error) => Promise.reject(error)
 );

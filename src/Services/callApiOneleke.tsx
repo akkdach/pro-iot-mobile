@@ -1,5 +1,6 @@
 // utils/api-client.ts
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import { attachAppName } from './appName';
 const baseURLOneleke = process.env.REACT_APP_API_ONELAKE_URL || "http://10.10.199.16:3005/api/";
 const apiClient = axios.create({
     baseURL: baseURLOneleke,
@@ -15,7 +16,7 @@ apiClient.interceptors.request.use((config: any) => {
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return attachAppName(config);
 });
 
 apiClient.interceptors.response.use(

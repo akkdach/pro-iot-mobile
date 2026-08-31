@@ -1,5 +1,6 @@
 // api.ts
 import axios, { AxiosRequestConfig } from 'axios';
+import { attachAppName } from './appName';
 interface AxiosResponse<T = any> {
   data: T;
   status: number;
@@ -10,7 +11,9 @@ interface AxiosResponse<T = any> {
 }
 
 const callDocu = axios.create({
-  baseURL: 'https://service.bevproasia.com/api', // เปลี่ยนเป็น URL จริงของคุณ
+  // ยิงตรง (ยังไม่ผ่าน Kong) — path /api/* บน gateway เป็น namespace ของ onelake-middleware
+  // ถ้าจะย้ายต้องเพิ่ม route เฉพาะใน Kong ก่อน
+  baseURL: 'https://service.bevproasia.com/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'multipart/form-data',
@@ -29,7 +32,7 @@ callDocu.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     config.headers['Content-Type']= "multipart/form-data";
-    return config;
+    return attachAppName(config);
   },
   (error) => Promise.reject(error)
 );

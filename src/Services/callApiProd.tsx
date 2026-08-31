@@ -1,5 +1,6 @@
 // api.ts
 import axios, { AxiosRequestConfig } from 'axios';
+import { attachAppName } from './appName';
 interface AxiosResponse<T = any> {
   data: T;
   status: number;
@@ -27,7 +28,7 @@ callApiProd.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    return config;
+    return attachAppName(config);
   },
   (error) => Promise.reject(error)
 );
